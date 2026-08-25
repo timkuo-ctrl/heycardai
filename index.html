@@ -11149,27 +11149,34 @@ function lOvSet(k,f,v){
  o[k]=cur;lcfgSet('ov',o)}
 function lOvClear(k){const o=Object.assign({},lcfg().ov||{});delete o[k];lcfgSet('ov',o)}
 function lOvHas(k){return Object.keys(lOv(k)).length>0}
+/* 第一張的「改過了」不只看欄位覆寫——拿掉身分也是改。
+   只看 ov 的話，只調過身分的人會發現「回復預設」是灰的，按不下去。 */
+function lDirty(k){return lOvHas(k)||(k==='me'&&lOffIds().length>0)}
 
 /* 文字：動過就用他的（可以是空字串）；沒動過跟著來源 */
 function lTxt(k,f,def){const v=lOv(k)[f];return (typeof v==='string')?v:(def||'')}
 /* 按鈕文字：空的沒有意義，一律退回預設 */
 function lLbl(k,f,def){return ((lOv(k)[f]||'')+'').trim()||def}
 
-/* 選中的身分：沒設定過就取前 5 張名片 */
+/* 記「不要放的」而不是「要放的」。
+   存白名單的話，之後新增一張名片就不在名單裡，會默默不出現——
+   用戶不會知道要回來這裡打勾。存黑名單則是新身分預設都在，拿掉的才記住。 */
+function lOffIds(){const o=lcfg().off;return Array.isArray(o)?o:[]}
+function lPicked(){
+ const cs=lineCards(),off=lOffIds();
+ const keep=cs.filter(function(x){return off.indexOf(x.id)<0});
+ return (keep.length?keep:cs).slice(0,L_MAXID)}
+
 function lIds(){
- const cs=lineCards(),pick=lcfg().ids;
- const keep=pick?cs.filter(function(x){return pick.indexOf(x.id)>=0}):cs;
- return (keep.length?keep:cs).slice(0,L_MAXID).map(function(x){
+ return lPicked().map(function(x){
   return {id:x.id,role:x.title||x.func||'',org:x.company||x.offer||x.industry||''}})
   .filter(function(x){return x.role||x.org})}
 
 /* 公司清單：只出現「有被選進第一張」的那些身分的公司。
    取消勾選一個身分卻還留著它的公司卡，收卡片的人會看到一家沒人介紹的公司。 */
 function lOrgs(){
- const pick=lcfg().ids;
- const cs=lineCards().filter(function(x){return !pick||pick.indexOf(x.id)>=0});
  const out=[],seen={};
- (cs.length?cs:lineCards()).forEach(function(x){
+ lPicked().forEach(function(x){
   const n=x.company;if(!n||seen[n])return;seen[n]=1;out.push({name:n,card:x})});
  return out}
 
@@ -11189,6 +11196,79 @@ function lOrgRows(name){
   if(x[0]==='tags')v=(O.tags&&O.tags.length)?O.tags.join('、'):'';
   if(v)out.push([x[1],String(v)])});
  return out}
+
+/* ═════ 按鈕：預設幾種型別，每種綁定該填什麼 ═════
+   Tim 問還需要哪些。挑選的標準不是「想得到什麼」，而是
+   **收到卡片的人在那一刻真的會做的動作**——在 LINE 裡收到一張名片，
+   接下來只會發生四件事：存起來、打過去、寫信、點開看看。
+   所以型別要對應「一個動作 ＋ 一個手機打得開的連結」，
+   不能對應「一段資訊」（那是卡片中段的事，不是按鈕的事）。
+
+   台灣特有的兩個一定要有：
+   · 加我 LINE —— 台灣的商務往來從交換 LINE 開始，這顆的轉換率
+     會高過所有其他按鈕。少了它，這張卡在台灣就是半殘的。
+   · 看地圖 —— 門市、展攤、辦公室，對方要的是導航，不是地址字串。
+
+   刻意不做的：
+   · 「下載名片 vCard」——LINE 內建瀏覽器對 .vcf 的處理各家不一，
+     按了沒反應比沒有這顆更糟。存聯絡人走 Heycard 公開頁比較穩。
+   · 「分享給朋友」——分享是 LINE 自己的事，不需要卡片上再放一顆。
+   · 社群帳號各給一顆（IG／FB／YouTube／LinkedIn）——會把三顆的位置吃光。
+     用「自訂連結」自己命名就好。
+
+   一張卡最多 3 顆。這不是技術限制，是參考版型本來就是 3 顆——
+   再多，卡片會長到 LINE 裡要滑兩下才看得完，人就不看了。 */
+const L_MAXACT=3;
+const L_ACTS={
+ page :{n:'看完整名片',k:'none'},
+ add  :{n:'加入好友',  k:'none'},
+ line :{n:'加我 LINE', k:'line',ph:'LINE ID 或邀請連結'},
+ tel  :{n:'致電給我',  k:'tel', ph:'0912 345 678'},
+ mail :{n:'聯絡我們',  k:'mail',ph:'you@company.com'},
+ web  :{n:'看網站',    k:'url', ph:'example.com'},
+ map  :{n:'看地圖',    k:'text',ph:'公司地址'},
+ book :{n:'預約時間',  k:'url', ph:'預約頁網址'},
+ folio:{n:'查看作品集',k:'url', ph:'作品集網址'},
+ link :{n:'自訂連結',  k:'url', ph:'網址'}};
+/* 個人卡與公司卡能用的型別不同：加人脈只有人有，看地圖多半是公司 */
+const L_ACTS_ME =['page','add','line','tel','mail','web','book','folio','link'];
+const L_ACTS_ORG=['web','mail','tel','line','map','book','folio','link'];
+
+function lActLabel(a){return ((a.l||'')+'').trim()||(L_ACTS[a.t]||{}).n||''}
+function lActNeedsValue(a){return ((L_ACTS[a.t]||{}).k||'url')!=='none'}
+function lActOK(a){
+ if(!L_ACTS[a.t])return false;
+ return !lActNeedsValue(a)||!!((a.v||'')+'').trim()}
+function lActURI(a,id){
+ const v=(((a.v||'')+'')).trim();
+ if(a.t==='page')return 'https://heycard.app/c/'+(id||'me');
+ if(a.t==='add') return 'https://heycard.app/add/'+(id||'me');
+ if(a.t==='line')return /^https?:/i.test(v)?v:('https://line.me/ti/p/~'+encodeURIComponent(v));
+ if(a.t==='tel') return 'tel:'+v.replace(/[^\d+]/g,'');
+ if(a.t==='mail')return 'mailto:'+v;
+ if(a.t==='map') return 'https://maps.google.com/?q='+encodeURIComponent(v);
+ return 'https://'+v.replace(/^https?:\/\//i,'')}
+
+/* 預設按鈕：沒設定過就從名片與登記資料推出來，
+   而且沿用 v4.5 舊的 b1/b2/site/mail 覆寫，改過的人不會被清掉 */
+function lActs(it){
+ const k=it.k,ov=lOv(k).acts;
+ if(Array.isArray(ov))return ov.slice(0,L_MAXACT);
+ if(k==='me'){
+  const c=lineCard();
+  return [{t:'page',l:lLbl(k,'b1','看完整名片')},
+          {t:'add', l:lLbl(k,'b2','加入好友')}]}
+ if(k==='hc')return [{t:'link',l:HC2.cta,v:'heycard.app/join'}];
+ const O=lOrg(it.org.name),card=it.org.card||{};
+ const site=lTxt(k,'site',(O&&O.web)||card.web||'');
+ const mail=lTxt(k,'mail',card.email||'');
+ const out=[];
+ if(site)out.push({t:'web', l:lLbl(k,'b1','看網站'),   v:site});
+ if(mail)out.push({t:'mail',l:lLbl(k,'b2','聯絡我們'),v:mail});
+ if(!out.length)out.push({t:'web',l:'看網站',v:''});
+ return out}
+
+function lLiveActs(it){return lActs(it).filter(lActOK)}
 
 /* ═════ Heycard 那張的固定文案 ═════ */
 const HC2={
@@ -11235,8 +11315,7 @@ function flexBubbleUser(c,T){
  const lines=ids.map(function(x){
   return {type:'text',text:[x.org,x.role].filter(Boolean).join(' '),
    size:'sm',color:'#3E3E46',wrap:true}});
- const acts=[[lLbl('me','b1','看完整名片'),'https://heycard.app/c/'+(c.id||'me')],
-             [lLbl('me','b2','加入好友'),'https://heycard.app/add/'+(c.id||'me')]];
+ const acts=lLiveActs({k:'me'});
  const sh=lShades(T.a,acts.length);
  return {type:'bubble',size:'kilo',
   hero:{type:'image',url:'https://heycard.app/av/'+(c.id||'me')+'.png',
@@ -11246,21 +11325,17 @@ function flexBubbleUser(c,T){
    {type:'box',layout:'vertical',spacing:'xs',margin:'md',contents:lines}
   ].concat(intro?[{type:'text',text:intro,size:'sm',color:'#7A7A83',wrap:true,margin:'md'}]:[])},
   footer:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'16px',paddingTop:'0px',
-   contents:acts.map(function(x,i){return lBtn(x[0],x[1],sh[i])})}}}
+   contents:acts.map(function(a,i){
+    return lBtn(lActLabel(a),lActURI(a,c.id),sh[i])})}}}
 
 /* ②④ 公司：滿版 Logo → 公司名 → 介紹 → 按鈕 */
 function flexBubbleOrg(it,T){
  const o=it.org,name=o.name,k=it.k,O=lOrg(name),B=lBrand(name);
  const meta=[lOrgF(name).ind&&O&&O.ind,lOrgF(name).size&&O&&O.size].filter(Boolean).join('　·　');
  const desc=lTxt(k,'desc',O&&O.desc?String(O.desc).slice(0,58)+'⋯':'');
- const site=lTxt(k,'site',(O&&O.web)||o.card.web||'');
- const mail=lTxt(k,'mail',o.card.email||'');
  const rows=lOrgRows(name).filter(function(r){
   return r[0]!=='產業'&&r[0]!=='員工人數'});
- const acts=[];
- if(site)acts.push([lLbl(k,'b1','看網站'),'https://'+String(site).replace(/^https?:\/\//,'')]);
- if(mail)acts.push([lLbl(k,'b2','聯絡我們'),'mailto:'+mail]);
- if(!acts.length)acts.push(['公司頁','https://heycard.app/o/'+encodeURIComponent(name)]);
+ const acts=lLiveActs(it);
  const sh=lShades(B?B.c:T.a,acts.length);
  const hero={type:'image',url:'https://heycard.app/org/'+encodeURIComponent(name)+'.png',
   size:'full',aspectRatio:'1:1',aspectMode:'cover'};
@@ -11275,7 +11350,8 @@ function flexBubbleOrg(it,T){
     {type:'text',text:r[0],size:'xs',color:'#A0A0A9',flex:2},
     {type:'text',text:r[1],size:'xs',color:'#5A5A63',flex:5,wrap:true}]}})).filter(Boolean)},
   footer:{type:'box',layout:'vertical',spacing:'sm',paddingAll:'16px',paddingTop:'0px',
-   contents:acts.map(function(x,i){return lBtn(x[0],x[1],sh[i])})}}}
+   contents:acts.map(function(a,i){
+    return lBtn(lActLabel(a),lActURI(a),sh[i])})}}}
 
 /* ③ Heycard：內容固定 */
 function flexBubbleHeycard(refId){
@@ -11308,11 +11384,11 @@ function lCardHTML(it,c,T){
   return '<div class="lcard'+(extra||'')+'" data-lk="'+esc(it.k)+'">'+inner+'</div>'};
 
  /* 按鈕：同一色相由淺到深，最深的在最下面 */
- const foot=function(labels,base){
-  const sh=lShades(base,labels.length);
-  return '<div class="lfoot">'+labels.map(function(t,i){
-   return '<div class="lbtn" style="background:'+sh[i]+';color:'+lOn(sh[i])+'">'+esc(t)+'</div>'
-  }).join('')+'</div>'};
+ const foot=function(acts,base){
+  const sh=lShades(base,acts.length);
+  return '<div class="lfoot">'+acts.map(function(a,i){
+   return '<div class="lbtn" style="background:'+sh[i]+';color:'+lOn(sh[i])+'">'
+    +esc(lActLabel(a))+'</div>'}).join('')+'</div>'};
 
  if(it.k==='me'){
   const ids=lIds(),intro=lTxt('me','intro',c.headline);
@@ -11326,7 +11402,7 @@ function lCardHTML(it,c,T){
    +'</div>'
    +(intro?'<div class="lhl" translate="no">'+esc(intro)+'</div>':'')
    +'</div>'
-   +foot([lLbl('me','b1','看完整名片'),lLbl('me','b2','加入好友')],T.a))}
+   +foot(lLiveActs(it),T.a))}
 
  if(it.k==='hc'){
   return tag(
@@ -11343,13 +11419,7 @@ function lCardHTML(it,c,T){
  const F=lOrgF(n);
  const meta=[F.ind&&O&&O.ind,F.size&&O&&O.size].filter(Boolean).join('　·　');
  const desc=lTxt(k,'desc',O&&O.desc?String(O.desc).slice(0,48)+'⋯':'');
- const site=lTxt(k,'site',(O&&O.web)||o.card.web||'');
- const mail=lTxt(k,'mail',o.card.email||'');
  const rows=lOrgRows(n).filter(function(r){return r[0]!=='產業'&&r[0]!=='員工人數'});
- const labels=[];
- if(site)labels.push(lLbl(k,'b1','看網站'));
- if(mail)labels.push(lLbl(k,'b2','聯絡我們'));
- if(!labels.length)labels.push('公司頁');
  return tag(
   '<div class="lhero"'+(B?' style="background:'+B.c+'"':'')+' translate="no">'
   +(B?'<img src="'+B.m+'" alt="">'
@@ -11362,7 +11432,7 @@ function lCardHTML(it,c,T){
   +rows.map(function(r){
     return '<div class="lkv"><span>'+esc(r[0])+'</span><b translate="no">'+esc(r[1])+'</b></div>'}).join('')
   +'</div>'
-  +foot(labels,B?B.c:T.a))}
+  +foot(lLiveActs(it),B?B.c:T.a))}
 
 function lRailHTML(o){
  o=o||{};
@@ -11430,6 +11500,10 @@ SCREENS.lineEdit=(a)=>{
  a=a||{};
  const pro=(typeof planAtLeast==='function')&&planAtLeast('pro');
  let cur=a.k||'me';
+ /* a.k 可能指向一張已經不存在的卡（身分被拿掉、公司沒了）。
+    不擋的話 paneHTML 會用一個對不上的 key 走進公司那一支，
+    標題會印成人名、上面也不會有任何一張被選中。 */
+ if(!lDeck(true).some(function(x){return x.k===cur}))cur='me';
  const itOf=function(k){
   return lDeck(true).filter(function(x){return x.k===k})[0]||{k:'me'}};
 
@@ -11447,12 +11521,12 @@ SCREENS.lineEdit=(a)=>{
   return '<i class="lchk'+(on?' on':'')+'">'+(on?ico('ck',13,'#fff',3):'')+'</i>'};
 
  const idRows=function(){
-  const cs=lineCards(),sel=lcfg().ids||cs.slice(0,L_MAXID).map(function(x){return x.id});
+  const cs=lineCards(),on=lPicked().map(function(x){return x.id});
   return cs.map(function(x){
    return '<button class="row" data-id="'+esc(x.id)+'" style="width:100%;text-align:left">'
     +'<div class="rt"><div class="n" translate="no">'+esc(x.title||x.func||'（未填職稱）')+'</div>'
     +'<div class="s" translate="no">'+esc(x.company||x.offer||x.industry||'—')+'</div></div>'
-    +chk(sel.indexOf(x.id)>=0)+'</button>'}).join('')};
+    +chk(on.indexOf(x.id)>=0)+'</button>'}).join('')};
 
  const ofRows=function(n){
   const O=lOrg(n),F=lOrgF(n);
@@ -11463,14 +11537,41 @@ SCREENS.lineEdit=(a)=>{
     +'<div class="s" translate="no">'+esc(String(val||'—'))+'</div></div>'
     +chk(!!F[x[0]])+'</button>'}).join('')};
 
+ /* ── 快捷按鈕：型別決定要填什麼 ──
+    型別跟值綁在一起，用戶不用自己想「這裡要打網址還是 Email」。 */
+ const actRows=function(k){
+  const it=itOf(k),list=lActs(it);
+  const menu=(k==='me'?L_ACTS_ME:L_ACTS_ORG);
+  return list.map(function(a,i){
+   const D=L_ACTS[a.t]||L_ACTS.link;
+   const opts=menu.map(function(t){
+    return '<option value="'+t+'"'+(t===a.t?' selected':'')+'>'+esc(L_ACTS[t].n)+'</option>'}).join('');
+   return '<div class="actrow">'
+    +'<div class="acthd"><span class="actno">'+(i+1)+'</span>'
+    +'<select data-a="t" data-i="'+i+'">'+opts+'</select>'
+    +'<button class="actdel" data-del="'+i+'" aria-label="移除">'+ico('x',15,'#9A9AA6',2.2)+'</button></div>'
+    +'<div class="fld"><label>按鈕文字</label>'
+    +'<input data-a="l" data-i="'+i+'" value="'+esc(a.l||'')+'" placeholder="'+esc(D.n)+'"></div>'
+    +(lActNeedsValue(a)
+      ?'<div class="fld"><label>'+esc(D.k==='mail'?'Email':D.k==='tel'?'電話':D.k==='line'?'LINE':D.k==='text'?'地址':'網址')+'</label>'
+       +'<input data-a="v" data-i="'+i+'" value="'+esc(a.v||'')+'" placeholder="'+esc(D.ph||'')+'"'
+       +(D.k==='mail'?' type="email" inputmode="email"':D.k==='tel'?' type="tel" inputmode="tel"':'')+'>'
+       +'</div>'
+       +(lActOK(a)?'':'<div class="err">留白的話這顆按鈕不會出現</div>')
+      :'<div class="tip" style="margin:-2px 0 8px">連到你的 Heycard 頁，不用填。</div>')
+    +'</div>'}).join('')
+   +(list.length<L_MAXACT
+     ?'<button class="btn tt sm" id="addAct" style="width:100%;margin-top:4px">＋ 加一顆按鈕</button>'
+     :'<div class="tip">一張卡最多 '+L_MAXACT+' 顆。再多，LINE 裡要滑兩下才看得完。</div>')};
+
  const paneHTML=function(k){
   const it=itOf(k);
   const head=function(t){return '<div class="sec" style="margin-top:22px"><b>'+esc(t)+'</b></div>'};
   const reset='<div style="margin-top:26px">'
-   +'<button class="btn tt sm" id="reset" style="width:100%"'+(lOvHas(k)?'':' disabled')+'>回復預設內容</button>'
+   +'<button class="btn tt sm" id="reset" style="width:100%"'+(lDirty(k)?'':' disabled')+'>回復預設內容</button>'
    +'<div class="tip" style="margin-top:10px;line-height:1.75">沒改過的欄位會一直跟著來源走——名片改了、公司資料更新了，這張卡會自己跟上。</div></div>';
 
-  if(k==='me')
+  if(it.k==='me')
    return '<div class="pad">'
     +'<div class="ptitle">第一張：你</div>'
     +fld(k,'name','顯示名稱',c.name,'')
@@ -11478,12 +11579,12 @@ SCREENS.lineEdit=(a)=>{
     +'<div class="tip" style="margin-top:-8px;line-height:1.75">最多 '+L_MAXID+' 個。大頭貼與按鈕位置固定。</div>'
     +'<div id="ids" style="margin-top:6px">'+idRows()+'</div>'
     +'<div style="margin-top:18px">'+fld(k,'intro','自我介紹',c.headline,'一兩句就好',3)+'</div>'
-    +head('按鈕文字')
-    +'<div style="margin-top:-6px">'+fld(k,'b1','主要按鈕','看完整名片','')+fld(k,'b2','次要按鈕','加入好友','')+'</div>'
-    +'<div class="tip" style="line-height:1.75">按鈕連到的地方固定：主要是你的公開頁，次要是加你為人脈。</div>'
+    +head('快捷按鈕')
+    +'<div class="tip" style="margin-top:-8px;line-height:1.75">選型別，下面就會問你要填什麼。由上到下顏色由淺到深。</div>'
+    +'<div id="acts" style="margin-top:10px">'+actRows(k)+'</div>'
     +reset+'</div>';
 
-  if(k==='hc')
+  if(it.k==='hc')
    return '<div class="pad">'
     +'<div class="ptitle">第三張：Heycard</div>'
     +'<div class="tip" style="line-height:1.75">這張的內容固定，每個人送出去的都一樣——它是收卡片的人認識 Heycard 的地方。</div>'
@@ -11501,11 +11602,9 @@ SCREENS.lineEdit=(a)=>{
       O&&O.desc?String(O.desc).slice(0,48)+'⋯':'','這家公司在做什麼',3)+'</div>'
    +head('要放哪些資料')
    +'<div id="fs" style="margin-top:-6px">'+ofRows(n)+'</div>'
-   +head('按鈕')
-   +'<div style="margin-top:-6px">'+fld(k,'b1','主要按鈕文字','看網站','')
-   +fld(k,'site','網址',(O&&O.web)||(it.org&&it.org.card.web)||'','留白就不放這顆按鈕')
-   +fld(k,'b2','次要按鈕文字','聯絡我們','')
-   +fld(k,'mail','Email',(it.org&&it.org.card.email)||'','留白就不放這顆按鈕')+'</div>'
+   +head('快捷按鈕')
+   +'<div class="tip" style="margin-top:-8px;line-height:1.75">選型別，下面就會問你要填什麼。由上到下顏色由淺到深。</div>'
+   +'<div id="acts" style="margin-top:10px">'+actRows(k)+'</div>'
    +reset+'</div>'};
 
  const el=screen(tbTitle('編輯卡片內容')
@@ -11527,12 +11626,30 @@ SCREENS.lineEdit=(a)=>{
   if(typeof i18nAll==='function')setTimeout(i18nAll,0)};
  const both=function(){rail();pane()};
 
+ const setActs=function(list){lOvSet(cur,'acts',list.slice(0,L_MAXACT))};
+ const acts=function(){
+  const box=$('#acts',el);if(box)box.innerHTML=actRows(cur);
+  if(typeof i18nAll==='function')setTimeout(i18nAll,0)};
+
  /* 打字只更新上面的卡片，不重繪欄位——重繪會把游標踢掉 */
  el.addEventListener('input',function(e){
+  const rs=function(){const b=$('#reset',el);if(b)b.disabled=false};
+  const ai=e.target.dataset.i;
+  if(ai!==undefined&&e.target.dataset.a){
+   const list=lActs(itOf(cur)).slice();
+   const i=+ai;if(!list[i])return;
+   list[i]=Object.assign({},list[i]);list[i][e.target.dataset.a]=e.target.value;
+   setActs(list);rail();rs();return}
   const f=e.target.dataset.f;if(!f)return;
-  lOvSet(cur,f,e.target.value);
-  rail();
-  const rs=$('#reset',el);if(rs)rs.disabled=false});
+  lOvSet(cur,f,e.target.value);rail();rs()});
+
+ /* 換型別要重畫那一區——要填的東西整個換掉了 */
+ el.addEventListener('change',function(e){
+  if(e.target.dataset.a!=='t')return;
+  const list=lActs(itOf(cur)).slice(),i=+e.target.dataset.i;
+  if(!list[i])return;
+  list[i]={t:e.target.value,l:'',v:list[i].v||''};
+  setActs(list);acts();rail()});
 
  el.addEventListener('click',function(e){
   const card=e.target.closest('#lrail .lcard');
@@ -11541,20 +11658,35 @@ SCREENS.lineEdit=(a)=>{
    const sel=$('#lrail .lcard.sel',el);
    if(sel&&sel.scrollIntoView)sel.scrollIntoView({block:'nearest',inline:'center'});
    return}
+  const del=e.target.closest('[data-del]');
+  if(del){
+   const list=lActs(itOf(cur)).slice();
+   if(list.length<=1){toast('至少要留一顆按鈕');return}
+   list.splice(+del.dataset.del,1);setActs(list);acts();rail();
+   const rb=$('#reset',el);if(rb)rb.disabled=false;return}
+  if(e.target.closest('#addAct')){
+   const list=lActs(itOf(cur)).slice();
+   if(list.length>=L_MAXACT){toast('一張卡最多 '+L_MAXACT+' 顆');return}
+   const menu=(cur==='me'?L_ACTS_ME:L_ACTS_ORG);
+   const used={};list.forEach(function(x){used[x.t]=1});
+   const t=menu.filter(function(x){return !used[x]})[0]||'link';
+   list.push({t:t,l:'',v:''});setActs(list);acts();rail();
+   const rb2=$('#reset',el);if(rb2)rb2.disabled=false;return}
   if(e.target.closest('#hcTgl')){
    if(!pro){toast('Pro 才能拿掉 Heycard 卡片');R.go('plans',{},'push');return}
    lcfgSet('hcOff',!lcfg().hcOff);both();return}
   if(e.target.closest('#reset')){
-   lOvClear(cur);if(cur==='me')lcfgSet('ids',null);
+   lOvClear(cur);if(cur==='me')lcfgSet('off',null);
    both();toast('已回復預設');return}
   const idb=e.target.closest('[data-id]');
   if(idb&&cur==='me'){
-   const id=idb.dataset.id;
-   const list=(lcfg().ids?lcfg().ids.slice():lineCards().slice(0,L_MAXID).map(function(x){return x.id}));
-   const i=list.indexOf(id);
-   if(i>=0){if(list.length<=1){toast('至少要留一個身分');return}list.splice(i,1)}
-   else{if(list.length>=L_MAXID){toast('最多 '+L_MAXID+' 個');return}list.push(id)}
-   lcfgSet('ids',list);
+   const id=idb.dataset.id,off=lOffIds().slice(),i=off.indexOf(id);
+   if(i>=0)off.splice(i,1);                       /* 重新放回來 */
+   else{
+    if(lPicked().length<=1){toast('至少要留一個身分');return}
+    off.push(id)}
+   lcfgSet('off',off);
+   if(lPicked().length>L_MAXID)toast('最多 '+L_MAXID+' 個，只會放前 '+L_MAXID+' 個');
    /* 身分變了，公司卡也會跟著增減——如果現在選的那張沒了，退回第一張 */
    if(!lDeck(true).some(function(x){return x.k===cur}))cur='me';
    both();return}
@@ -11587,6 +11719,17 @@ SCREENS.lineEdit=(a)=>{
 #lrail .lcard.cardoff:after{content:'';position:absolute}
 #lrail .lcard.cardoff.sel{opacity:.6}
 .ptitle{font-size:15px;font-weight:700;letter-spacing:-.012em;margin:2px 0 14px}
+.actrow{background:#fff;border:1px solid var(--hair);border-radius:14px;padding:12px 12px 4px;margin-bottom:10px}
+.acthd{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.actno{flex:0 0 auto;width:19px;height:19px;border-radius:6px;background:var(--fill);
+ color:var(--ink3);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.acthd select{flex:1;min-width:0;font-size:13.5px;font-weight:700;letter-spacing:-.01em;
+ border:0;background:transparent;color:var(--ink);padding:2px 0;appearance:none;
+ -webkit-appearance:none;cursor:pointer}
+.actdel{flex:0 0 auto;width:26px;height:26px;border:0;background:transparent;display:flex;
+ align-items:center;justify-content:center;border-radius:8px}
+.actdel:active{background:var(--fill)}
+.actrow .fld{background:var(--fill);margin-bottom:8px}
 /* 滿版：頭像與 Logo 都做成整寬的正方形，不留內距、不做圓角 */
 /* padding:0 是必要的——v4.4 的 #lrail .lhero 有 padding:16px，同分特異性下
    我沒宣告的屬性會留著，滿版就會被那 16px 吃掉一圈白邊 */
@@ -11646,10 +11789,21 @@ if(typeof EN==='object'){Object.assign(EN,{
  '顯示名稱':'Display name','要放哪些身分':'Which identities',
  '最多 5 個。大頭貼與按鈕位置固定。':'Up to 5. The photo and buttons stay put.',
  '自我介紹':'About you','一兩句就好':'A sentence or two',
- '按鈕文字':'Button labels','主要按鈕':'Primary','次要按鈕':'Secondary',
- '主要按鈕文字':'Primary label','次要按鈕文字':'Secondary label',
- '按鈕連到的地方固定：主要是你的公開頁，次要是加你為人脈。':
-  'Where they go is fixed: your public page, and adding you as a contact.',
+ '快捷按鈕':'Shortcut buttons',
+ '選型別，下面就會問你要填什麼。由上到下顏色由淺到深。':
+  'Pick a type and it asks for what it needs. Shades run light to dark.',
+ '按鈕文字':'Button label','＋ 加一顆按鈕':'+ Add a button',
+ '一張卡最多 3 顆。再多，LINE 裡要滑兩下才看得完。':
+  'Three per card. More and it takes two swipes to read in LINE.',
+ '一張卡最多 3 顆':'Three buttons per card','至少要留一顆按鈕':'Keep at least one button',
+ '連到你的 Heycard 頁，不用填。':'Goes to your Heycard page. Nothing to fill in.',
+ '留白的話這顆按鈕不會出現':'Leave blank and this button won\'t show',
+ '看完整名片':'Full card','加入好友':'Add me','加我 LINE':'Add me on LINE',
+ '致電給我':'Call me','聯絡我們':'Contact us','看網站':'Website','看地圖':'Map',
+ '預約時間':'Book a time','查看作品集':'Portfolio','自訂連結':'Custom link',
+ 'LINE ID 或邀請連結':'LINE ID or invite link','公司地址':'Company address',
+ '預約頁網址':'Booking page URL','作品集網址':'Portfolio URL','網址':'URL',
+ '電話':'Phone','地址':'Address',
  '公司名稱':'Company name','公司介紹':'Description',
  '這家公司在做什麼':'What this company does',
  '要放哪些資料':'Which details','按鈕':'Buttons',
