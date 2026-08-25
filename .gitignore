@@ -1,0 +1,63 @@
+# ── Heycard 原型：build 產物（由 BUILD.sh 從 app/_*.js 組出，不進 git，改 app/ 底下的原始檔）
+/heycard-app.html
+/heycard-app-v*.html
+/deploy/
+
+# ── 測試 / 巡檢產物（Playwright 截圖，可重新產生）
+/shots/
+
+# ── Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+playwright-report/
+test-results/
+/.cache/
+
+# ── 環境變數 / 私密資訊
+.env
+.env.*
+!.env.example
+
+# ── 本機參考檔（大型上傳的原始 PDF，不需要進版控）
+/vi.pdf
+
+# ── OS / 編輯器
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# ── 兩份指定語言的建置產物（由 BUILD.sh 產生）
+/heycard-zh.html
+/heycard-en.html
+/heycard-artifact.html
+
+# ── 一次性的量測與截圖腳本（開發過程產物，非專案資產）
+/cam.js
+/cen.js
+/chk.js
+/dual.js
+/eff.js
+/gg.js
+/h.js
+/mobcheck.js
+/shot58.js
+/shot59.js
+/t56*.js
+/tlang*.js
+/v39.js
+/v40.js
+/textscan.js
+/textreport.json
+/i18n-report.json
+/missing.json
+/todo*.txt
+/todo.json
+
+# ── 私鑰絕對不進版控
+/ssh-key/
+*.pem
+id_ed25519
+id_rsa
