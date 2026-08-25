@@ -61,3 +61,7 @@ Thumbs.db
 *.pem
 id_ed25519
 id_rsa
+
+# ── LINE 卡片開發期的量測腳本
+/line.js
+/line2.js
