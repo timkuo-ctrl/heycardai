@@ -144,13 +144,42 @@ function lHcOff(){
 /* 公司卡要顯示哪些欄位：每家各自設定 */
 function lOrgF(name){return lOv('org:'+name).F||L_ORGF_DEF}
 
-function lOrgRows(name){
- const O=lOrg(name);if(!O)return [];
+/* ═════ 公司資料：用戶自己的優先 ═════
+   順序一律是「這個編輯器裡改過的 → 用戶名片上的 → 公示登記資料 → 空的」。
+   登記資料是我們幫他查的，他自己填的才是他要對外講的版本；
+   兩邊不一樣的時候，以他為準。 */
+function lOrgData(name,card){
+ const O=lOrg(name)||{};card=card||{};
+ return {
+  name:card.company||O.full||name,
+  ind:O.ind||card.industry||'',
+  size:O.size||'',
+  addr:card.addr||O.addr||'',
+  founded:O.founded||'',
+  capital:O.capital||'',
+  tags:(O.tags&&O.tags.length)?O.tags:[],
+  desc:O.desc||'',
+  web:card.web||O.web||'',
+  mail:card.email||'',
+  tel:card.tel||''}}
+
+/* Logo 也一樣：用戶自己上傳的優先。
+   但兩種來源的形狀不同——品牌方磚是為了滿版做的（正方、留白算好），
+   用戶上傳的多半是橫式標準字，滿版裁切會把字切掉。所以來源決定裁切方式。
+   card.logo 在 v1.9 的素材播種時會被塞成 BRAND[x].l，那不是用戶上傳的，
+   要認出來換用方磚，否則示範帳號會拿到一張被硬塞進正方形的橫式字標。 */
+function lOrgLogo(name,card){
+ const B=lBrand(name),up=card&&card.logo;
+ if(up&&!(B&&up===B.l))return {src:up,fit:'contain',bg:'#FFFFFF',own:true};
+ if(B)return {src:B.m,fit:'cover',bg:B.c,own:false};
+ return null}
+
+function lOrgRows(it){
+ const name=it.org?it.org.name:'',D=lOrgData(name,it.org&&it.org.card);
  const F=lOrgF(name),out=[];
  L_ORGF.forEach(function(x){
   if(!F[x[0]])return;
-  let v=O[x[0]];
-  if(x[0]==='tags')v=(O.tags&&O.tags.length)?O.tags.join('、'):'';
+  let v=x[0]==='tags'?(D.tags.length?D.tags.join('、'):''):D[x[0]];
   if(v)out.push([x[1],String(v)])});
  return out}
 
@@ -175,18 +204,26 @@ function lOrgRows(name){
 
    一張卡最多 3 顆。這不是技術限制，是參考版型本來就是 3 顆——
    再多，卡片會長到 LINE 裡要滑兩下才看得完，人就不看了。 */
+/* 型別要有圖示才認得出來——字級一樣的一排文字，眼睛不會停。
+   IC 裡沒有地圖、日曆、地球，補上。 */
+if(typeof IC==='object'){
+ if(!IC.pin) IC.pin='M12 21s7-6.6 7-11.2A7 7 0 1 0 5 9.8C5 14.4 12 21 12 21zM12 12.2a2.4 2.4 0 1 0 0-4.8 2.4 2.4 0 0 0 0 4.8';
+ if(!IC.cal) IC.cal='M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 10h16M8.5 3v4M15.5 3v4';
+ if(!IC.mail)IC.mail='M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3.5 7.5l8.5 6 8.5-6';
+ if(!IC.glob)IC.glob='M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M3.6 9h16.8M3.6 15h16.8M12 3c2.4 2.4 3.6 5.4 3.6 9s-1.2 6.6-3.6 9c-2.4-2.4-3.6-5.4-3.6-9S9.6 5.4 12 3';
+}
 const L_MAXACT=3;
 const L_ACTS={
- page :{n:'看完整名片',k:'none'},
- add  :{n:'加入好友',  k:'none'},
- line :{n:'加我 LINE', k:'line',ph:'LINE ID 或邀請連結'},
- tel  :{n:'致電給我',  k:'tel', ph:'0912 345 678'},
- mail :{n:'聯絡我們',  k:'mail',ph:'you@company.com'},
- web  :{n:'看網站',    k:'url', ph:'example.com'},
- map  :{n:'看地圖',    k:'text',ph:'公司地址'},
- book :{n:'預約時間',  k:'url', ph:'預約頁網址'},
- folio:{n:'查看作品集',k:'url', ph:'作品集網址'},
- link :{n:'自訂連結',  k:'url', ph:'網址'}};
+ page :{n:'看完整名片',k:'none',i:'idc'},
+ add  :{n:'加入好友',  k:'none',i:'plus'},
+ line :{n:'加我 LINE', k:'line',i:'msg', ph:'LINE ID 或邀請連結'},
+ tel  :{n:'致電給我',  k:'tel', i:'call',ph:'0912 345 678'},
+ mail :{n:'聯絡我們',  k:'mail',i:'mail',ph:'you@company.com'},
+ web  :{n:'看網站',    k:'url', i:'glob',ph:'example.com'},
+ map  :{n:'看地圖',    k:'text',i:'pin', ph:'公司地址'},
+ book :{n:'預約時間',  k:'url', i:'cal', ph:'預約頁網址'},
+ folio:{n:'查看作品集',k:'url', i:'img', ph:'作品集網址'},
+ link :{n:'自訂連結',  k:'url', i:'link',ph:'網址'}};
 /* 個人卡與公司卡能用的型別不同：加人脈只有人有，看地圖多半是公司 */
 const L_ACTS_ME =['page','add','line','tel','mail','web','book','folio','link'];
 const L_ACTS_ORG=['web','mail','tel','line','map','book','folio','link'];
@@ -216,9 +253,9 @@ function lActs(it){
   return [{t:'page',l:lLbl(k,'b1','看完整名片')},
           {t:'add', l:lLbl(k,'b2','加入好友')}]}
  if(k==='hc')return [{t:'link',l:HC2.cta,v:'heycard.app/join'}];
- const O=lOrg(it.org.name),card=it.org.card||{};
- const site=lTxt(k,'site',(O&&O.web)||card.web||'');
- const mail=lTxt(k,'mail',card.email||'');
+ const D=lOrgData(it.org.name,it.org.card);
+ const site=lTxt(k,'site',D.web);
+ const mail=lTxt(k,'mail',D.mail);
  const out=[];
  if(site)out.push({t:'web', l:lLbl(k,'b1','看網站'),   v:site});
  if(mail)out.push({t:'mail',l:lLbl(k,'b2','聯絡我們'),v:mail});
@@ -246,8 +283,7 @@ function lDeck(all){
 function lTitleOf(it){
  if(it.k==='me')return lTxt('me','name',lineCard().name||'');
  if(it.k==='hc')return 'Heycard';
- const O=lOrg(it.org.name);
- return lTxt(it.k,'title',(O&&O.full)||it.org.name)}
+ return lTxt(it.k,'title',lOrgData(it.org.name,it.org.card).name)}
 
 /* ═════ 按鈕的深淺階梯 ═════
    參考版型的按鈕不是「一深一淺」，是同一個色相由淺到深疊下來。
@@ -287,16 +323,18 @@ function flexBubbleUser(c,T){
 
 /* ②④ 公司：滿版 Logo → 公司名 → 介紹 → 按鈕 */
 function flexBubbleOrg(it,T){
- const o=it.org,name=o.name,k=it.k,O=lOrg(name),B=lBrand(name);
- const meta=[lOrgF(name).ind&&O&&O.ind,lOrgF(name).size&&O&&O.size].filter(Boolean).join('　·　');
- const desc=lTxt(k,'desc',O&&O.desc?String(O.desc).slice(0,58)+'⋯':'');
- const rows=lOrgRows(name).filter(function(r){
+ const o=it.org,name=o.name,k=it.k,B=lBrand(name);
+ const D=lOrgData(name,o.card),F=lOrgF(name),L=lOrgLogo(name,o.card);
+ const meta=[F.ind&&D.ind,F.size&&D.size].filter(Boolean).join('　·　');
+ const desc=lTxt(k,'desc',D.desc?String(D.desc).slice(0,58)+'⋯':'');
+ const rows=lOrgRows(it).filter(function(r){
   return r[0]!=='產業'&&r[0]!=='員工人數'});
  const acts=lLiveActs(it);
  const sh=lShades(B?B.c:T.a,acts.length);
  const hero={type:'image',url:'https://heycard.app/org/'+encodeURIComponent(name)+'.png',
-  size:'full',aspectRatio:'1:1',aspectMode:'cover'};
- if(B)hero.backgroundColor=B.c;
+  size:'full',aspectRatio:L&&L.fit==='contain'?'16:10':'1:1',
+  aspectMode:L&&L.fit==='contain'?'fit':'cover'};
+ if(L)hero.backgroundColor=L.bg;
  return {type:'bubble',size:'kilo',hero:hero,
   body:{type:'box',layout:'vertical',paddingAll:'20px',contents:[
    {type:'text',text:lTitleOf(it),weight:'bold',size:'lg',wrap:true},
@@ -372,14 +410,15 @@ function lCardHTML(it,c,T){
    +'<div class="lfoot"><div class="lbtn" style="background:var(--mang);color:#fff">'
    +esc(HC2.cta)+'</div></div>',' dark')}
 
- const o=it.org,n=o.name,k=it.k,O=lOrg(n),B=lBrand(n);
- const F=lOrgF(n);
- const meta=[F.ind&&O&&O.ind,F.size&&O&&O.size].filter(Boolean).join('　·　');
- const desc=lTxt(k,'desc',O&&O.desc?String(O.desc).slice(0,48)+'⋯':'');
- const rows=lOrgRows(n).filter(function(r){return r[0]!=='產業'&&r[0]!=='員工人數'});
+ const o=it.org,n=o.name,k=it.k,B=lBrand(n);
+ const D=lOrgData(n,o.card),F=lOrgF(n),L=lOrgLogo(n,o.card);
+ const meta=[F.ind&&D.ind,F.size&&D.size].filter(Boolean).join('　·　');
+ const desc=lTxt(k,'desc',D.desc?String(D.desc).slice(0,48)+'⋯':'');
+ const rows=lOrgRows(it).filter(function(r){return r[0]!=='產業'&&r[0]!=='員工人數'});
  return tag(
-  '<div class="lhero"'+(B?' style="background:'+B.c+'"':'')+' translate="no">'
-  +(B?'<img src="'+B.m+'" alt="">'
+  '<div class="lhero'+(L&&L.fit==='contain'?' fitlogo':'')+'"'
+  +(L?' style="background:'+L.bg+'"':'')+' translate="no">'
+  +(L?'<img src="'+esc(L.src)+'" alt="">'
      :'<div class="lmark" style="background:'+T.a+'">'+esc((n||'?')[0])+'</div>')
   +'</div>'
   +'<div class="lbody">'
@@ -461,6 +500,7 @@ SCREENS.lineEdit=(a)=>{
     不擋的話 paneHTML 會用一個對不上的 key 走進公司那一支，
     標題會印成人名、上面也不會有任何一張被選中。 */
  if(!lDeck(true).some(function(x){return x.k===cur}))cur='me';
+ let openAct=-1;
  const itOf=function(k){
   return lDeck(true).filter(function(x){return x.k===k})[0]||{k:'me'}};
 
@@ -486,40 +526,60 @@ SCREENS.lineEdit=(a)=>{
     +chk(on.indexOf(x.id)>=0)+'</button>'}).join('')};
 
  const ofRows=function(n){
-  const O=lOrg(n),F=lOrgF(n);
+  const F=lOrgF(n),it0=itOf('org:'+n);
+  const D=lOrgData(n,it0.org&&it0.org.card);
   return L_ORGF.map(function(x){
-   const val=x[0]==='tags'?((O&&O.tags)||[]).join('、'):((O&&O[x[0]])||'');
+   const val=x[0]==='tags'?D.tags.join('、'):(D[x[0]]||'');
    return '<button class="row" data-of="'+x[0]+'" style="width:100%;text-align:left">'
     +'<div class="rt"><div class="n">'+esc(x[1])+'</div>'
     +'<div class="s" translate="no">'+esc(String(val||'—'))+'</div></div>'
     +chk(!!F[x[0]])+'</button>'}).join('')};
 
- /* ── 快捷按鈕：型別決定要填什麼 ──
-    型別跟值綁在一起，用戶不用自己想「這裡要打網址還是 Email」。 */
+ /* ── 快捷按鈕 ──
+    這一區改過一次。第一版把型別做成 <select>，在手機和桌機上都看不出來可以點：
+    一顆沒有外框、沒有箭頭的粗體字，眼睛會當它是標題。
+    改法是讓「可以點」這件事由外觀講，不要靠旁邊寫一行字說明：
+      · 型別做成一個有底色、有圖示、有箭頭的控制項，點下去就地展開所有選項
+      · 展開後每個型別都是看得見的一顆晶片，不需要先知道有幾個選項才敢點
+      · 左邊那格不是編號，是**這顆按鈕實際會長的顏色**——
+        深淺階梯用色塊直接看到，就不必寫「由上到下顏色由淺到深」 */
  const actRows=function(k){
-  const it=itOf(k),list=lActs(it);
+  const it=itOf(k),list=lActs(it),T=lineTheme(c);
+  const B=(it.org&&lBrand(it.org.name));
+  const sh=lShades(B?B.c:T.a,Math.max(list.length,1));
   const menu=(k==='me'?L_ACTS_ME:L_ACTS_ORG);
   return list.map(function(a,i){
-   const D=L_ACTS[a.t]||L_ACTS.link;
-   const opts=menu.map(function(t){
-    return '<option value="'+t+'"'+(t===a.t?' selected':'')+'>'+esc(L_ACTS[t].n)+'</option>'}).join('');
-   return '<div class="actrow">'
-    +'<div class="acthd"><span class="actno">'+(i+1)+'</span>'
-    +'<select data-a="t" data-i="'+i+'">'+opts+'</select>'
-    +'<button class="actdel" data-del="'+i+'" aria-label="移除">'+ico('x',15,'#9A9AA6',2.2)+'</button></div>'
+   const D=L_ACTS[a.t]||L_ACTS.link,open=(openAct===i);
+   const grid=open
+    ?'<div class="actgrid">'+menu.map(function(t){
+       const on=(t===a.t);
+       return '<button class="actchip'+(on?' on':'')+'" data-pick="'+t+'" data-i="'+i+'">'
+        +ico(L_ACTS[t].i,14,on?'#fff':'#7A7A83',2)+esc(L_ACTS[t].n)+'</button>'}).join('')+'</div>'
+    :'';
+   return '<div class="actrow'+(open?' open':'')+'">'
+    +'<div class="acthd">'
+    +'<button class="actsel'+(open?' open':'')+'" data-sel="'+i+'">'
+    +'<i class="actsw" style="background:'+sh[i]+'"></i>'
+    +'<i class="acticon">'+ico(D.i,15,'#5A5A63',2)+'</i>'
+    +'<span class="actname">'+esc(D.n)+'</span>'
+    +'<i class="actcv">'+ico('arr',15,'#9A9AA6',2.4)+'</i></button>'
+    +'<button class="actdel" data-del="'+i+'" aria-label="移除">'+ico('x',15,'#9A9AA6',2.2)+'</button>'
+    +'</div>'
+    +grid
     +'<div class="fld"><label>按鈕文字</label>'
     +'<input data-a="l" data-i="'+i+'" value="'+esc(a.l||'')+'" placeholder="'+esc(D.n)+'"></div>'
     +(lActNeedsValue(a)
-      ?'<div class="fld"><label>'+esc(D.k==='mail'?'Email':D.k==='tel'?'電話':D.k==='line'?'LINE':D.k==='text'?'地址':'網址')+'</label>'
+      ?'<div class="fld'+(lActOK(a)?'':' bad')+'"><label>'
+       +esc(D.k==='mail'?'Email':D.k==='tel'?'電話':D.k==='line'?'LINE':D.k==='text'?'地址':'網址')+'</label>'
        +'<input data-a="v" data-i="'+i+'" value="'+esc(a.v||'')+'" placeholder="'+esc(D.ph||'')+'"'
        +(D.k==='mail'?' type="email" inputmode="email"':D.k==='tel'?' type="tel" inputmode="tel"':'')+'>'
        +'</div>'
        +(lActOK(a)?'':'<div class="err">留白的話這顆按鈕不會出現</div>')
-      :'<div class="tip" style="margin:-2px 0 8px">連到你的 Heycard 頁，不用填。</div>')
+      :'')
     +'</div>'}).join('')
    +(list.length<L_MAXACT
-     ?'<button class="btn tt sm" id="addAct" style="width:100%;margin-top:4px">＋ 加一顆按鈕</button>'
-     :'<div class="tip">一張卡最多 '+L_MAXACT+' 顆。再多，LINE 裡要滑兩下才看得完。</div>')};
+     ?'<button class="actadd" id="addAct">'+ico('plus',16,'currentColor',2.2)+'加一顆按鈕</button>'
+     :'')};
 
  const paneHTML=function(k){
   const it=itOf(k);
@@ -537,8 +597,7 @@ SCREENS.lineEdit=(a)=>{
     +'<div id="ids" style="margin-top:6px">'+idRows()+'</div>'
     +'<div style="margin-top:18px">'+fld(k,'intro','自我介紹',c.headline,'一兩句就好',3)+'</div>'
     +head('快捷按鈕')
-    +'<div class="tip" style="margin-top:-8px;line-height:1.75">選型別，下面就會問你要填什麼。由上到下顏色由淺到深。</div>'
-    +'<div id="acts" style="margin-top:10px">'+actRows(k)+'</div>'
+    +'<div id="acts" style="margin-top:-6px">'+actRows(k)+'</div>'
     +reset+'</div>';
 
   if(it.k==='hc')
@@ -551,17 +610,16 @@ SCREENS.lineEdit=(a)=>{
     +'<div class="s">'+(pro?'關掉之後只剩你自己和公司的卡片':'Pro 才能關掉')+'</div></div>'
     +chk(!lHcOff())+'</button></div></div>';
 
-  const n=it.org?it.org.name:'',O=lOrg(n);
+  const n=it.org?it.org.name:'',D=lOrgData(n,it.org&&it.org.card);
   return '<div class="pad">'
    +'<div class="ptitle" translate="no">'+esc(lTitleOf(it))+'</div>'
-   +fld(k,'title','公司名稱',(O&&O.full)||n,'')
+   +fld(k,'title','公司名稱',D.name,'')
    +'<div style="margin-top:14px">'+fld(k,'desc','公司介紹',
-      O&&O.desc?String(O.desc).slice(0,48)+'⋯':'','這家公司在做什麼',3)+'</div>'
+      D.desc?String(D.desc).slice(0,48)+'⋯':'','這家公司在做什麼',3)+'</div>'
    +head('要放哪些資料')
    +'<div id="fs" style="margin-top:-6px">'+ofRows(n)+'</div>'
    +head('快捷按鈕')
-   +'<div class="tip" style="margin-top:-8px;line-height:1.75">選型別，下面就會問你要填什麼。由上到下顏色由淺到深。</div>'
-   +'<div id="acts" style="margin-top:10px">'+actRows(k)+'</div>'
+   +'<div id="acts" style="margin-top:-6px">'+actRows(k)+'</div>'
    +reset+'</div>'};
 
  const el=screen(tbTitle('編輯卡片內容')
@@ -600,13 +658,7 @@ SCREENS.lineEdit=(a)=>{
   const f=e.target.dataset.f;if(!f)return;
   lOvSet(cur,f,e.target.value);rail();rs()});
 
- /* 換型別要重畫那一區——要填的東西整個換掉了 */
- el.addEventListener('change',function(e){
-  if(e.target.dataset.a!=='t')return;
-  const list=lActs(itOf(cur)).slice(),i=+e.target.dataset.i;
-  if(!list[i])return;
-  list[i]={t:e.target.value,l:'',v:list[i].v||''};
-  setActs(list);acts();rail()});
+
 
  el.addEventListener('click',function(e){
   const card=e.target.closest('#lrail .lcard');
@@ -615,6 +667,15 @@ SCREENS.lineEdit=(a)=>{
    const sel=$('#lrail .lcard.sel',el);
    if(sel&&sel.scrollIntoView)sel.scrollIntoView({block:'nearest',inline:'center'});
    return}
+  const selb=e.target.closest('[data-sel]');
+  if(selb){const i=+selb.dataset.sel;openAct=(openAct===i?-1:i);acts();return}
+  const pick=e.target.closest('[data-pick]');
+  if(pick){
+   const i=+pick.dataset.i,list=lActs(itOf(cur)).slice();
+   if(!list[i])return;
+   if(list[i].t!==pick.dataset.pick)list[i]={t:pick.dataset.pick,l:'',v:list[i].v||''};
+   setActs(list);openAct=-1;acts();rail();
+   const rb0=$('#reset',el);if(rb0)rb0.disabled=false;return}
   const del=e.target.closest('[data-del]');
   if(del){
    const list=lActs(itOf(cur)).slice();
@@ -627,7 +688,7 @@ SCREENS.lineEdit=(a)=>{
    const menu=(cur==='me'?L_ACTS_ME:L_ACTS_ORG);
    const used={};list.forEach(function(x){used[x.t]=1});
    const t=menu.filter(function(x){return !used[x]})[0]||'link';
-   list.push({t:t,l:'',v:''});setActs(list);acts();rail();
+   list.push({t:t,l:'',v:''});setActs(list);openAct=list.length-1;acts();rail();
    const rb2=$('#reset',el);if(rb2)rb2.disabled=false;return}
   if(e.target.closest('#hcTgl')){
    if(!pro){toast('Pro 才能拿掉 Heycard 卡片');R.go('plans',{},'push');return}
@@ -676,23 +737,49 @@ SCREENS.lineEdit=(a)=>{
 #lrail .lcard.cardoff:after{content:'';position:absolute}
 #lrail .lcard.cardoff.sel{opacity:.6}
 .ptitle{font-size:15px;font-weight:700;letter-spacing:-.012em;margin:2px 0 14px}
-.actrow{background:#fff;border:1px solid var(--hair);border-radius:14px;padding:12px 12px 4px;margin-bottom:10px}
-.acthd{display:flex;align-items:center;gap:9px;margin-bottom:10px}
-.actno{flex:0 0 auto;width:19px;height:19px;border-radius:6px;background:var(--fill);
- color:var(--ink3);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
-.acthd select{flex:1;min-width:0;font-size:13.5px;font-weight:700;letter-spacing:-.01em;
- border:0;background:transparent;color:var(--ink);padding:2px 0;appearance:none;
- -webkit-appearance:none;cursor:pointer}
-.actdel{flex:0 0 auto;width:26px;height:26px;border:0;background:transparent;display:flex;
- align-items:center;justify-content:center;border-radius:8px}
+.actrow{background:#fff;border:1px solid var(--hair);border-radius:14px;padding:10px 10px 2px;
+ margin-bottom:10px;transition:border-color .14s}
+.actrow.open{border-color:var(--mang)}
+.acthd{display:flex;align-items:center;gap:4px;margin-bottom:8px}
+/* 型別：看得出來是個控制項——有底、有圖示、有箭頭 */
+.actsel{flex:1;min-width:0;display:flex;align-items:center;gap:9px;text-align:left;
+ background:var(--fill);border:1px solid transparent;border-radius:10px;padding:9px 10px;
+ transition:.14s;cursor:pointer}
+.actsel.open{background:#fff;border-color:var(--mang)}
+.actsw{flex:0 0 auto;width:20px;height:20px;border-radius:6px}
+.acticon{flex:0 0 auto;display:flex}
+.actname{flex:1;min-width:0;font-size:13.5px;font-weight:700;letter-spacing:-.012em;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.actcv{flex:0 0 auto;display:flex;transform:rotate(90deg);transition:transform .18s}
+.actsel.open .actcv{transform:rotate(-90deg)}
+.actdel{flex:0 0 auto;width:30px;height:30px;border:0;background:transparent;display:flex;
+ align-items:center;justify-content:center;border-radius:9px}
 .actdel:active{background:var(--fill)}
+/* 展開：所有型別一次看完，不用先知道有幾個才敢點 */
+.actgrid{display:flex;flex-wrap:wrap;gap:6px;margin:0 2px 12px}
+.actchip{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;
+ letter-spacing:-.008em;padding:8px 11px;border-radius:9px;background:var(--fill);
+ color:var(--ink2);border:1px solid transparent;transition:.12s}
+.actchip.on{background:var(--mang);color:#fff;border-color:var(--mang)}
+.actadd{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;
+ padding:13px;border-radius:14px;border:1.5px dashed #CFCFD8;background:transparent;
+ color:var(--ink3);font-size:13px;font-weight:700;letter-spacing:-.01em}
+.actadd:active{background:var(--fill)}
 .actrow .fld{background:var(--fill);margin-bottom:8px}
+@media(hover:hover) and (pointer:fine){
+ .actsel:hover{background:#EFEFF3}
+ .actchip:hover:not(.on){background:#E9E9EE}
+ .actadd:hover{border-color:var(--mang);color:var(--mang)}}
 /* 滿版：頭像與 Logo 都做成整寬的正方形，不留內距、不做圓角 */
 /* padding:0 是必要的——v4.4 的 #lrail .lhero 有 padding:16px，同分特異性下
    我沒宣告的屬性會留著，滿版就會被那 16px 吃掉一圈白邊 */
 #lrail .lhero,#lone .lhero{position:relative;width:100%;aspect-ratio:1/1;overflow:hidden;
  padding:0;background:var(--fill);flex:0 0 auto;display:block}
 #lrail .lhero img,#lone .lhero img{width:100%;height:100%;object-fit:cover;display:block}
+/* 用戶自己上傳的多半是橫式標準字：滿版裁切會把字切掉，塞進正方形又整片空。
+   所以寬度照樣滿版，高度收成 16:10 的橫幅，字標放大、白邊變少。 */
+#lrail .lhero.fitlogo,#lone .lhero.fitlogo{aspect-ratio:16/10;background:#fff}
+#lrail .lhero.fitlogo img,#lone .lhero.fitlogo img{object-fit:contain;padding:11% 13%}
 #lrail .lhero svg,#lone .lhero svg{width:100%;height:100%;display:block}
 #lrail .lmark,#lone .lmark{width:100%;height:100%;color:#fff;display:flex;
  align-items:center;justify-content:center;font-size:56px;font-weight:300}
@@ -747,9 +834,7 @@ if(typeof EN==='object'){Object.assign(EN,{
  '最多 5 個。大頭貼與按鈕位置固定。':'Up to 5. The photo and buttons stay put.',
  '自我介紹':'About you','一兩句就好':'A sentence or two',
  '快捷按鈕':'Shortcut buttons',
- '選型別，下面就會問你要填什麼。由上到下顏色由淺到深。':
-  'Pick a type and it asks for what it needs. Shades run light to dark.',
- '按鈕文字':'Button label','＋ 加一顆按鈕':'+ Add a button',
+ '按鈕文字':'Button label','加一顆按鈕':'Add a button','移除':'Remove',
  '一張卡最多 3 顆。再多，LINE 裡要滑兩下才看得完。':
   'Three per card. More and it takes two swipes to read in LINE.',
  '一張卡最多 3 顆':'Three buttons per card','至少要留一顆按鈕':'Keep at least one button',
