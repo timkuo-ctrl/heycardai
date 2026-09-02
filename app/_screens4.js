@@ -22,7 +22,7 @@ SCREENS.contact=(a)=>{
  +'<div class="pad" style="padding-bottom:calc(30px + var(--sab))">'
  +'<div class="sec"><b>你們怎麼認識的</b></div>'
  +'<div class="pl">'+kvRow('時間',c.met||'—')+kvRow('場域',c.venue||'—')
-  +kvRow('方式',{qr:'掃 QR 雙向交換',photo:'拍照收錄',link:'連結加入',manual:'手動新增'}[c.via]||'—')
+  +kvRow('方式',{qr:'掃 QR 雙向交換',photo:'拍照收錄',upload:'上傳補件',link:'連結加入',manual:'手動新增'}[c.via]||'—')
   +'<div style="display:flex;gap:12px;padding:9px 0"><span style="font-size:11px;font-weight:300;color:#95959D;width:56px;flex:0 0 auto">你給他</span>'
   +'<div style="flex:1;display:flex;align-items:center;gap:9px">'+(cur?cardHTML(cur,26,{d:0,photo:0,flat:1}):'')
   +'<span style="font-size:12.5px">'+esc(cur?[cur.company,cur.title].filter(Boolean).join(' · ')||cur.name:'—')+'</span></div></div></div>'

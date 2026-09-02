@@ -45,9 +45,12 @@
 
  /* 未登入：沒有導覽也沒有右欄，單欄回到整個視窗置中 */
  #dev.noauth{background:#FAFAFB}
- #dev.noauth>.scr{left:50%;right:auto;transform:translateX(-50%);width:var(--colw)}
+ /* 置中用負 margin，不能用 transform：推頁動畫 @keyframes pin 的
+    to{transform:none} 會把置中的 translateX(-50%) 一起清掉（animation 有 fill:both，
+    而 .push 沒有人移除），結果整頁往右偏半個欄寬、上一頁還留在旁邊。 */
+ #dev.noauth>.scr{left:50%;right:auto;margin-left:calc(var(--colw) / -2);width:var(--colw)}
  #dev.noauth>.scr:after{display:none}
- #dev.noauth .sheet{left:50%;transform:translateX(-50%);width:var(--colw)}
+ #dev.noauth .sheet{left:50%;margin-left:calc(var(--colw) / -2);width:var(--colw)}
 }
 
 @media(min-width:1360px){
