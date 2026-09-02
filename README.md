@@ -3,15 +3,17 @@
 Heycard（黑卡智能）的產品原型：一套會更新的數位名片，加上讓公司留住人脈的企業版。
 這個 repo 放的是**可以直接在瀏覽器打開的互動原型**與產品規格，不是正式產品程式碼。
 
-## 三個原型
+## 兩個原型
 
 | 原型 | 打開 | 是什麼 |
 |---|---|---|
-| **App** | `index.html`（中文）／`en.html`（英文） | 使用者端。名片、收名片、人脈、訊息、尋求、活動、NFC、企業卡。手機尺寸模擬器 |
+| **App** | `index.html`（中文）／`en.html`（英文） | 使用者端。名片、收名片、人脈、訊息、尋求、活動、NFC、企業卡。用瀏覽器打開就是網頁版 |
 | **企業後台** | `business.html` | `business.heycard.app`：前台著陸頁 → 登入（同 App 帳密）→ 企業管理後台 |
-| **個人網頁版** | `web.html` | `heycard.app`：登入 → 訊息、人脈庫、我的名片、公開頁 |
 
-線上版（GitHub Pages）：`/`＝App，`/en.html`、`/business.html`、`/web.html`。
+線上版（GitHub Pages）：`/`＝App，`/en.html`、`/business.html`。
+
+`web/heycard-web.html` 是早期單獨做的個人網頁版，**已不建置也不發佈**——App 本身用瀏覽器開就是網頁版，
+不需要再維護第二份。檔案留著只當參考。
 
 ## 一條產品原則：捕捉在 App，管理在網頁
 
@@ -34,17 +36,20 @@ App 是由 `app/_*.js` 依序串成單一 HTML——**改 `app/` 底下的原始
 順序不可調換，`_events.js` 一定最後（裡面有 `boot()`）。BUILD 會做語法檢查，並產生：
 
 - `heycard-zh.html` / `heycard-en.html` / `heycard-artifact.html`（交付與 Artifact 用，不進版控）
-- `index.html`、`en.html`、`business.html`、`web.html`（GitHub Pages，進版控）
+- `index.html`、`en.html`、`business.html`（GitHub Pages，進版控）
 
-企業後台與個人網頁版各自是**單一檔案**（`admin/heycard-admin.html`、`web/heycard-web.html`），
-直接編輯即可；BUILD 只是把它們包成可獨立打開的完整 HTML 放進 Pages。
+企業後台是**單一檔案**（`admin/heycard-admin.html`），直接編輯即可；
+BUILD 只是把它包成可獨立打開的完整 HTML 放進 Pages。
+
+**字型**：三個原型的 `<style>` 之前都要有那三行 Taipei Sans TC 的 CDN link，
+少了繁中會掉回系統 PingFang，字型就跟 App 對不起來（BUILD 的 `wrap()` 會把 `<style>` 之前的整段搬進 `<head>`）。
 
 ## 目錄
 
 ```
 app/            App 原始檔（_css.txt → _core → _state → _screens*.js → _events.js）
 admin/          企業後台（heycard-admin.html）、開攤頁、企業入口轉址卡
-web/            個人網頁版（heycard-web.html）
+web/            早期個人網頁版（已停止建置，僅留參考）
 docs/           產品規格書（最新 v4.2）、隱私、條款、文案語氣、欄位定義
 design/         設計稿與 VI（heycard-logo.png 為標準字）
 gen/            示範資料用的頭像與公司 Logo 產生器與素材
