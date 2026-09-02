@@ -5898,41 +5898,66 @@ function idLine(c){
 /* ═════ ① 名片：solo 不留空的公司列 ═════ */
 function cardHTML(c,w,o){
  o=o||{};const M=(typeof cardTheme==='function')?cardTheme(c):(MAT[c.material]||MAT.silver);
- const H=Math.round(w*1.586),k=w/320,z=function(v){return Math.round(v*k*100)/100};
- const showPhoto=o.photo!==0 && !!c.photo && w>=110;
+ /* 直式為預設；c.ori==='land'（或 o.land 覆寫）＝橫式。w 一律是卡片寬。 */
+ const land=(o.land!=null)?!!o.land:c.ori==='land';
+ const H=Math.round(land?w/1.586:w*1.586),k=(land?w/1.586:w)/320,z=function(v){return Math.round(v*k*100)/100};
+ const showPhoto=!land && o.photo!==0 && !!c.photo && w>=110;
  const nm=c.name||'　';
  const K=idKind(c);
  /* 獨立接案的人最需要的就是聯絡方式，別預設用極簡版式把它藏掉 */
  const lay=LAYOUTS[c.layout]?c.layout:'classic';
  const lpos=LOGOPOS[c.logoPos]?c.logoPos:'top';
- const big=o.big||(K==='solo'&&w>=150?(nm.length>=5?38:48):(nm.length>=5?34:nm.length===4?38:44));
+ const big=o.big||(K==='solo'&&!land&&w>=150?(nm.length>=5?38:48):(nm.length>=5?34:nm.length===4?38:44));
  const dark=(c.material==='steel'||c.material==='mang');
  const hue=+c.hue||0;
  const lines=[];
  if(c.tel)lines.push(['T',c.tel]);
  if(c.email)lines.push(['E',c.email]);
  if(c.web)lines.push(['W',c.web]);
- if(w>=150&&c.addr)lines.push(['A',c.addr]);
- const detail=(o.d===0||w<86||lay==='minimal')?[]:lines;
- const ctr=lay==='center';
+ if(!land&&w>=150&&c.addr)lines.push(['A',c.addr]);
+ const detail=(o.d===0||(land?w<150:w<86)||lay==='minimal')?[]:lines;
+ const ctr=!land&&lay==='center';
 
- /* 主列＝這個人的歸屬；副列＝在裡面做什麼。
-    solo 沒有歸屬，主列就換成他的專業，副列放服務範圍。 */
  const mainLine=(K==='solo')?(c.title||c.func||c.headline||''):(c.company||'');
  const subLine =(K==='solo')?(c.offer||c.industry||'')
                             :[c.dept,c.title].filter(Boolean).join('　');
 
  const logoImg=function(h){return '<img src="'+esc(c.logo)+'" alt="" style="height:'+z(h)+'px;max-width:'+z(104)+'px;object-fit:contain;'
   +'object-position:'+(ctr?'center':'left')+' center;filter:brightness(0)'+(dark?' invert(1)':'')+';opacity:'+(dark?.86:.78)+';display:block">'};
- const topLogo=(c.logo&&lpos==='top'&&w>=86)?logoImg(19):'<span></span>';
+ /* 企業認證等標籤：左上小膠囊（與後台 appCard 同款） */
+ const tagEl=(c.tag&&w>=86)?'<span style="font-size:'+z(8.5)+'px;font-weight:700;letter-spacing:.06em;color:'+M.sub+';border:1px solid '+M.mut+';border-radius:99px;padding:'+z(2)+'px '+z(7)+'px;white-space:nowrap;line-height:1.4">'+esc(c.tag)+'</span>':'';
+ const topLogo0=(c.logo&&lpos==='top'&&w>=86)?logoImg(19):'';
+ const topLogo=(tagEl||topLogo0)?'<div style="display:flex;align-items:center;gap:'+z(8)+'px">'+tagEl+topLogo0+'</div>':'<span></span>';
  const brand=c.hideBrand?'<span></span>':'<div style="width:'+z(50)+'px;color:'+M.mark+';flex:0 0 auto">'+LOGO+'</div>';
 
- return '<div class="card" style="width:'+w+'px;height:'+H+'px;border-radius:'+z(16)+'px;box-shadow:'+(o.flat?'0 1px 3px rgba(0,0,0,.18)':'var(--shc)')+(M.font?';font-family:'+M.font:'')+'">'
+ const shell='<div class="card" style="width:'+w+'px;height:'+H+'px;border-radius:'+z(16)+'px;box-shadow:'+(o.flat?'0 1px 3px rgba(0,0,0,.18)':'var(--shc)')+(M.font?';font-family:'+M.font:'')+'">'
  +'<div style="position:absolute;inset:0;background:'+M.bg+(hue?';filter:hue-rotate('+hue+'deg) saturate(1.1)':'')+'"></div>'
- /* 灰階材質轉色相沒有反應（灰沒有色相可轉），改用「上色」疊層讓色調真的看得見 */
  +((hue&&/^(silver|mist|steel)$/.test(c.material||'silver'))?'<div style="position:absolute;inset:0;background:hsl('+hue+' 72% '+(c.material==='steel'?'46':'62')+'% / '+(c.material==='steel'?'.34':'.28')+');mix-blend-mode:color;pointer-events:none"></div>':'')
  +'<div class="g" style="background:'+M.sh+'"></div><div class="gr" style="opacity:'+M.gr+';background-image:'+GR+'"></div>'
- +'<div class="ed" style="border-radius:'+z(16)+'px"></div>'
+ +'<div class="ed" style="border-radius:'+z(16)+'px"></div>';
+
+ /* ── 橫式：同一套元素——上列 Logo／品牌、名字靠左置中、聯絡一列、歸屬左下、標記右下 ── */
+ if(land)return shell
+ +'<div style="position:relative;height:100%;padding:'+z(20)+'px '+z(24)+'px;display:flex;flex-direction:column">'
+ +'<div style="display:flex;align-items:center;justify-content:space-between;gap:'+z(10)+'px;min-height:'+z(19)+'px">'+topLogo+brand+'</div>'
+ +'<div style="flex:1;display:flex;align-items:center;gap:'+z(16)+'px;min-height:0">'
+ +'<div class="hero" style="font-size:'+z(big*.86)+'px;color:'+M.ink+';white-space:nowrap">'+esc(nm)+'</div>'
+ +(c.nameEn?'<div class="lat" style="font-size:'+z(11)+'px;font-weight:400;letter-spacing:.22em;color:'+M.sub+';align-self:flex-end;padding-bottom:'+z(5)+'px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(c.nameEn)+'</div>':'')
+ +'</div>'
+ +(detail.length?'<div style="display:flex;gap:'+z(14)+'px;font-weight:300;font-size:'+z(10)+'px;color:'+M.sub+';margin-bottom:'+z(6)+'px;overflow:hidden">'
+   +detail.slice(0,2).map(function(r){return '<span style="display:inline-flex;gap:'+z(6)+'px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"><span style="font-family:var(--fe);opacity:.62">'+r[0]+'</span>'+esc(r[1])+'</span>'}).join('')+'</div>':'')
+ +'<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:'+z(12)+'px">'
+ +'<div style="min-width:0">'
+ +(subLine?'<div style="font-weight:400;font-size:'+z(11)+'px;color:'+M.sub+';margin-bottom:'+z(1)+'px">'+esc(subLine)+'</div>':'')
+ +((c.logo&&lpos==='bottom'&&w>=86)
+   ?'<div style="display:flex;align-items:center;gap:'+z(8)+'px">'+logoImg(14)
+    +(mainLine?'<span style="font-weight:400;font-size:'+z(12)+'px;color:'+M.ink+';letter-spacing:-.01em">'+esc(mainLine)+'</span>':'')+'</div>'
+   :(mainLine?'<div style="font-weight:400;font-size:'+z(12)+'px;color:'+M.ink+';letter-spacing:-.01em">'+esc(mainLine)+'</div>':''))
+ +'</div>'
+ +(c.hideBrand?'':'<div class="ftx" style="font-size:'+z(6.5)+'px;letter-spacing:.24em;color:'+M.mut+';gap:'+z(10)+'px;flex:0 0 auto"><span>Hey</span><span>to</span><span>Connect</span></div>')
+ +'</div></div></div>';
+
+ return shell
  +'<div style="position:relative;height:100%;padding:'+z(24)+'px '+z(23)+'px;display:flex;flex-direction:column'+(ctr?';text-align:center;align-items:center':'')+'">'
  +'<div style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:'+z(10)+'px;min-height:'+z(19)+'px">'
  +topLogo+brand+'</div>'
@@ -7872,18 +7897,21 @@ document.addEventListener('click',function(e){
 /* ═════ 設計器：一次寫清楚，分層一眼看懂 ═════ */
 SCREENS.aiDesign=()=>{
  const cur=S.curCard()||{};
- let d={material:cur.material||'silver',layout:cur.layout||'classic',logoPos:cur.logoPos||'top',hue:+cur.hue||0,hideBrand:!!cur.hideBrand,ink:cur.ink||'',font:cur.font||'modern'};
+ let d={material:cur.material||'silver',layout:cur.layout||'classic',logoPos:cur.logoPos||'top',hue:+cur.hue||0,hideBrand:!!cur.hideBrand,ink:cur.ink||'',font:cur.font||'modern',ori:cur.ori||'port'};
  let tab='style';
  const TABS=[['style','款式',''],['mat','材質',''],['lay','版式',''],['logo','Logo',''],['hue','色調','plus'],['brand','標記','plus'],['ink','字色','pro'],['font','字體','pro']];
  const el=screen(tbTitle('設計名片','<button class="tx" id="save">套用</button>')
- +'<div style="flex:0 0 auto;background:var(--fill);padding:18px 0 12px"><div style="display:flex;justify-content:center" id="pv"></div><div id="using" style="display:flex;justify-content:center;gap:6px;margin-top:12px;min-height:18px"></div></div>'
+ +'<div style="flex:0 0 auto;background:var(--fill);padding:18px 0 12px"><div style="display:flex;justify-content:center;min-height:150px;align-items:center" id="pv"></div><div style="display:flex;justify-content:center;margin-top:12px" id="oriw"></div><div id="using" style="display:flex;justify-content:center;gap:6px;margin-top:12px;min-height:18px"></div></div>'
  +'<div id="tb2" style="flex:0 0 auto;display:flex;align-items:stretch;gap:0;padding:0 8px;border-bottom:1px solid var(--hair);background:#fff;overflow-x:auto;scrollbar-width:none;white-space:nowrap"></div>'
  +'<div class="body pad" id="op" style="padding-top:16px;padding-bottom:28px"></div>');
 
  const usesPlus=function(){return !!(d.hue||d.hideBrand)};
  const usesPro=function(){return !!((d.ink&&d.ink.toLowerCase()!==(INK_DEFAULT[d.material]||INK_DEFAULT.silver).ink.toLowerCase())||(d.font&&d.font!=='modern'))};
  const preview=function(){
-  $('#pv',el).innerHTML=cardHTML(Object.assign({},cur,d),172);
+  $('#pv',el).innerHTML=cardHTML(Object.assign({},cur,d),d.ori==='land'?236:172);
+  $('#oriw',el).innerHTML='<div style="display:flex;background:#fff;border-radius:10px;padding:3px;box-shadow:0 1px 3px rgba(0,0,0,.06)">'
+   +[['port','直式'],['land','橫式']].map(function(x){const on=d.ori===x[0];
+     return '<button data-dori2="'+x[0]+'" style="padding:6px 16px;border-radius:8px;font-size:12.5px;font-weight:'+(on?700:400)+';background:'+(on?'var(--mang)':'transparent')+';color:'+(on?'#fff':'var(--ink2)')+'">'+x[1]+'</button>'}).join('')+'</div>';
   const u=[];if(usesPlus())u.push('plus');if(usesPro())u.push('pro');
   $('#using',el).innerHTML=u.length?'<span style="font-size:11px;color:var(--ink3);margin-right:2px">用到</span>'+u.map(function(t){return tierPill(t)}).join(''):'<span style="font-size:11px;color:var(--ink3)">免費款</span>';
   const need=(usesPro()&&!isPro())?'pro':(usesPlus()&&!isPlus())?'plus':'';
@@ -7950,13 +7978,14 @@ SCREENS.aiDesign=()=>{
   const L=e.target.closest('[data-lay]');if(L){d.layout=L.dataset.lay;draw();return}
   const P=e.target.closest('[data-lp]');if(P){d.logoPos=P.dataset.lp;draw();return}
   const b=e.target.closest('[data-brand]');if(b){d.hideBrand=!d.hideBrand;draw();return}
+  const orx=e.target.closest('[data-dori2]');if(orx){d.ori=orx.dataset.dori2;draw();return}
   const ik=e.target.closest('[data-ink]');if(ik){d.ink=ik.dataset.ink;draw();return}
   const ft=e.target.closest('[data-font]');if(ft){d.font=ft.dataset.font;draw();return}
   if(e.target.closest('#save')){
    const needPro=usesPro()&&!isPro(),needPlus=usesPlus()&&!isPlus();
    const cards=S.cards,i=cards.findIndex(function(x){return x.id===cur.id});
    /* 免費的部分先存起來；付費的部分升級後才帶走 */
-   const keep={material:d.material,layout:d.layout,logoPos:d.logoPos};
+   const keep={material:d.material,layout:d.layout,logoPos:d.logoPos,ori:d.ori};
    if(isPlus()){keep.hue=d.hue;keep.hideBrand=d.hideBrand}
    if(isPro()){keep.ink=d.ink;keep.font=d.font}
    if(i>=0){Object.assign(cards[i],keep);S.cards=cards}
@@ -8429,7 +8458,7 @@ const EN={
 /* 名片頁 */
 '名片正面':'Card front','換到名片的人都看得到':'Everyone you exchange with sees this','完整檔案':'Full profile','加你為人脈的人看得到，也用在你的公開頁':'Visible to your contacts and on your public page','只有你看得到':'Only you','不對外，只給 AI 判讀合作機會':'Private — used only by AI to spot collaboration','我正在找':'I\'m looking for','升級後：拿掉標記、自由配色 →':'Upgrade: remove the mark, pick your tone →','試試色調與去標記 →':'Try tones and no mark →','試試字色與字體 →':'Try ink and fonts →','Plus 設計':'Plus design','Pro 設計':'Pro design','只給這一張':'Just this card','給完整檔案':'Full profile','2 個身分，對方可自己切換':'2 identities — they can switch','不管給一張還是給完整檔案，出口都是同兩顆按鈕。習慣一次建立就好。':'One card or full profile, same two buttons. Learn it once.','對方會看到':'They\'ll see','預覽名片頁':'Preview page','單張名片 · 讓對方掃這個':'Single card · let them scan this','原型：圖案為示意，非可掃描 QR':'Prototype: sample pattern, not a real QR','改成掃描對方':'Scan theirs instead','對方看到的樣子':'What they see','建立你自己的名片':'Create your own card','當前身分':'Current identity','切換':'Switch','交換與收錄都會用這張':'Used for exchanges and scans','我的名片':'My cards','新名片':'New card',
 /* 設計器 */
-'設計名片':'Design card','款式':'Styles','版式':'Layout','色調':'Tone','標記':'Mark','字色':'Ink','字體':'Font','銀霧':'Silver Mist','曜黑':'Obsidian','極光':'Aurora','錳藍':'Manganese','玫瑰金':'Rose Gold','香檳':'Champagne','墨綠':'Deep Green','湖水':'Lake','暮紫':'Dusk','典藏':'Archive','經典':'Classic','置中':'Centered','極簡':'Minimal','上方':'Top','公司名旁':'By company name','銀':'Silver','鋼':'Steel','霧':'Mist','錳':'Manganese','先在自己的名片上試，喜歡再升級帶走':'Try it on your own card — upgrade to keep it','隱藏名片上的 Heycard 標記':'Hide the Heycard mark','你的名片，只有你的品牌':'Your card, only your brand','這種材質合得來的字色':'Ink colors that suit this material','永':'Aa','預設':'Default','深錳':'Deep Mn','深藍':'Navy','赭':'Ochre','深灰':'Charcoal','純白':'White','墨黑':'Ink black','金':'Gold','薄荷':'Mint','淡錳':'Light Mn','自訂顏色':'Custom color','現代':'Modern','簡約':'Light','Taipei Sans，VI 標準':'Taipei Sans, VI standard','宋體，穩重、有年資感':'Serif — steady, seasoned','細體、寬字距，留白多':'Thin, wide-set, airy','用到':'Uses','升級並套用':'Upgrade & apply','先上傳公司 Logo':'Upload your logo first','已套用':'Applied',
+'設計名片':'Design card','款式':'Styles','版式':'Layout','直式':'Portrait','橫式':'Landscape','色調':'Tone','標記':'Mark','字色':'Ink','字體':'Font','銀霧':'Silver Mist','曜黑':'Obsidian','極光':'Aurora','錳藍':'Manganese','玫瑰金':'Rose Gold','香檳':'Champagne','墨綠':'Deep Green','湖水':'Lake','暮紫':'Dusk','典藏':'Archive','經典':'Classic','置中':'Centered','極簡':'Minimal','上方':'Top','公司名旁':'By company name','銀':'Silver','鋼':'Steel','霧':'Mist','錳':'Manganese','先在自己的名片上試，喜歡再升級帶走':'Try it on your own card — upgrade to keep it','隱藏名片上的 Heycard 標記':'Hide the Heycard mark','你的名片，只有你的品牌':'Your card, only your brand','這種材質合得來的字色':'Ink colors that suit this material','永':'Aa','預設':'Default','深錳':'Deep Mn','深藍':'Navy','赭':'Ochre','深灰':'Charcoal','純白':'White','墨黑':'Ink black','金':'Gold','薄荷':'Mint','淡錳':'Light Mn','自訂顏色':'Custom color','現代':'Modern','簡約':'Light','Taipei Sans，VI 標準':'Taipei Sans, VI standard','宋體，穩重、有年資感':'Serif — steady, seasoned','細體、寬字距，留白多':'Thin, wide-set, airy','用到':'Uses','升級並套用':'Upgrade & apply','先上傳公司 Logo':'Upload your logo first','已套用':'Applied',
 /* 方案／付款 */
 '名片是你的':'Your card is yours','人脈會思考':'A network that thinks','拿掉標記、自由配色——名片是你的':'No mark, your tone — the card is yours','字色、字體、洞察與 AI——人脈會思考':'Ink, fonts, insights and AI — a network that thinks','現在的名片，已經很好用':'Your card today is already great','（目前方案）':'(current plan)','現在的名片，已經很好用（目前方案）':'Your card today is already great (current plan)','字色、字體、洞察與 AI——人脈會思考（目前方案）':'Ink, fonts, insights and AI — a network that thinks (current plan)','免費就有':'Free includes','多張名片、多重身分':'Multiple cards and identities','收名片、人脈、訊息、尋求全部免費':'Scanning, network, messages and Seek — all free','5 種材質、3 種版式':'5 materials, 3 layouts','AI 搜尋每月 20 次':'20 AI searches a month','名片上不再有 Heycard 標記':'No Heycard mark on your card','只有你的品牌':'Only your brand','自由配色':'Free color tone','色調由你決定':'You pick the tone','所有款式解鎖':'All styles unlocked','含色調款式':'including toned styles','洞察全開':'Full insights','人脈的結構、變化、往返':'Structure, changes and give-and-take of your network','AI 搜尋 ×10':'10× AI searches','每月 200 次':'200 a month','名片字色與字體':'Card ink and fonts','每種材質一組合得來的顏色':'A matching palette per material','年繳送 NFC 實體卡':'Yearly plan ships an NFC card','一碰就交換':'Tap to exchange','含 Plus 全部功能':'Everything in Plus','省 2 個月':'save 2 months','省 2 個月 · 送 NFC 卡':'save 2 months · NFC card','移除 Heycard 標記':'Remove Heycard mark','所有款式':'All styles','字色與字體':'Ink & fonts','AI 搜尋／月':'AI searches / mo','NFC 實體卡':'NFC card','年繳送':'Yearly','隨時可以取消，用到期末為止。':'Cancel anytime; you keep access to the end of the period.','訂閱在 heycard.app 完成，不經 App Store。':'Subscriptions are handled on heycard.app, not the App Store.','繼續用免費版':'Keep using Free','已包含在 Pro':'Included in Pro','目前是 Pro（年繳）':'You\'re on Pro (yearly)','目前是 Plus（年繳）':'You\'re on Plus (yearly)','目前是 Pro（月繳）':'You\'re on Pro (monthly)','目前是 Plus（月繳）':'You\'re on Plus (monthly)','heycard.app／checkout · 安全付款':'heycard.app/checkout · secure payment','訂閱 Plus':'Subscribe to Plus','訂閱 Pro':'Subscribe to Pro','Plus 年繳':'Plus · yearly','Plus 月繳':'Plus · monthly','Pro 年繳':'Pro · yearly','Pro 月繳':'Pro · monthly','下次扣款：一年後 · 隨時取消':'Next charge in a year · cancel anytime','下次扣款：一個月後 · 隨時取消':'Next charge in a month · cancel anytime','付款方式':'Payment','信用卡／簽帳卡':'Credit / debit card','原型：不會真的扣款':'Prototype: no real charge','付款由 heycard.app 處理，不經 App Store。付款完成會自動回到 App。':'Payment is handled by heycard.app, not the App Store. You\'ll return to the app when it\'s done.','處理中…':'Processing…','名片是你的了':'The card is yours now','人脈會思考了':'Your network thinks now','標記已可拿掉，色調由你決定':'You can remove the mark and pick your tone','去設計名片':'Design my card','回到我的名片':'Back to my cards','NFC 實體卡 ×1（寄到名片上的地址）':'NFC card ×1 (shipped to the address on your card)','贈送':'Free','拿掉名片上的 Heycard 標記、自由配色。你的名片，只有你的品牌。':'Remove the Heycard mark and pick your tone. Your card, only your brand.','拿掉 Heycard 標記、自由配色，NT$79／月起':'No mark, your tone — from NT$79/mo','洞察全開、AI 搜尋 200 次／月、年繳送 NFC 卡':'Full insights, 200 AI searches/mo, NFC card on yearly','洞察全開、AI 搜尋 ×10、字色與字體，年繳送 NFC 卡。':'Full insights, 10× AI searches, ink & fonts, NFC card on yearly.','全部功能已開。感謝你讓人脈會思考。':'Everything is on. Thanks for letting your network think.','NT$79／月起':'From NT$79/mo','NT$179／月起':'From NT$179/mo','看 Pro':'See Pro','洞察、AI 與字色字體，都在 Pro':'Insights, AI, ink and fonts — all in Pro','拿掉標記、自由配色，都在 Plus':'No mark, your tone — all in Plus','這張設計用到了字色與字體，升級 Pro 就能帶走':'This design uses ink and fonts — upgrade to Pro to keep it','這張設計用到了色調或去標記，升級 Plus 就能帶走':'This design uses a tone or no mark — upgrade to Plus to keep it','商業提案是 Pro 的功能。AI 依對方公司與現在的時機起草，你改一改就能送。':'Proposals are a Pro feature. AI drafts from their company and today\'s timing — tweak and send.',
 /* 設定 */
@@ -12009,6 +12038,589 @@ if(typeof EN==='object'){Object.assign(EN,{
  '）——Flex 只吃圖片網址，不吃 HTML，也不吃 data URI。':
   ') — Flex takes image URLs only, not HTML and not data URIs.'});
  if(typeof EN_N==='object')Object.keys(EN).forEach(function(k){EN_N[nrm(k)]=EN[k]})}
+
+/* ═══════════════════════════════════════════
+   v5.0 ㊿：企業版連動——短的先做
+   ─────────────────────────────────────────
+   後台（business.heycard.app）已定案的東西，員工端要跟上的第一批：
+   ① 企業認證名片：公司發的卡，卡面帶「企業認證」標籤，版型／材質由公司統一
+   ② 欄位歸屬：公司資訊、職稱、公司 Email、卡面設計＝公司管理（唯讀）；
+      姓名（中／英）可確認、手機必填——沒填完卡片不啟用
+   ③ 收名片歸入：用企業卡的身分收的（紙本／Heycard／NFC）自動進公司人脈庫，
+      確認畫面看得到「歸入」；用個人卡收的留在個人
+   ④ 公司交辦：後台 AI 洞察指派的行動，出現在員工的待辦
+   ⑤ 透明：公司看得到我什麼——跟後台「資料邊界」一字不差
+   ═══════════════════════════════════════════ */
+
+/* ── 工具 ── */
+IC.lock='M5 11h14v10H5zM8 11V7a4 4 0 0 1 8 0v4';
+function orgCards(){return S.cards.filter(function(c){return c.org})}
+function orgCardOf(c){return c&&c.org?c.org:null}
+const ORG_LOCK=['company','dept','title','email','web','addr','logo'];
+
+/* ① 接受企業卡邀請（原型：由模擬入口觸發；正式版是通知／Email 連結） */
+function acceptOrgCard(){
+ const u=S.user||{};
+ const cards=S.cards;
+ if(cards.some(function(c){return c.org&&c.org.name==='黑卡智能'})){toast('已經有黑卡智能的企業卡了');return}
+ const me=cards[0]||{};
+ const c={id:uid(),kind:'work',org:{name:'黑卡智能',issued:'今天'},tag:'企業認證',
+  name:me.name||u.name||'',nameEn:me.nameEn||'',title:'業務經理',dept:'',company:'黑卡智能',
+  email:(me.name?'':'')+'you@heycard.app',tel:me.tel||'',web:'heycard.app',
+  material:'steel',ori:'land',layout:'classic',logoPos:'top',hideBrand:0,hue:0,ink:'',font:'modern'};
+ cards.push(c);S.cards=cards;S.cur=cards.length-1;
+ DB.set('orgTasks',[
+  {id:'t1',who:'黑卡智能',target:'張維中 · 立昇電子',topic:'約下週回訪，聊 Q4 自動化採購',why:'對方兩週內看了名片 3 次',st:'todo'},
+  {id:'t2',who:'黑卡智能',target:'周永昌 · 大甲精機',topic:'寄公司介紹，約帶樣品拜訪',why:'NFC 一碰後沒有後續',st:'todo'}]);
+ toast(c.tel?'黑卡智能的企業名片已加入':'企業名片已加入——補上手機號碼就啟用')}
+
+/* 模擬入口多一段 */
+const _sim70=SCREENS.simEntry;
+SCREENS.simEntry=()=>{
+ const el=_sim70();
+ const body=$('.body',el);
+ if(body){body.insertAdjacentHTML('beforeend',
+  '<div class="sec" style="margin-top:24px"><b>企業版</b></div>'
+  +'<button class="btn tt" id="simOrg" style="width:100%;margin-bottom:9px;justify-content:flex-start;gap:10px">'+ico('shield',17,'currentColor',2.2)+'接受「黑卡智能」的企業名片邀請</button>'
+  +'<div class="tip" style="line-height:1.75">正式版：公司在後台邀請你，通知或 Email 連結進來，確認姓名、補手機，卡就在你的名片列裡。</div>');
+  el.addEventListener('click',function(e){if(e.target.closest('#simOrg')){acceptOrgCard();R.go('me',null,'root')}})}
+ return el};
+
+/* ② 編輯：公司管理的欄位唯讀，手機必填提示 */
+const _ce70=SCREENS.cardEdit;
+SCREENS.cardEdit=(a)=>{
+ const el=_ce70(a);
+ const cur=(a&&a.id)?S.cards.find(function(c){return c.id===a.id}):S.curCard();
+ const org=orgCardOf(cur);if(!org)return el;
+ setTimeout(function(){
+  const flds=$('#flds',el);
+  if(flds&&!$('#orgNote',el))flds.parentNode.insertBefore(h('<div id="orgNote" style="display:flex;gap:9px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--mangS);color:var(--mangD);font-size:12.5px;line-height:1.6;margin-bottom:12px">'
+   +ico('shield',14,'currentColor',2.6)+'<span>'+esc(org.name)+' 的企業名片 · 標「公司管理」的欄位改不了 · <b>手機必填才啟用</b></span></div>'),flds);
+  ORG_LOCK.forEach(function(k){
+   $$('[data-k="'+k+'"]',el).forEach(function(inp){inp.disabled=true;inp.style.background='var(--fill)';inp.style.color='var(--ink3)';
+    const lab=inp.closest('.fld');if(lab){const l=$('label',lab);if(l&&!/公司管理/.test(l.textContent))l.insertAdjacentHTML('beforeend','<span style="font-weight:400;color:var(--mang);margin-left:6px">公司管理</span>')}})});
+  const tel=$('[data-k="tel"]',el);
+  if(tel){const lab=tel.closest('.fld');const l=lab&&$('label',lab);if(l&&!/必填/.test(l.textContent))l.insertAdjacentHTML('beforeend','<span style="font-weight:400;color:#C8322B;margin-left:6px">必填</span>')}
+ },80);
+ return el};
+
+/* 設計：企業卡的卡面由公司統一，這裡只看不改 */
+const _ad70=SCREENS.aiDesign;
+SCREENS.aiDesign=()=>{
+ const cur=S.curCard();const org=orgCardOf(cur);
+ if(!org)return _ad70();
+ return screen(tbTitle('設計名片')
+  +'<div style="flex:0 0 auto;background:var(--fill);padding:22px 0 18px;display:flex;justify-content:center">'+cardHTML(cur,cur.ori==='land'?236:172)+'</div>'
+  +'<div class="body pad" style="padding-top:18px">'
+  +'<div class="pl" style="display:flex;gap:12px;align-items:flex-start"><span style="display:flex;color:var(--mang);margin-top:2px">'+ico('shield',18,'currentColor',2.4)+'</span>'
+  +'<div style="flex:1"><div style="font-size:14px;font-weight:700">這張卡的樣子由 '+esc(org.name)+' 統一設計</div>'
+  +'<div class="tip" style="margin-top:4px;line-height:1.7">材質、直橫式、色調、字體都跟全公司一致，公司在後台改了會即時同步到你這張。你的個人名片不受影響，隨時可以另外設計。</div></div></div>'
+  +'</div>')};
+
+/* ③ 收名片：確認畫面看得到「歸入」——跟著你現在用的身分走 */
+const _cf70=SCREENS.confirm;
+SCREENS.confirm=(a)=>{
+ const el=_cf70(a);
+ const cur=S.curCard();const org=orgCardOf(cur);
+ const body=$('.body',el);if(!body)return el;
+ body.insertAdjacentHTML('afterbegin',
+  '<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;margin-bottom:10px;background:'+(org?'var(--mangS)':'var(--fill)')+'">'
+  +'<span style="display:flex;color:'+(org?'var(--mangD)':'var(--ink3)')+'">'+ico(org?'shield':'card',15,'currentColor',2.4)+'</span>'
+  +'<div style="flex:1;min-width:0"><div style="font-size:12.5px;font-weight:700;color:'+(org?'var(--mangD)':'var(--ink)')+'">歸入：'+(org?esc(org.name)+' 的公司人脈庫':'我的個人人脈')+'</div>'
+  +'<div style="font-size:11px;color:var(--ink3)">'+(org?'你正在用企業名片，這些名片會回到公司；公司看得到名片面資料、時間地點與經手人':'你正在用個人名片，這些名片只有你看得到')+'</div></div>'
+  +'<button class="tx" data-act="swapId" style="font-size:12px;flex:0 0 auto">換身分</button></div>');
+ el.addEventListener('click',function(e){if(e.target.closest('[data-act="swapId"]')){toast('切換用哪張名片收：在名片頁換一張再拍');}});
+ return el};
+
+/* ④ 公司交辦：後台指派的行動 */
+SCREENS.orgTasks=()=>{
+ const ts=DB.get('orgTasks',[]);
+ const el=screen(tbTitle('公司交辦')
+  +'<div class="body pad" style="padding-top:14px">'
+  +'<div class="tip" style="line-height:1.75;margin-bottom:12px">公司後台的 AI 洞察建議、由主管指派給你的行動。做完按「完成」，後台會看到。</div>'
+  +(ts.length?ts.map(function(t){return '<div class="pl" style="margin-bottom:9px;display:flex;gap:12px;align-items:flex-start">'
+    +'<div style="flex:1;min-width:0"><div style="font-size:11px;color:var(--mangD);font-weight:700;margin-bottom:3px">'+esc(t.who)+' 交辦</div>'
+    +'<div style="font-size:14px;font-weight:700">'+esc(t.target)+'</div>'
+    +'<div style="font-size:13px;color:var(--ink2);margin-top:2px">'+esc(t.topic)+'</div>'
+    +'<div class="tip" style="margin-top:3px">為什麼：'+esc(t.why)+'</div></div>'
+    +(t.st==='done'?'<span class="bdg b-t" style="align-self:center">'+ico('ck',10,'#00806E',2.8)+'完成</span>'
+      :'<button class="btn sm" data-done="'+t.id+'" style="align-self:center;flex:0 0 auto">完成</button>')+'</div>'}).join('')
+   :'<div class="pl tip" style="text-align:center">目前沒有交辦。</div>')
+  +'</div>');
+ el.addEventListener('click',function(e){const d=e.target.closest('[data-done]');if(!d)return;
+  const ts2=DB.get('orgTasks',[]);const t=ts2.find(function(x){return x.id===d.dataset.done});if(t)t.st='done';DB.set('orgTasks',ts2);R.refresh();toast('已回報完成')});
+ return el};
+
+/* 名片頁：有企業卡且有待辦時，設計狀態帶下方多一條 */
+const _me70=SCREENS.me;
+SCREENS.me=()=>{
+ const el=_me70();
+ setTimeout(function(){
+  const cur=S.curCard();const org=orgCardOf(cur);
+  const ts=DB.get('orgTasks',[]).filter(function(t){return t.st!=='done'});
+  if(!org)return;
+  /* Logo 由公司管理：名片頁上的「＋Logo」入口收起 */
+  $$('[data-fld="logo"]',el).forEach(function(b){b.style.display='none';const hint=b.previousElementSibling;if(hint&&/Logo/.test(hint.textContent)&&hint.tagName==='DIV')hint.style.display='none'});
+  if($('#orgBand',el))return;
+  const row=$('[data-act="preview"]',el);const anchor=row&&row.parentNode;if(!anchor)return;
+  const after=anchor.nextElementSibling||anchor;
+  after.insertAdjacentHTML('afterend','<button id="orgBand" data-go="orgTasks" style="width:100%;display:flex;align-items:center;gap:10px;margin-top:10px;padding:11px 14px;border-radius:12px;background:var(--mangS);text-align:left">'
+   +'<span style="display:flex;color:var(--mangD)">'+ico('shield',16,'currentColor',2.4)+'</span>'
+   +'<span style="flex:1;font-size:13px"><b>'+esc(org.name)+'</b> 的企業名片'+(cur.tel?'':' · <span style="color:#C8322B">補手機才啟用</span>')+(ts.length?' · 交辦 <b>'+ts.length+'</b> 件':'')+'</span>'
+   +ico('arr',15,'#95959D')+'</button>')},20);
+ return el};
+
+/* ⑤ 透明：公司看得到我什麼（跟後台「資料邊界」一致） */
+const _tr70=SCREENS.transparency;
+SCREENS.transparency=()=>{
+ const el=_tr70();
+ const oc=orgCards();if(!oc.length)return el;
+ const body=$('.body',el);if(!body)return el;
+ const row=function(ok,t){return '<div style="display:flex;gap:10px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--hair)">'+ico(ok?'ck':'x',15,ok?'#00D6B3':'#C8322B',2.6)+'<span style="flex:1;font-size:12.5px">'+t+'</span></div>'};
+ body.insertAdjacentHTML('beforeend',
+  '<div class="sec" style="margin-top:24px"><b>'+esc(oc[0].org.name)+'（你的企業名片）看得到</b></div>'
+  +'<div class="pl" style="padding:0">'+[ '用企業名片換到的名片：名片面資料、時間地點、來源（紙本／Heycard／NFC／公開頁）','每筆是你經手的','有沒有互動——只有「有／沒有」','你的企業名片被看過幾次'].map(function(t){return row(1,t)}).join('')+'</div>'
+  +'<div class="sec"><b>看不到</b></div>'
+  +'<div class="pl" style="padding:0">'+['用個人名片換的任何名片——連存在都查不到','訊息內容的任何一個字','你的備註與標籤','你在其他公司的企業名片'].map(function(t){return row(0,t)}).join('')+'</div>'
+  +'<div class="tip" style="margin-top:10px;line-height:1.7">後台每一個關於你的數字，這裡都查得到——沒有你看不見的欄位。</div>');
+ return el};
+
+/* ═══════════════════════════════════════════
+   v5.1 ㊿-2：企業版連動第二批（6–13）＋人脈回公司的機制＋NFC 綁定規則
+   ─────────────────────────────────────────
+   人脈回公司——機制設計（給 Tim 拍板的版本）：
+   ① 有企業卡的人，收名片「預設歸公司」，不是跟著當下用哪張卡走。
+      用個人卡也一樣，確認畫面預設就是公司；要留私人得主動點「私人」。
+      → 失誤（拿錯卡）不會漏；有心藏，也得每一張都動手。
+   ② 「私人」的筆數公司看得到（只有數字，沒有內容）——透明頁寫明。
+      這是嚇阻，不是監控：內容永遠不給公司（Q-17）。
+   ③ 個人 → 公司可以事後轉入；公司 → 個人不行（公司已經有了）。
+   ④ 公司配發的 NFC 卡鎖死開企業名片，App 端沒有「換身分」；
+      自己買的 NFC 卡可選「某一張名片」或「完整檔案（總頁面）」。
+   ⑤ 企業卡在時，企業卡就是預設身分（App 一開、拍名片、感應都是它）。
+   ═══════════════════════════════════════════ */
+
+/* ── 歸入（全域）：有企業卡＝預設公司 ── */
+let CAP_BUCKET=null;   /* 'org' | 'me' | null（null＝依規則） */
+function capBucket(){const oc=orgCards();if(!oc.length)return 'me';return CAP_BUCKET||'org'}
+const _add70=addContact;
+addContact=function(p){
+ p=p||{};
+ const oc=orgCards();
+ if(oc.length){const b=capBucket();p.bucket=b;if(b==='org')p.org=oc[0].org.name;
+  if(b==='me'){DB.set('privCount',(DB.get('privCount',0)||0)+1)}}
+ return _add70(p)};
+
+/* 確認畫面：歸入帶改成「公司／私人」二選一，預設公司 */
+SCREENS.confirm=(a)=>{
+ const el=_cf70(a);
+ const oc=orgCards();
+ const body=$('.body',el);if(!body)return el;
+ const old=$('[data-act="swapId"]',el);if(old){const band=old.closest('div');if(band)band.remove()}
+ if(!oc.length)return el;
+ CAP_BUCKET=CAP_BUCKET||'org';
+ const paint=function(){
+  const b=capBucket();
+  $('#bkOrg',el).style.cssText='flex:1;padding:9px;border-radius:9px;font-size:13px;font-weight:700;'+(b==='org'?'background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08);color:var(--mangD)':'color:var(--ink3)');
+  $('#bkMe',el).style.cssText='flex:1;padding:9px;border-radius:9px;font-size:13px;font-weight:700;'+(b==='me'?'background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08);color:var(--ink)':'color:var(--ink3)');
+  $('#bkTip',el).textContent=b==='org'?'回到公司人脈庫 · 公司看不到你的備註與訊息':'只有你看得到 · 公司只會知道筆數'};
+ body.insertAdjacentHTML('afterbegin',
+  '<div style="border-radius:14px;padding:10px 12px;margin-bottom:10px;background:var(--mangS)">'
+  +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="display:flex;color:var(--mangD)">'+ico('shield',14,'currentColor',2.6)+'</span><span style="font-size:12px;font-weight:700;color:var(--mangD)">歸入</span></div>'
+  +'<div style="display:flex;background:rgba(255,255,255,.55);border-radius:11px;padding:3px"><button id="bkOrg">'+esc(oc[0].org.name)+'</button><button id="bkMe">私人</button></div>'
+  +'<div id="bkTip" style="font-size:11px;color:var(--ink2);line-height:1.6;margin-top:8px"></div></div>');
+ setTimeout(paint,0);
+ el.addEventListener('click',function(e){
+  if(e.target.closest('#bkOrg')){CAP_BUCKET='org';paint()}
+  if(e.target.closest('#bkMe')){CAP_BUCKET='me';paint()}});
+ return el};
+
+/* 人脈列：公司歸戶的一筆帶小標 */
+const _row70=rowHTML;
+rowHTML=function(c){
+ let html=_row70(c);
+ if(c&&c.bucket==='org'&&c.org)html=html.replace('<div class="s">','<div class="s"><span style="display:inline-block;font-size:10px;font-weight:700;color:var(--mangD);background:var(--mangS);border-radius:99px;padding:1px 6px;margin-right:6px;vertical-align:1px">'+esc(c.org)+'</span>');
+ return html};
+
+/* 人脈詳情：私人 → 轉入公司（單向） */
+const _ct70=SCREENS.contact;
+SCREENS.contact=(a)=>{
+ const el=_ct70(a);
+ const c=a&&S.contact(a.id);const oc=orgCards();
+ if(!c||!oc.length)return el;
+ setTimeout(function(){
+  const body=$('.body',el);if(!body||$('#bkRow',el))return;
+  body.insertAdjacentHTML('afterbegin',
+   '<div id="bkRow" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;background:'+(c.bucket==='org'?'var(--mangS)':'var(--fill)')+';margin-bottom:10px;font-size:12.5px">'
+   +'<span style="display:flex;color:'+(c.bucket==='org'?'var(--mangD)':'var(--ink3)')+'">'+ico('shield',14,'currentColor',2.6)+'</span>'
+   +'<span style="flex:1">'+(c.bucket==='org'?'在 <b>'+esc(c.org)+'</b> 的公司人脈庫':'私人人脈，公司看不到')+'</span>'
+   +(c.bucket==='org'?'':'<button class="tx" data-act="toOrg" style="font-size:12.5px;color:var(--mangD);font-weight:700">轉入 '+esc(oc[0].org.name)+'</button>')+'</div>')},0);
+ el.addEventListener('click',function(e){
+  if(!e.target.closest('[data-act="toOrg"]'))return;
+  const cs=S.contacts;const x=cs.find(function(y){return y.id===c.id});if(!x)return;
+  x.bucket='org';x.org=oc[0].org.name;S.contacts=cs;R.refresh();toast('已轉入 '+oc[0].org.name+' 的人脈庫（轉入後不能再轉回私人）')});
+ return el};
+
+/* ── ⑥ 邀請接受：確認姓名、補手機 ── */
+function orgInvitePending(){return DB.get('orgInvite',null)}
+SCREENS.orgInvite=()=>{
+ const inv=orgInvitePending()||{co:'黑卡智能',title:'業務經理',name:'',nameEn:'',cem:'you@heycard.app',design:{material:'steel',ori:'land'}};
+ const me=S.cards[0]||{},u=S.user||{};
+ const pv=function(n,ne){return cardHTML({name:n||inv.name||me.name||u.name||'　',nameEn:ne||inv.nameEn||me.nameEn||'',title:inv.title,company:inv.co,material:inv.design.material,ori:inv.design.ori,tag:'企業認證',hideBrand:inv.design.hideBrand,hue:inv.design.hue},236)};
+ const el=screen(tbTitle('加入 '+esc(inv.co))
+  +'<div style="flex:0 0 auto;background:var(--fill);padding:20px 0 16px;display:flex;justify-content:center" id="ivPv">'+pv()+'</div>'
+  +'<div class="body pad" style="padding-top:16px;padding-bottom:calc(30px + var(--sab))">'
+  +'<div style="font-size:15px;font-weight:800;letter-spacing:-.02em">'+esc(inv.co)+' 發了一張企業名片給你</div>'
+  +'<div class="tip" style="margin:6px 0 16px;line-height:1.75">職稱、公司資訊、卡面由公司管理；你只要確認名字、補上手機。手機沒填，卡片不會啟用。</div>'
+  +'<div class="fld"><label>中文姓名（公司先填的，可改）</label><input id="ivNm" value="'+esc(inv.name||me.name||u.name||'')+'"></div>'
+  +'<div class="fld"><label>英文姓名</label><input id="ivEn" value="'+esc(inv.nameEn||me.nameEn||'')+'" placeholder="Hsiao-Ming Wang"></div>'
+  +'<div class="fld"><label>手機　<span style="color:#C8322B;font-weight:400">必填</span></label><input id="ivTel" inputmode="tel" value="'+esc(me.tel||'')+'" placeholder="0912 345 678"></div>'
+  +'<div class="fld"><label>職稱　<span style="color:var(--mang);font-weight:400">公司管理</span></label><input value="'+esc(inv.title)+'" disabled style="background:var(--fill);color:var(--ink3)"></div>'
+  +'<div class="fld"><label>公司 Email　<span style="color:var(--mang);font-weight:400">公司管理</span></label><input value="'+esc(inv.cem)+'" disabled style="background:var(--fill);color:var(--ink3)"></div>'
+  +'<div class="err hide" id="ivErr"></div>'
+  +'<div style="margin-top:18px"><button class="btn" id="ivGo">加入，啟用企業名片</button></div>'
+  +'<div class="tip" style="text-align:center;margin-top:10px">用企業名片換到的名片會回到 '+esc(inv.co)+'；你的個人名片與個人人脈不受影響。</div>'
+  +'</div>');
+ el.addEventListener('input',function(e){if(e.target.id==='ivNm'||e.target.id==='ivEn'){$('#ivPv',el).innerHTML=pv($('#ivNm',el).value,$('#ivEn',el).value)}});
+ el.addEventListener('click',function(e){
+  if(!e.target.closest('#ivGo'))return;
+  const nm=$('#ivNm',el).value.trim(),en=$('#ivEn',el).value.trim(),tel=$('#ivTel',el).value.trim();
+  const E=$('#ivErr',el);
+  if(!nm){E.textContent='請填姓名';E.classList.remove('hide');return}
+  if(!tel){E.textContent='手機是必填——公司卡上要有你的聯絡方式';E.classList.remove('hide');$('#ivTel',el).focus();return}
+  const cards=S.cards;
+  const c={id:uid(),kind:'work',org:{name:inv.co,issued:'今天'},tag:'企業認證',name:nm,nameEn:en,title:inv.title,dept:'',company:inv.co,email:inv.cem,tel:tel,web:'heycard.app',
+   material:inv.design.material||'steel',ori:inv.design.ori||'land',layout:'classic',logoPos:'top',hideBrand:inv.design.hideBrand||0,hue:inv.design.hue||0,ink:inv.design.ink||'',font:inv.design.font||'modern'};
+  cards.push(c);S.cards=cards;S.cur=cards.length-1;
+  DB.set('orgInvite',null);
+  /* 公司配發的 NFC 卡：一起綁進來，鎖死開企業名片 */
+  DB.set('orgNfc',[{id:'HC-3A1F-02',org:inv.co,cardId:c.id,at:'今天'}]);
+  DB.set('orgTasks',[
+   {id:'t1',who:inv.co,target:'張維中 · 立昇電子',topic:'約下週回訪，聊 Q4 自動化採購',why:'對方兩週內看了名片 3 次',st:'todo'},
+   {id:'t2',who:inv.co,target:'周永昌 · 大甲精機',topic:'寄公司介紹，約帶樣品拜訪',why:'NFC 一碰後沒有後續',st:'todo'}]);
+  CAP_BUCKET='org';
+  R.reset('me');toast('企業名片已啟用；公司配發的 NFC 卡 HC-3A1F-02 也綁好了')});
+ return el};
+
+/* 模擬入口：邀請、核准職稱、收回 */
+const _sim70b=SCREENS.simEntry;
+SCREENS.simEntry=()=>{
+ const el=_sim70b();
+ const b=$('#simOrg',el);
+ if(b){b.insertAdjacentHTML('afterend','<button class="btn tt" id="simInv" style="width:100%;margin-bottom:9px;justify-content:flex-start;gap:10px">'+ico('shield',17,'currentColor',2.2)+'收到「黑卡智能」的企業名片邀請</button>'
+  +'<button class="btn tt" id="simTtl" style="width:100%;margin-bottom:9px;justify-content:flex-start;gap:10px">'+ico('ck',17,'currentColor',2.2)+'模擬：公司核准職稱申請</button>'
+  +'<button class="btn tt" id="simOff" style="width:100%;margin-bottom:9px;justify-content:flex-start;gap:10px;color:#C0392B">'+ico('x',17,'currentColor',2.2)+'模擬：離職，公司收回企業卡</button>');b.remove();
+  el.addEventListener('click',function(e){
+   if(e.target.closest('#simInv')){DB.set('orgInvite',{co:'黑卡智能',title:'業務經理',name:(S.cards[0]||{}).name||'',nameEn:(S.cards[0]||{}).nameEn||'',cem:'you@heycard.app',design:{material:'steel',ori:'land'}});R.go('orgInvite');return}
+   if(e.target.closest('#simTtl')){const cs=S.cards;let hit=0;cs.forEach(function(c){if(c.org&&c.org.titleReq&&c.org.titleReq.st==='pending'){c.title=c.org.titleReq.to;c.org.titleReq=null;hit=1}});S.cards=cs;toast(hit?'公司核准了，卡面職稱已更新':'沒有待審的職稱申請');return}
+   if(e.target.closest('#simOff')){offboard();return}})}
+ return el};
+
+/* 名片頁：有邀請未接受 → 提示 */
+const _me70b=SCREENS.me;
+SCREENS.me=()=>{
+ const el=_me70b();
+ setTimeout(function(){
+  const inv=orgInvitePending();if(!inv||orgCards().length||$('#ivBand',el))return;
+  const row=$('[data-act="preview"]',el);const anchor=row&&row.parentNode;if(!anchor)return;
+  (anchor.nextElementSibling||anchor).insertAdjacentHTML('afterend','<button id="ivBand" data-go="orgInvite" style="width:100%;display:flex;align-items:center;gap:10px;margin-top:10px;padding:11px 14px;border-radius:12px;background:var(--mang);color:#fff;text-align:left">'
+   +'<span style="display:flex">'+ico('shield',16,'currentColor',2.4)+'</span><span style="flex:1;font-size:13px"><b>'+esc(inv.co)+'</b> 邀請你加入，發了一張企業名片</span>'+ico('arr',15,'rgba(255,255,255,.7)')+'</button>')},30);
+ return el};
+
+/* ── ⑦ 職稱審核：企業卡上申請改職稱 ── */
+const _ce70b=SCREENS.cardEdit;
+SCREENS.cardEdit=(a)=>{
+ const el=_ce70b(a);
+ const cur=(a&&a.id)?S.cards.find(function(c){return c.id===a.id}):S.curCard();
+ const org=orgCardOf(cur);if(!org)return el;
+ setTimeout(function(){
+  const t=$('[data-k="title"]',el);if(!t||$('#ttlReq',el))return;
+  const fld=t.closest('.fld')||t.parentNode;
+  const req=org.titleReq;
+  fld.insertAdjacentHTML('afterend','<div id="ttlReq" style="margin:-4px 0 12px;padding:0 4px">'
+   +(req&&req.st==='pending'
+     ?'<div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:#8A6500"><span class="bdg b-a">審核中</span><span>申請改為「'+esc(req.to)+'」，公司核准前卡面維持「'+esc(cur.title)+'」</span></div>'
+     :'<button class="tx" data-act="ttlAsk" style="font-size:12.5px;color:var(--mangD);font-weight:700">申請更改職稱</button>'
+      +'<div id="ttlForm" class="hide" style="display:flex;gap:8px;margin-top:8px"><input id="ttlTo" placeholder="新的職稱" style="flex:1"><button class="btn sm" data-act="ttlSend">送出</button></div>')
+   +'</div>')},120);
+ el.addEventListener('click',function(e){
+  if(e.target.closest('[data-act="ttlAsk"]')){const f=$('#ttlForm',el);if(f){f.classList.remove('hide');f.style.display='flex';$('#ttlTo',el).focus()}return}
+  if(e.target.closest('[data-act="ttlSend"]')){const to=($('#ttlTo',el).value||'').trim();if(!to)return;
+   const cs=S.cards;const x=cs.find(function(y){return y.id===cur.id});if(!x)return;x.org.titleReq={to:to,st:'pending'};S.cards=cs;
+   toast('已送出，公司核准前卡面維持現在的職稱');R.refresh()}});
+ return el};
+
+/* ── ⑧ NFC：公司配發的鎖死；自己的可選名片或完整檔案 ── */
+function orgNfcAll(){return DB.get('orgNfc',[])}
+/* 感應：公司卡 → 開企業名片；'*' → 完整檔案 */
+const _tap70=SCREENS.nfcTap;
+SCREENS.nfcTap=(a)=>{
+ a=a||{};
+ const on=orgNfcAll().find(function(x){return x.id===a.card});
+ if(on){setTimeout(function(){R.replace('visit',{id:on.cardId,via:'nfc'})},900);
+  return screen('<div class="body pad" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">'
+   +'<div style="width:82px;height:82px;border-radius:99px;background:var(--mangS);display:flex;align-items:center;justify-content:center">'+ico('nfc',38,'var(--mang)',2)+'</div>'
+   +'<div style="font-size:17px;font-weight:800;margin-top:20px">'+esc(on.org)+' 的企業卡</div><div class="tip" style="margin-top:8px">卡號 '+esc(on.id)+' · 正在開啟企業名片…</div></div>')}
+ const rec=nfcFind(a.card);
+ if(rec&&rec.cardId==='*'){setTimeout(function(){R.replace('visit',{id:(S.cards[0]||{}).id,via:'nfc',full:1})},900)}
+ return _tap70(a)};
+
+/* 綁定：多一個「完整檔案」選項 */
+const _bind70=SCREENS.nfcBind;
+SCREENS.nfcBind=(a)=>{
+ a=a||{};
+ if(orgNfcAll().some(function(x){return x.id===a.card})){toast('公司配發的卡固定開企業名片，不能改');return SCREENS.nfcCards()}
+ const el=_bind70(a);
+ const pick=$('#pick',el);if(!pick)return el;
+ const rec=nfcFind(a.card);
+ pick.insertAdjacentHTML('afterbegin','<button data-cid="*" style="width:100%;text-align:left;display:flex;align-items:center;gap:13px;padding:12px;border-radius:14px;border:1px solid var(--e6);margin-bottom:9px">'
+  +'<div style="width:44px;height:70px;flex:0 0 auto;border-radius:8px;background:var(--fill);display:flex;align-items:center;justify-content:center;color:var(--ink3)">'+ico('grid',20,'currentColor',2)+'</div>'
+  +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700">完整檔案（總頁面）</div><div style="font-size:12px;color:var(--ink3);margin-top:2px">你的所有身分，對方自己切換</div></div>'
+  +'<span class="ck" style="width:22px;height:22px;border-radius:99px;border:2px solid var(--e6);display:flex;align-items:center;justify-content:center;flex:0 0 auto"></span></button>');
+ /* 企業卡不出現在「自己的卡」可選清單：公司卡走公司的卡 */
+ $$('[data-cid]',el).forEach(function(b){const c=S.cards.find(function(x){return x.id===b.dataset.cid});if(c&&c.org)b.remove()});
+ if(rec&&rec.cardId==='*'){setTimeout(function(){const b=$('[data-cid="*"]',el);if(b)b.click()},10)}
+ return el};
+
+/* 我的實體卡：公司配發一區、自己的一區；目標顯示清楚 */
+const _cards70=SCREENS.nfcCards;
+SCREENS.nfcCards=()=>{
+ const el=_cards70();
+ const on=orgNfcAll();
+ const body=$('.body',el);if(!body)return el;
+ /* 自己的卡：目標若是完整檔案，改文案 */
+ nfcAll().filter(function(r){return r.active&&r.cardId==='*'}).forEach(function(r){
+  const b=$('[data-swap="'+r.id+'"]',el);const box=b&&b.closest('div').parentNode;if(!box)return;
+  const t=box.querySelector('[style*="目前代表"]');
+  const lab=[...box.querySelectorAll('div')].find(function(d){return d.textContent.trim()==='目前代表'});
+  if(lab){lab.nextElementSibling.textContent='完整檔案（總頁面）';const pvw=lab.parentNode.previousElementSibling;if(pvw)pvw.innerHTML='<div style="width:34px;height:54px;border-radius:6px;background:var(--fill);display:flex;align-items:center;justify-content:center;color:var(--ink3)">'+ico('grid',16,'currentColor',2)+'</div>'}});
+ $$('[data-swap]',el).forEach(function(b){b.textContent='換要開的頁面'});
+ if(on.length){
+  body.insertAdjacentHTML('afterbegin','<div class="sec" style="margin-top:0"><b>公司配發</b></div>'
+   +on.map(function(r){const c=S.cards.find(function(x){return x.id===r.cardId})||{};
+    return '<div style="border:1px solid var(--e6);border-radius:16px;padding:15px;margin-bottom:11px;background:var(--mangS)">'
+    +'<div style="display:flex;align-items:center;gap:12px"><span style="display:flex;color:var(--mang)">'+ico('nfc',20,'currentColor',2.2)+'</span>'
+    +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700">'+esc(r.id)+'</div><div style="font-size:12px;color:var(--ink3);margin-top:2px">'+esc(r.org)+' 配發 · '+esc(r.at)+'</div></div>'
+    +'<span style="display:flex;color:var(--mangD)">'+ico('lock',16,'currentColor',2.2)+'</span></div>'
+    +'<div style="display:flex;align-items:center;gap:11px;margin-top:13px;padding-top:13px;border-top:1px solid rgba(92,92,255,.15)">'
+    +'<div style="width:54px;flex:0 0 auto">'+cardHTML(c,54,{d:0,photo:0,flat:1,big:12})+'</div>'
+    +'<div style="flex:1;min-width:0"><div style="font-size:11.5px;color:var(--ink3)">固定開</div><div style="font-size:13.5px;font-weight:700;margin-top:1px">'+esc(r.org)+' 企業名片</div>'
+    +'<div style="font-size:11.5px;color:var(--ink3);margin-top:2px">不能改 · 離職交回</div></div></div>'
+    +'<button class="btn tt sm" data-lostorg="'+esc(r.id)+'" style="width:100%;margin-top:12px">遺失，通知公司停用</button></div>'}).join('')
+   +'<div class="sec"><b>自己的卡</b></div>');
+  el.addEventListener('click',function(e){const l=e.target.closest('[data-lostorg]');if(!l)return;
+   DB.set('orgNfc',orgNfcAll().filter(function(x){return x.id!==l.dataset.lostorg}));toast('已通知公司，這張卡已停用');R.refresh()})}
+ return el};
+
+/* 名片頁：實體卡入口放在名片下面（跟企業卡狀態帶同一組） */
+const _me70c=SCREENS.me;
+SCREENS.me=()=>{
+ const el=_me70c();
+ setTimeout(function(){
+  if($('#nfcBand',el))return;
+  const mine=nfcAll().filter(function(r){return r.active}),on=orgNfcAll();
+  if(!mine.length&&!on.length)return;
+  const row=$('[data-act="preview"]',el);const anchor=row&&row.parentNode;if(!anchor)return;
+  let after=anchor.nextElementSibling||anchor;if($('#orgBand',el))after=$('#orgBand',el);
+  const first=mine[0];
+  const tgt=first?(first.cardId==='*'?'完整檔案':((S.cards.find(function(c){return c.id===first.cardId})||{}).title||'這張名片')):'';
+  after.insertAdjacentHTML('afterend','<button id="nfcBand" data-go="nfcCards" style="width:100%;display:flex;align-items:center;gap:10px;margin-top:8px;padding:11px 14px;border-radius:12px;background:var(--fill);text-align:left">'
+   +'<span style="display:flex;color:var(--ink2)">'+ico('nfc',16,'currentColor',2.2)+'</span>'
+   +'<span style="flex:1;font-size:13px">實體卡 '+(mine.length+on.length)+' 張'+(first?' · 你的卡開「'+esc(tgt)+'」':'')+(on.length?' · 公司卡固定開企業名片':'')+'</span>'
+   +ico('arr',15,'#95959D')+'</button>')},40);
+ return el};
+
+/* ── ⑨ 公開頁留 Email：企業卡的頁面，這筆回公司 ── */
+const _vs70=SCREENS.visitSent;
+SCREENS.visitSent=(a)=>{
+ const el=_vs70(a);
+ const c=visitTarget(a&&a.id);
+ if(!c||!c.org)return el;
+ const body=$('.body',el);
+ if(body)body.insertAdjacentHTML('beforeend','<div style="display:flex;gap:9px;align-items:flex-start;margin-top:14px;padding:10px 12px;border-radius:12px;background:var(--mangS);text-align:left;font-size:12px;color:var(--ink2);line-height:1.65"><span style="display:flex;color:var(--mangD);margin-top:1px">'+ico('shield',13,'currentColor',2.6)+'</span><span>這是 <b>'+esc(c.org.name)+'</b> 的企業名片：你留的 Email 會一併回到該公司的人脈庫，由 '+esc(c.name)+' 跟進。</span></div>');
+ return el};
+
+/* ── ⑪ 透明：公司看得到我的數字 ── */
+const _tr70b=SCREENS.transparency;
+SCREENS.transparency=()=>{
+ const el=_tr70b();
+ const oc=orgCards();if(!oc.length)return el;
+ const body=$('.body',el);if(!body)return el;
+ const cs=S.contacts.filter(function(c){return c.bucket==='org'});
+ const cos=new Set(cs.map(function(c){return c.company}).filter(Boolean)).size;
+ const th=S.threads||[];
+ const act=cs.filter(function(c){return th.some(function(t){return t.with===c.id})}).length;
+ const priv=DB.get('privCount',0)||0;
+ body.insertAdjacentHTML('beforeend','<div class="sec" style="margin-top:22px"><b>'+esc(oc[0].org.name)+' 現在看到的數字</b></div>'
+  +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'
+  +[[cs.length,'收進名片'],[cos,'接觸公司'],[act,'互動中'],[cs.length-act,'待跟進']].map(function(x){return '<div class="pl" style="text-align:center;padding:12px 6px"><div style="font-family:var(--fe);font-size:20px;font-weight:800">'+x[0]+'</div><div style="font-size:11px;color:var(--ink3);margin-top:2px">'+x[1]+'</div></div>'}).join('')+'</div>'
+  +'<div class="tip" style="margin-top:8px;line-height:1.7">你標為私人的 <b>'+priv+'</b> 筆——公司只看得到這個數字。</div>');
+ return el};
+
+/* ── ⑫ 離職：人走卡留、名單留公司；個人不受影響 ── */
+function offboard(){
+ const oc=orgCards();if(!oc.length){toast('沒有企業卡');return}
+ const name=oc[0].org.name;
+ S.cards=S.cards.filter(function(c){return !c.org});S.cur=0;
+ S.contacts=S.contacts.filter(function(c){return c.bucket!=='org'});
+ DB.set('orgNfc',[]);DB.set('orgTasks',[]);DB.set('orgInvite',null);CAP_BUCKET=null;
+ R.reset('me');toast(name+' 已收回企業名片、公司配發的 NFC 卡與公司人脈；你的個人名片與個人人脈都還在')}
+
+/* ── ⑬ 方案：企業卡＝Pro 全功能 ── */
+const _isPro70=isPro,_isPlus70=isPlus;
+isPro=function(){const c=S.curCard();return (c&&c.org)?true:_isPro70()};
+isPlus=function(){const c=S.curCard();return (c&&c.org)?true:_isPlus70()};
+const _dsh70=designStateHTML;
+designStateHTML=function(c){
+ if(!(c&&c.org))return _dsh70(c);
+ return '<button data-act="aiDesign" style="width:100%;display:flex;align-items:center;gap:8px;padding:9px 12px;margin-top:12px;border-radius:12px;background:var(--fill);text-align:left">'
+  +'<span style="font-size:12px;color:var(--ink3)">企業版 · 全功能</span><span style="font-size:12px;color:var(--mangD);font-weight:700">卡面由 '+esc(c.org.name)+' 統一設計</span><span style="flex:1"></span></button>'};
+
+/* 企業卡在：App 開啟時企業卡為預設身分 */
+setTimeout(function(){const oc=orgCards();if(oc.length&&S.cards.length){const i=S.cards.findIndex(function(c){return c.org});if(i>=0&&S.cur!==i&&!DB.get('orgDefaultSet',0)){S.cur=i;DB.set('orgDefaultSet',1)}}},0);
+
+/* ═══ 原型示範：登入後公司邀請自動送到（正式版＝後台邀請 → 推播／Email） ═══ */
+(function(){
+ const DEMO_INV={co:'黑卡智能',title:'業務經理',cem:'you@heycard.app',design:{material:'steel',ori:'land'}};
+ let shown=0;
+ setInterval(function(){
+  try{
+   if(!(S.user&&S.cards.length))return;
+   if(orgCards().length)return;
+   const dismissed=DB.get('invDismissed',0);
+   if(!orgInvitePending()&&!dismissed){const me=S.cards[0]||{};DB.set('orgInvite',Object.assign({},DEMO_INV,{name:me.name||'',nameEn:me.nameEn||''}));const t=R.top&&R.top();if(t&&t.name==='me')R.refresh()}
+   }catch(e){}},1200);
+})();
+/* 邀請畫面：可以「先不要」——之後從名片頁的橫幅再進來 */
+const _inv70=SCREENS.orgInvite;
+SCREENS.orgInvite=()=>{
+ const el=_inv70();
+ const body=$('.body',el);
+ if(body)body.insertAdjacentHTML('beforeend','<button class="tx mut" data-act="invLater" style="display:block;margin:14px auto 0;font-size:13px">先不要，之後再說</button>'
+  +'<div class="sim" style="margin:18px auto 0;display:table">'+ico('warn',11,'#8A6500',2.2)+'原型：模擬公司從後台發出的邀請</div>');
+ el.addEventListener('click',function(e){if(e.target.closest('[data-act="invLater"]')){DB.set('invDismissed',1);R.back();R.refresh();toast('邀請留在名片頁，隨時可以接受')}});
+ return el};
+/* 接受後把「先不要」的旗標清掉（下次離職再收到） */
+const _off70=offboard;
+offboard=function(){_off70();DB.set('invDismissed',1)};
+
+/* ═══ v5.2 設計收斂：少字、用版面帶路 ═══ */
+
+/* 邀請：卡片是主角；只留你要做的兩件事 */
+SCREENS.orgInvite=()=>{
+ const inv=orgInvitePending()||{co:'黑卡智能',title:'業務經理',name:'',nameEn:'',cem:'you@heycard.app',design:{material:'steel',ori:'land'}};
+ const me=S.cards[0]||{},u=S.user||{};
+ const pv=function(n,ne,tel){return cardHTML({name:n||inv.name||me.name||u.name||'　',nameEn:ne||inv.nameEn||me.nameEn||'',title:inv.title,company:inv.co,tel:tel,email:inv.cem,material:inv.design.material,ori:inv.design.ori,tag:'企業認證',hideBrand:inv.design.hideBrand,hue:inv.design.hue},250)};
+ const el=screen(tbTitle('')
+  +'<div style="flex:0 0 auto;padding:6px 0 18px;display:flex;flex-direction:column;align-items:center;background:linear-gradient(180deg,var(--fill),transparent)">'
+  +'<div id="ivPv">'+pv(null,null,me.tel)+'</div>'
+  +'<div style="font-size:19px;font-weight:800;letter-spacing:-.02em;margin-top:18px">'+esc(inv.co)+' 邀請你</div>'
+  +'<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;justify-content:center">'
+  +'<span class="chip" style="font-size:11.5px;padding:4px 10px">'+esc(inv.title)+'</span><span class="chip" style="font-size:11.5px;padding:4px 10px">'+esc(inv.cem)+'</span><span class="chip" style="font-size:11.5px;padding:4px 10px;color:var(--ink3)">'+ico('lock',10,'currentColor',2.4)+' 公司設定</span></div>'
+  +'</div>'
+  +'<div class="body pad" style="padding-top:8px;padding-bottom:calc(30px + var(--sab))">'
+  +'<div class="fld"><label>姓名</label><input id="ivNm" value="'+esc(inv.name||me.name||u.name||'')+'"></div>'
+  +'<div class="fld"><label>英文姓名</label><input id="ivEn" value="'+esc(inv.nameEn||me.nameEn||'')+'" placeholder="Hsiao-Ming Wang"></div>'
+  +'<div class="fld"><label>手機　<span style="color:#C8322B;font-weight:400">必填</span></label><input id="ivTel" inputmode="tel" value="'+esc(me.tel||'')+'" placeholder="0912 345 678"></div>'
+  +'<div class="err hide" id="ivErr"></div>'
+  +'<div style="margin-top:14px"><button class="btn" id="ivGo">加入 '+esc(inv.co)+'</button></div>'
+  +'<button class="tx mut" data-act="invLater" style="display:block;margin:14px auto 0;font-size:13px">先不要</button>'
+  +'<div class="tip" style="text-align:center;margin-top:18px;line-height:1.7">用這張卡換到的名片會回到 '+esc(inv.co)+'<br>你的個人名片與人脈不受影響</div>'
+  +'</div>');
+ const repaint=function(){$('#ivPv',el).innerHTML=pv($('#ivNm',el).value,$('#ivEn',el).value,$('#ivTel',el).value)};
+ el.addEventListener('input',function(e){if(/^iv(Nm|En|Tel)$/.test(e.target.id))repaint()});
+ el.addEventListener('click',function(e){
+  if(e.target.closest('[data-act="invLater"]')){DB.set('invDismissed',1);R.back();R.refresh();return}
+  if(!e.target.closest('#ivGo'))return;
+  const nm=$('#ivNm',el).value.trim(),en=$('#ivEn',el).value.trim(),tel=$('#ivTel',el).value.trim();
+  const E=$('#ivErr',el);
+  if(!nm){E.textContent='請填姓名';E.classList.remove('hide');return}
+  if(!tel){E.textContent='手機必填，卡片才會啟用';E.classList.remove('hide');$('#ivTel',el).focus();return}
+  const cards=S.cards;
+  const c={id:uid(),kind:'work',org:{name:inv.co,issued:'今天'},tag:'企業認證',name:nm,nameEn:en,title:inv.title,dept:'',company:inv.co,email:inv.cem,tel:tel,web:'heycard.app',
+   material:inv.design.material||'steel',ori:inv.design.ori||'land',layout:'classic',logoPos:'top',hideBrand:inv.design.hideBrand||0,hue:inv.design.hue||0,ink:inv.design.ink||'',font:inv.design.font||'modern'};
+  cards.push(c);S.cards=cards;S.cur=cards.length-1;
+  DB.set('orgInvite',null);
+  DB.set('orgNfc',[{id:'HC-3A1F-02',org:inv.co,cardId:c.id,at:'今天'}]);
+  DB.set('orgTasks',[
+   {id:'t1',who:inv.co,target:'張維中 · 立昇電子',topic:'約下週回訪，聊 Q4 自動化採購',why:'對方兩週內看了名片 3 次',st:'todo'},
+   {id:'t2',who:inv.co,target:'周永昌 · 大甲精機',topic:'寄公司介紹，約帶樣品拜訪',why:'NFC 一碰後沒有後續',st:'todo'}]);
+  CAP_BUCKET='org';
+  R.reset('me');toast('企業名片已啟用')});
+ return el};
+
+/* 名片頁：企業卡的三條帶合成一張卡——標題列＋兩個入口 */
+const _me70d=SCREENS.me;
+SCREENS.me=()=>{
+ const el=_me70d();
+ setTimeout(function(){
+  const cur=S.curCard();const org=orgCardOf(cur);
+  ['#orgBand','#nfcBand'].forEach(function(id){const b=$(id,el);if(b)b.remove()});
+  const ds=$('[data-act="aiDesign"]',el);
+  if(!org){return}
+  if(ds&&/企業版/.test(ds.textContent))ds.remove();
+  /* 其他包裝層可能晚一點才插入設計狀態帶——再掃一次 */
+  setTimeout(function(){$$('[data-act="aiDesign"]',el).forEach(function(b){if(/企業版/.test(b.textContent))b.remove()})},260);
+  if($('#orgCard',el))return;
+  const row=$('[data-act="preview"]',el);const anchor=row&&row.parentNode;if(!anchor)return;
+  const ts=DB.get('orgTasks',[]).filter(function(t){return t.st!=='done'}).length;
+  const nf=orgNfcAll().length+nfcAll().filter(function(r){return r.active}).length;
+  const rowH=function(go,icon,t,badge){return '<button data-go="'+go+'" style="width:100%;display:flex;align-items:center;gap:10px;padding:12px 14px;border-top:1px solid rgba(92,92,255,.12);text-align:left">'
+   +'<span style="display:flex;color:var(--mangD)">'+ico(icon,16,'currentColor',2.2)+'</span><span style="flex:1;font-size:13.5px">'+t+'</span>'
+   +(badge?'<span style="min-width:20px;height:20px;border-radius:99px;background:var(--mang);color:#fff;font-size:11.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;padding:0 6px">'+badge+'</span>':'')
+   +ico('arr',15,'#95959D')+'</button>'};
+  anchor.insertAdjacentHTML('afterend','<div id="orgCard" style="margin-top:12px;border-radius:14px;background:var(--mangS);overflow:hidden">'
+   +'<div style="display:flex;align-items:center;gap:10px;padding:12px 14px">'
+   +'<span style="display:flex;color:var(--mangD)">'+ico('shield',17,'currentColor',2.4)+'</span>'
+   +'<div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:800">'+esc(org.name)+'</div><div style="font-size:11.5px;color:var(--ink3)">企業名片 · 全功能 · 卡面由公司設計</div></div>'
+   +(cur.tel?'':'<span class="bdg b-a">補手機才啟用</span>')+'</div>'
+   +rowH('orgTasks','ck','公司交辦',ts||'')
+   +rowH('nfcCards','nfc','實體卡',nf||'')
+   +'</div>')},60);
+ return el};
+
+/* 名片頁：邀請橫幅（不跳出，放這裡＋通知） */
+const _me70e=SCREENS.me;
+SCREENS.me=()=>{
+ const el=_me70e();
+ setTimeout(function(){
+  const inv=orgInvitePending();const old=$('#ivBand',el);if(old)old.remove();
+  if(!inv||orgCards().length)return;
+  const row=$('[data-act="preview"]',el);const anchor=row&&row.parentNode;if(!anchor)return;
+  (anchor.nextElementSibling||anchor).insertAdjacentHTML('afterend','<button id="ivBand" data-go="orgInvite" style="width:100%;display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px 14px;border-radius:14px;background:var(--mang);color:#fff;text-align:left">'
+   +'<div style="width:46px;flex:0 0 auto;border-radius:5px;overflow:hidden">'+cardHTML({name:(S.cards[0]||{}).name||'',company:inv.co,material:inv.design.material||'steel',ori:inv.design.ori||'land',hideBrand:1},46,{d:0,photo:0,flat:1,big:9})+'</div>'
+   +'<div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:800">'+esc(inv.co)+' 邀請你</div><div style="font-size:11.5px;opacity:.8">發了一張企業名片 · 點一下接受</div></div>'
+   +ico('arr',15,'rgba(255,255,255,.75)')+'</button>')},80);
+ return el};
+
+/* 公司交辦：一件一張，勾了就完成 */
+SCREENS.orgTasks=()=>{
+ const ts=DB.get('orgTasks',[]);const oc=orgCards();
+ const el=screen(tbTitle('公司交辦')
+  +'<div class="body pad" style="padding-top:12px">'
+  +(ts.length?ts.map(function(t){const done=t.st==='done';return '<div class="pl" style="margin-bottom:9px;display:flex;gap:12px;align-items:center'+(done?';opacity:.55':'')+'">'
+    +'<button data-done="'+t.id+'"'+(done?' disabled':'')+' style="width:30px;height:30px;border-radius:99px;flex:0 0 auto;border:2px solid '+(done?'var(--turq)':'var(--e6)')+';background:'+(done?'var(--turq)':'transparent')+';display:flex;align-items:center;justify-content:center">'+(done?ico('ck',14,'#fff',3):'')+'</button>'
+    +'<div style="flex:1;min-width:0"><div style="font-size:14.5px;font-weight:700'+(done?';text-decoration:line-through':'')+'">'+esc(t.target)+'</div>'
+    +'<div style="font-size:13px;color:var(--ink2);margin-top:2px">'+esc(t.topic)+'</div>'
+    +'<div style="font-size:11.5px;color:var(--mangD);margin-top:4px;display:flex;gap:5px;align-items:center">'+ico('seek',11,'currentColor',2.4)+esc(t.why)+'</div></div></div>'}).join('')
+   :'<div class="pl" style="text-align:center;padding:30px 16px"><div style="display:flex;justify-content:center;color:#C4C4CC">'+ico('ck',30,'currentColor',2)+'</div><div class="tip" style="margin-top:10px">沒有交辦</div></div>')
+  +(oc.length?'<div class="tip" style="text-align:center;margin-top:14px">'+esc(oc[0].org.name)+' 後台指派 · 勾了公司就看得到</div>':'')
+  +'</div>');
+ el.addEventListener('click',function(e){const d=e.target.closest('[data-done]');if(!d)return;
+  const ts2=DB.get('orgTasks',[]);const t=ts2.find(function(x){return x.id===d.dataset.done});if(t)t.st='done';DB.set('orgTasks',ts2);R.refresh();toast('已完成')});
+ return el};
+
+/* 通知：邀請放在「要你行動」最上面（notif 定義在 _events，等載入完再包） */
+setTimeout(function(){
+ const _nt70=SCREENS.notif;if(!_nt70)return;
+ SCREENS.notif=()=>{
+  const el=_nt70();
+  const inv=orgInvitePending();if(!inv||orgCards().length)return el;
+  const secs=$$('.sec',el);const sec=secs.find(function(x){return /要你行動/.test(x.textContent)});if(!sec)return el;
+  sec.insertAdjacentHTML('afterend','<button data-go="orgInvite" style="width:100%;text-align:left;display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:14px;background:var(--mang);color:#fff;margin-bottom:9px">'
+   +'<div style="width:46px;flex:0 0 auto;border-radius:5px;overflow:hidden">'+cardHTML({name:(S.cards[0]||{}).name||'',company:inv.co,material:inv.design.material||'steel',ori:inv.design.ori||'land',hideBrand:1},46,{d:0,photo:0,flat:1,big:9})+'</div>'
+   +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:800">'+esc(inv.co)+' 邀請你加入</div><div style="font-size:11.5px;opacity:.8;margin-top:2px">發了一張企業名片給你 · 接受</div></div>'+ico('arr',15,'rgba(255,255,255,.75)')+'</button>');
+  return el}},0);
 
 /* ═════════ 通知中心 ═════════ */
 SCREENS.notif=()=>screen(tbTitle('通知')
