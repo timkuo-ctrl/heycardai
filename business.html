@@ -1,0 +1,2500 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#EFEFF0">
+<title>Heycard 企業後台</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<style>
+/* ═══ Heycard 企業後台 · 可操作模擬 ═══
+   單一淺色視覺（跟 App 同一套設計系統），所有底色明寫，不跟宿主主題 */
+:root{
+ --mang:#5C5CFF;--mangD:#4A4AE0;--mangS:#F0F0FF;
+ --ink:#1E1E1E;--ink2:#3A3A3A;--ink3:#565656;
+ --bg:#EFEFF0;--card:#FFFFFF;--fill:#F5F5F6;--hair:#EBEBEC;
+ --amber:#B98900;--amberS:#FBF3DF;--turq:#00D6B3;
+ --ft:'Taipei Sans TC','Taipei Sans TC Beta','PingFang TC','Noto Sans TC',system-ui,sans-serif;--fe:'Creato Display','Outfit','Noto Sans TC',sans-serif}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:var(--bg)}
+body{font-family:var(--ft);color:var(--ink);font-size:14px;line-height:1.6;
+ -webkit-font-smoothing:antialiased}
+button{font:inherit;border:0;background:none;cursor:pointer;color:inherit}
+input,select{font:inherit;color:inherit}
+
+/* ── 殼層：側欄 ＋ 主區 ── */
+#shell{display:flex;min-height:100vh}
+#side{flex:0 0 216px;background:var(--card);border-right:1px solid var(--hair);
+ padding:22px 14px;display:flex;flex-direction:column;gap:2px;position:sticky;top:0;height:100vh}
+#brand{padding:0 10px 18px}
+#brand b{font-size:17px;font-weight:800;letter-spacing:-.02em;display:block}
+#brand span{font-size:11px;color:var(--ink3)}
+.nv{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+ font-size:13.5px;font-weight:500;color:var(--ink2);width:100%;text-align:left}
+.nv svg{flex:0 0 auto}
+.nv.on{background:var(--mangS);color:var(--mangD);font-weight:700}
+.nv:hover:not(.on){background:var(--fill)}
+.nv .n{margin-left:auto;font-family:var(--fe);font-size:11px;font-weight:700;
+ background:var(--mang);color:#fff;border-radius:99px;padding:1px 7px}
+#sfoot{margin-top:auto;padding:10px}
+#main{flex:1;min-width:0;padding:26px 30px 60px;max-width:1080px}
+h1{font-size:19px;font-weight:800;letter-spacing:-.02em}
+.sub{font-size:12.5px;color:var(--ink3);margin-top:3px}
+
+/* ── 元件 ── */
+.card{background:var(--card);border:1px solid var(--hair);border-radius:14px;padding:18px 20px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px}
+.tile .v{font-family:var(--fe);font-size:26px;font-weight:700;letter-spacing:-.02em;
+ font-variant-numeric:tabular-nums}
+.tile .l{font-size:11.5px;color:var(--ink3);margin-top:2px}
+.tile .d{font-size:11px;color:var(--turq);margin-top:6px}
+.sec{font-size:14.5px;font-weight:700;letter-spacing:-.01em;margin:26px 0 10px;
+ display:flex;align-items:baseline;gap:10px}
+.sec span{font-size:11.5px;font-weight:400;color:var(--ink3)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;font-weight:700;color:var(--ink3);text-align:left;padding:8px 10px;
+ border-bottom:1px solid var(--hair);white-space:nowrap;cursor:pointer;user-select:none}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
+th:hover{color:var(--mangD)}
+th .ar{font-size:9px;margin-left:3px;color:var(--mang)}
+td{padding:9px 10px;border-bottom:1px solid var(--hair);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+tbody tr{cursor:default}
+tbody tr:hover td{background:var(--fill)}
+.num{font-family:var(--fe)}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;
+ padding:4px 10px;border-radius:99px;background:var(--fill);color:var(--ink2)}
+.chip.on{background:var(--mang);color:#fff}
+.chip.warn{background:var(--amberS);color:var(--amber)}
+.chiprow{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 12px}
+.btn{display:inline-flex;align-items:center;gap:7px;background:var(--mang);color:#fff;
+ font-size:13px;font-weight:700;padding:9px 16px;border-radius:10px}
+.btn:hover{background:var(--mangD)}
+.btn.tt{background:var(--fill);color:var(--ink2)}
+.btn.tt:hover{background:#E6E6E6}
+.btn.sm{padding:6px 12px;font-size:12px}
+.inp{background:var(--fill);border:1px solid transparent;border-radius:10px;
+ padding:8px 12px;font-size:13px;outline:none;min-width:200px}
+.inp:focus{background:var(--card);border-color:var(--mang)}
+.tip{font-size:12px;color:var(--ink3);line-height:1.7}
+.fixnote{font-size:10.5px;color:var(--mangD)}
+
+/* ── 圖表：量＝單色調；文字永遠用文字色 ── */
+.bar{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.bar .bl{flex:0 0 76px;font-size:12px;color:var(--ink2);text-align:right}
+.bar .btr{flex:1;height:18px;background:var(--fill);border-radius:0 4px 4px 0;position:relative}
+.bar .bf{height:100%;border-radius:0 4px 4px 0;background:var(--mang);min-width:3px;
+ transition:width .3s}
+.bar .bv{position:absolute;left:calc(100% + 8px);top:0;font-family:var(--fe);font-size:12px;
+ color:var(--ink2);line-height:18px}
+.cols{display:flex;align-items:flex-end;gap:6px;padding-top:26px}
+.col{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative}
+.col i{width:100%;max-width:34px;background:var(--mang);border-radius:4px 4px 0 0;
+ display:block;min-height:3px;position:relative}
+.col.mut i{background:#C7C7FF}
+.col b{font-size:10px;color:var(--ink3);font-weight:400}
+.col .tipv{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);
+ background:var(--ink);color:#fff;font-family:var(--fe);font-size:11px;padding:2px 8px;
+ border-radius:6px;opacity:0;pointer-events:none;transition:opacity .12s;white-space:nowrap}
+.col:hover .tipv{opacity:1}
+.col:hover i{background:var(--mangD)}
+
+/* 抽屜與彈窗 */
+#ovl{position:fixed;inset:0;background:rgba(20,20,26,.4);display:none;z-index:50}
+#ovl.show{display:block}
+#drawer{position:fixed;top:0;right:0;bottom:0;width:420px;max-width:92vw;background:var(--card);
+ z-index:60;transform:translateX(105%);transition:transform .22s;padding:24px;overflow-y:auto;
+ box-shadow:-8px 0 40px -12px rgba(20,20,28,.25)}
+#drawer.show{transform:none}
+textarea.csv{width:100%;height:220px;background:var(--fill);border:1px solid var(--hair);
+ border-radius:10px;padding:12px;font:11.5px/1.6 ui-monospace,monospace;resize:vertical}
+
+.edge{background:var(--card);border:1px solid var(--hair);border-radius:14px;padding:18px 20px;
+ margin-bottom:12px}
+.edge b{display:block;font-size:13.5px;margin-bottom:4px}
+.edge.no{border-left:3px solid var(--amber)}
+.edge.yes{border-left:3px solid var(--turq)}
+/* 導覽分組與次要區 */
+.ngrp{font-size:10.5px;font-weight:700;letter-spacing:.08em;color:var(--ink3);padding:16px 12px 4px}
+.nv2{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:9px;font-size:12px;color:var(--ink3);width:100%;text-align:left}
+.nv2.on,.nv2:hover{background:var(--fill);color:var(--ink2)}
+/* 一律有回饋：鍵盤焦點、hover 過場 */
+button:focus-visible,a:focus-visible,.inp:focus-visible,select:focus-visible{outline:2px solid var(--mang);outline-offset:2px}
+.btn,.chip,.nv,.nv2,tbody tr,a{transition:background .15s,color .15s,border-color .15s,opacity .15s}
+.bk{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--ink3);cursor:pointer;margin-bottom:12px}
+.bk:hover{color:var(--mangD)}
+.evrow:hover{border-color:#D9D9D9;background:#FFFFFF}
+/* 回饋：提示條與數字閃動——按了就要有動靜 */
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(10px);background:#1E1E1E;color:#fff;
+ font-size:13px;padding:10px 16px;border-radius:12px;opacity:0;pointer-events:none;transition:.18s;z-index:80;
+ white-space:nowrap;box-shadow:0 10px 30px -10px rgba(0,0,0,.4)}
+#toast.show{opacity:1;transform:translateX(-50%)}
+@keyframes pulse{0%{background:#E0E0FF}100%{background:transparent}}
+.pulse{animation:pulse 1.1s ease-out;border-radius:8px}
+
+/* ── 設定頁模式：一區一卡，標題列在上、動作靠右（Stripe／Vercel 式） ── */
+.sect{background:var(--card);border:1px solid var(--hair);border-radius:14px;margin-bottom:14px;overflow:hidden}
+.sect>.sh{display:flex;align-items:center;gap:10px;padding:13px 20px;border-bottom:1px solid var(--hair);min-height:52px}
+.sh b{font-size:14px;letter-spacing:-.01em}
+.sh .s{font-size:12px;color:var(--ink3)}
+.sh .act{margin-left:auto;display:flex;gap:8px;align-items:center}
+.sect>.sb{padding:18px 20px}
+.sect>.sb.tbl{padding:2px 10px 6px}
+.sect>.sb+.sb{border-top:1px solid var(--hair)}
+.kpi{display:flex;align-items:baseline;gap:6px;line-height:1}
+.kpi b{font-family:var(--fe);font-size:30px;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi span{font-size:13px;color:var(--ink2)}
+.meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:var(--ink2);margin-top:8px}
+.meta i{width:1px;height:11px;background:#D9D9D9;display:inline-block}
+.lrow{display:flex;align-items:center;gap:14px;padding:12px 0}
+.lrow+.lrow{border-top:1px solid var(--hair)}
+.lrow .ic{width:38px;height:38px;border-radius:10px;background:var(--fill);display:flex;align-items:center;justify-content:center;color:var(--ink2);flex:0 0 auto}
+.lrow b{font-size:13.5px;display:block}
+.lrow .tip{font-size:12px}
+.lrow.mute{opacity:.55}
+.btn.ghost{background:#fff;border:1px solid var(--hair);color:var(--ink)}
+.btn.ghost:hover{background:var(--fill)}
+.seg{display:inline-flex;background:var(--fill);border-radius:10px;padding:3px;gap:2px}
+.seg button{padding:7px 13px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--ink2);white-space:nowrap}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.bar4{height:4px;border-radius:99px;background:var(--fill);overflow:hidden;width:180px}
+.bar4 i{display:block;height:100%;background:var(--mang)}
+.drop{border:1.5px dashed #D9D9D9;border-radius:12px;padding:16px;text-align:center;background:#F5F5F6}
+.drop.ok{border-style:solid;border-color:#5CD6C4;background:#E2F9F4}
+.prwrap textarea.pr{height:118px}
+.spec .chip,.specl .chip{white-space:nowrap;align-self:flex-start}
+.dlb{font-size:11.5px;font-weight:700;color:var(--ink3);margin-bottom:6px}
+/* ── 前台著陸頁（未登入時整頁顯示；登入後只剩後台） ── */
+#land{display:none;max-width:1080px;margin:0 auto;padding:0 24px 60px}
+body.out #shell{display:none}
+body.out #land{display:block}
+body.out{background:var(--bg)}
+/* ── 導覽：貼頂 ── */
+.lnav{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:26px;padding:16px 0;margin-bottom:8px;background:rgba(239,239,240,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.lnav b{font-family:var(--fe);font-size:20px;font-weight:800;letter-spacing:-.02em}
+.lnav b span{font-weight:300}
+.lnav b.lg{display:flex;align-items:flex-end;gap:7px}
+.lnav b.lg>span:last-child{font-family:var(--fe);font-size:15.5px;font-weight:400;color:var(--ink2);line-height:1;padding-bottom:3px;letter-spacing:.01em}
+.lgw{display:inline-block;width:92px;color:var(--ink);line-height:0;vertical-align:middle}
+.lnav .lgw{margin-top:-2px;color:var(--mang)}
+.lnav a{font-size:13.5px;color:var(--ink2);cursor:pointer;text-decoration:none;transition:color .15s}
+.lnav a:hover{color:var(--ink)}
+.lnav .sp{flex:1}
+.lnav .lgn{font-weight:600;color:var(--ink)}
+.lnav .go{background:var(--mang);color:#fff;font-weight:700;padding:9px 18px;border-radius:99px}
+.lnav .go:hover{background:var(--mangD);color:#fff}
+/* Hero 來源 icon 列（Meta 平台 icon 列式） */
+.hicons{display:flex;gap:10px;margin-top:20px}
+.hicons span{width:40px;height:40px;border-radius:12px;background:#fff;border:1px solid var(--hair);display:flex;align-items:center;justify-content:center;color:var(--ink2)}
+/* 段落內 CTA：每一段都能開始（Meta 式重複 CTA） */
+.btn.sb{margin-top:22px;padding:11px 22px;font-size:14px;border-radius:99px}
+/* 目標卡片 */
+.goals{display:grid;grid-template-columns:repeat(3,1fr);gap:0 36px;margin-top:28px;border-top:1px solid #D9D9D9}
+.gcard{padding:20px 0 22px;border-bottom:1px solid var(--hair);display:flex;flex-direction:column}
+.gcard .gi{display:none}
+.gcard b{font-size:17px;letter-spacing:-.01em;line-height:1.4}
+.gcard .gl{margin-top:10px;font-size:13.5px;font-weight:600;color:var(--mangD);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.gcard .gl:hover{text-decoration:underline}
+.gcard .gl svg{flex:0 0 auto}
+/* 收名片帶狀面板 */
+.srcband{margin-top:28px;background:#fff;border:1px solid var(--hair);border-radius:20px;padding:30px 24px}
+.srcband .srcrow{grid-template-columns:repeat(4,auto)}
+.dn2{display:flex;justify-content:center;color:#BDBDBD;margin:16px 0}
+.mailc{border-radius:6px;background:#fff;border:1px solid #E6E6E6;box-shadow:0 8px 20px -12px rgba(30,30,30,.35);padding:12px 10px;display:flex;flex-direction:column;gap:7px;justify-content:center}
+.mailc .inb{height:22px;border:1px solid #E6E6E6;border-radius:6px;font-family:var(--fe);font-size:8.5px;color:var(--ink3);display:flex;align-items:center;padding:0 7px;overflow:hidden;white-space:nowrap}
+.mailc .bb{height:22px;border-radius:6px;background:var(--mang);color:#fff;font-size:9.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+/* 企業認證名片：品牌面板 */
+.brandp{margin-top:96px;background:#F5F5F6;border:1px solid var(--hair);border-radius:24px;padding:48px 44px;display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center}
+.brandp h2{font-size:28px;letter-spacing:-.03em;line-height:1.3;font-weight:800}
+.brandp .d{font-size:15px;color:var(--ink2);margin-top:12px;line-height:1.75}
+.fan{position:relative;height:300px}
+/* ── Hero：左主張＋流程圖、右登入 ── */
+.hero{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:56px;align-items:start;padding:36px 0 24px}
+.hero h1{font-size:44px;line-height:1.18;letter-spacing:-.035em;font-weight:800}
+.hero h1 em{font-style:normal;color:var(--mang)}
+.hero .lead{font-size:18px;color:var(--ink2);margin-top:16px;line-height:1.6;max-width:520px}
+.hero .lead b{color:var(--ink);font-weight:700}
+/* 流程圖：三張名片 → 公司人脈庫 */
+.flow{display:grid;grid-template-columns:auto 72px minmax(0,1fr);align-items:center;gap:0;margin-top:34px}
+.flow .cards{display:grid;gap:10px}
+.src{display:grid;grid-template-columns:150px auto;gap:12px;align-items:center}
+.src .lb{font-size:12.5px;color:var(--ink2);white-space:nowrap}
+.src .lb b{display:block;font-size:13px;color:var(--ink)}
+.src .lb i{font-style:normal;font-size:11px;color:var(--ink3)}
+/* 紙本名片：白卡＋灰線＋掃描框 */
+.paper{width:150px;height:95px;border-radius:6px;background:#FFFFFF;border:1px solid #E6E6E6;box-shadow:0 8px 20px -12px rgba(30,30,30,.35);position:relative;padding:14px 14px;overflow:hidden}
+.paper i{display:block;height:5px;border-radius:3px;background:#E6E6E6;margin-bottom:6px}
+.paper i.t{width:54%;height:8px;background:#BDBDBD;margin-bottom:9px}
+.paper i.s{width:70%}.paper i.m{width:44%}
+.paper .lg3{position:absolute;right:12px;top:12px;width:22px;height:22px;border-radius:5px;background:#EFEFF0}
+.paper .scan{position:absolute;inset:0;border:2px solid var(--mang);border-radius:6px;opacity:.9}
+.paper .scan:before,.paper .scan:after{content:'';position:absolute;left:8px;right:8px;height:1.5px;background:var(--mang);opacity:.7;animation:scan 2.2s ease-in-out infinite}
+.paper .scan:after{display:none}
+@keyframes scan{0%,100%{top:14%}50%{top:82%}}
+@media(prefers-reduced-motion:reduce){.paper .scan:before{animation:none;top:50%}}
+.nfcw{position:absolute;right:12px;top:34px;color:rgba(255,255,255,.8)}
+.flow .cards .acard{transition:transform .25s}
+.flow svg.ln{width:72px;height:100%;display:block;overflow:visible}
+.flow .dn{display:none}
+.lib{background:var(--card);border:1px solid var(--hair);border-radius:16px;padding:14px 16px;box-shadow:0 18px 44px -28px rgba(30,30,30,.35)}
+.lib .h{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;margin-bottom:8px}
+.lib .h span{margin-left:auto;font-family:var(--fe);font-size:11px;color:var(--turqD,#00806E);background:var(--turqS,#E2F9F4);padding:2px 8px;border-radius:99px;font-weight:700}
+.lib .r{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--hair);font-size:12.5px}
+.lib .r .av{width:26px;height:26px;border-radius:8px;background:var(--fill);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink2);flex:0 0 auto}
+.lib .r .who{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lib .r .who i{font-style:normal;color:var(--ink3);margin-left:6px}
+.lib .r .by{font-size:11px;color:var(--mangD);background:var(--mangS);padding:2px 7px;border-radius:99px;white-space:nowrap}
+.lib .r.new{animation:rowin .6s ease-out both}
+@keyframes rowin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+/* ── 痛點：三張小卡 ── */
+.pain{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}
+.pain>div{background:#fff;border:1px solid var(--hair);border-radius:16px;padding:20px}
+.pain .pi{width:38px;height:38px;border-radius:11px;background:var(--fill);color:var(--ink2);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.pain b{font-size:15px;display:block}
+.pain .s{font-size:13px;color:var(--ink3);margin-top:4px}
+.ctr{text-align:center;max-width:640px;margin-inline:auto}
+.ctr .d{margin-inline:auto}
+.srcrow{display:grid;grid-template-columns:repeat(3,auto);gap:18px;justify-content:center}
+.srcrow .src{grid-template-columns:1fr;gap:8px;justify-items:center}
+.srcrow .lb{text-align:center}
+.srcrow .lb i{display:block}
+/* ── 段落標題 ── */
+.sec2{margin-top:96px}
+.sec2 .k{font-size:13px;font-weight:600;color:var(--ink3)}
+.sec2 h2{font-size:30px;letter-spacing:-.03em;line-height:1.25;margin-top:8px;font-weight:800}
+.sec2 .d{font-size:16px;color:var(--ink2);margin-top:10px;line-height:1.7;max-width:560px}
+/* ── 後台縮影 ── */
+.mock{margin-top:28px;border:1px solid var(--hair);border-radius:18px;background:var(--bg);overflow:hidden;position:relative;height:520px;box-shadow:0 30px 60px -40px rgba(30,30,30,.4)}
+.mock .bar{height:36px;display:flex;align-items:center;gap:6px;padding:0 14px;border-bottom:1px solid var(--hair);background:#fff}
+.mock .bar i{width:9px;height:9px;border-radius:50%;background:#D9D9D9;display:inline-block}
+.mock .bar span{margin-left:8px;font-family:var(--fe);font-size:11px;color:var(--ink3)}
+.mock .mk{width:1442px;transform:scale(.72);transform-origin:top left;pointer-events:none;display:flex;user-select:none}
+.mock .mks{flex:0 0 216px;background:#fff;border-right:1px solid var(--hair);padding:22px 14px;height:700px}
+.mock .mkm{flex:1;min-width:0;max-width:1000px;padding:26px 30px}
+.mock:after{content:'';position:absolute;left:0;right:0;bottom:0;height:90px;background:linear-gradient(transparent,var(--bg));pointer-events:none}
+.mockcap{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.mockcap span{font-size:12.5px;color:var(--ink2);background:#fff;border:1px solid var(--hair);border-radius:99px;padding:6px 12px}
+.mockcap b{color:var(--ink)}
+/* ── 三段功能：左右交替，視覺用真的元件 ── */
+.fx{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:center;margin-top:72px}
+.fx.alt .fxv{order:-1}
+.fx .k{font-size:13px;font-weight:600;color:var(--ink3);margin-bottom:8px}
+.fx h3{font-size:28px;letter-spacing:-.03em;line-height:1.25;font-weight:800}
+.fxt{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.fxt span{font-size:12.5px;font-weight:600;background:#fff;border:1px solid var(--hair);border-radius:99px;padding:6px 12px;color:var(--ink2)}
+.fx .d{font-size:16px;color:var(--ink2);margin-top:10px;line-height:1.7}
+.fx ul{list-style:none;margin-top:18px;display:grid;gap:9px}
+.fx li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--ink2)}
+.fx li span{color:var(--mang);display:flex;flex:0 0 auto;padding-top:2px}
+.fxv{background:#fff;border:1px solid var(--hair);border-radius:18px;padding:18px;min-height:280px;display:flex;align-items:center;justify-content:center;min-width:0}
+.fxv table{width:100%;font-size:12.5px}
+.fxv .stage{display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap}
+.fxv .chips{display:grid;gap:8px}
+.fxv .chips span{font-size:12.5px;background:var(--fill);border-radius:10px;padding:8px 12px;color:var(--ink2);display:flex;gap:8px;align-items:center}
+.fxv .chips span i{width:6px;height:6px;border-radius:50%;background:var(--mang);display:inline-block}
+/* ── 價格 ── */
+.ptg{display:inline-flex;background:#fff;border:1px solid var(--hair);border-radius:12px;padding:4px;margin-top:18px}
+.ptg button{padding:8px 14px;border-radius:9px;font-size:13px;font-weight:600;color:var(--ink2)}
+.ptg button.on{background:var(--ink);color:#fff}
+.ptg button small{font-weight:400;color:inherit;opacity:.7;margin-left:4px}
+.plans{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-top:20px}
+.pl{background:#fff;border:1px solid var(--hair);border-radius:20px;padding:28px}
+.pl.hi{border:2px solid var(--mang);position:relative}
+.pl.hi:before{content:'企業版';position:absolute;top:-12px;left:24px;background:var(--mang);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px}
+.pl .nm{font-size:15px;font-weight:700}
+.pl .amt{display:flex;align-items:baseline;gap:6px;margin-top:10px;font-family:var(--fe)}
+.pl .amt b{font-size:48px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.pl .amt span{font-size:14px;color:var(--ink3);font-family:var(--ft)}
+.pl .sub2{font-size:13px;color:var(--ink3);margin-top:8px;min-height:20px}
+.pl ul{list-style:none;margin-top:18px;display:grid;gap:9px;padding-top:18px;border-top:1px solid var(--hair)}
+.pl li{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--ink2)}
+.pl li span{color:var(--mang);display:flex;flex:0 0 auto;padding-top:2px}
+.pl .btn{width:100%;justify-content:center;margin-top:22px;padding:12px}
+.pl .btn.ghost{background:#fff;border:1px solid var(--hair);color:var(--ink)}
+/* ── 收尾 CTA：淺色漸層（Meta 式） ── */
+.cta{margin-top:96px;border-radius:24px;padding:64px 40px;background:linear-gradient(120deg,#F0F0FF 0%,#EDF4FE 45%,#E2F9F4 100%);color:var(--ink);text-align:center;position:relative;overflow:hidden}
+.cta .k{font-size:14px;font-weight:600;color:var(--ink2);position:relative;margin-bottom:12px}
+.cta h2{font-size:34px;letter-spacing:-.03em;font-weight:800;position:relative;line-height:1.4}
+.cta .d{color:var(--ink2);margin-top:10px;font-size:14.5px;position:relative}
+.cta .btn{position:relative;display:inline-flex;margin-top:28px;padding:13px 28px;font-size:14.5px;border-radius:99px}
+.lfoot{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-top:36px;padding-top:18px;border-top:1px solid var(--hair);font-size:12px;color:var(--ink3)}
+/* 小後台縮影（放在功能格裡，跟其他視覺同一節奏） */
+.mock.sm{height:280px;margin-top:0;box-shadow:none;border-radius:14px;width:100%}
+.mock.sm .mk{transform:scale(.34)}
+/* FAQ */
+.faq{max-width:720px;margin:20px auto 0}
+.faq details{background:#fff;border:1px solid var(--hair);border-radius:14px;margin-bottom:10px;overflow:hidden}
+.faq summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:16px 20px;font-size:14.5px;font-weight:700}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary svg{margin-left:auto;color:var(--ink3);transition:transform .2s;flex:0 0 auto}
+.faq details[open] summary svg{transform:rotate(180deg)}
+.faq .a{padding:0 20px 16px;font-size:13.5px;color:var(--ink2);line-height:1.75}
+/* 關於我們／部落格 */
+.page{max-width:720px;margin:24px auto 0}
+.page h1{font-size:32px;letter-spacing:-.03em;font-weight:800}
+.page .sub3{font-size:15px;color:var(--ink2);margin-top:10px;line-height:1.8}
+.page p{font-size:14.5px;color:var(--ink2);line-height:1.9;margin-top:16px}
+.page h2{font-size:20px;letter-spacing:-.02em;margin-top:32px}
+.post{display:block;background:#fff;border:1px solid var(--hair);border-radius:16px;padding:22px;margin-top:12px;cursor:pointer;text-align:left;width:100%}
+.post:hover{border-color:#BDBDBD}
+.post .dt{font-family:var(--fe);font-size:11.5px;color:var(--ink3)}
+.post b{font-size:16px;display:block;margin-top:4px;letter-spacing:-.01em}
+.post .ex{font-size:13px;color:var(--ink3);margin-top:6px;line-height:1.7}
+/* Demo／試用橫幅 */
+.demoban{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#1E1E1E;color:#fff;border-radius:12px;padding:10px 14px;margin-bottom:18px;font-size:13px}
+.demoban b{font-size:13px}
+.demoban span{color:#BDBDBD}
+.demoban.tr{background:var(--mangS);color:var(--ink)}
+.demoban.tr b{color:var(--mangD)}
+.demoban.tr span{color:var(--ink2)}
+/* 出場 */
+.rv{opacity:1}
+.rv.in{opacity:1}
+@media(prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}.lib .r.new{animation:none}}
+/* App 同套名片 */
+.acard{position:relative;overflow:hidden;flex:0 0 auto;font-family:var(--ft)}
+.acard .g,.acard .gr,.acard .ed{position:absolute;inset:0}
+.acard .gr{mix-blend-mode:overlay}
+.acard .ed{box-shadow:inset 0 1px 0 rgba(255,255,255,.42),inset 0 0 0 1px rgba(0,0,0,.05)}
+.acard .bm{position:absolute;inset:0;background:repeating-linear-gradient(100deg,rgba(255,255,255,.03) 0 1px,transparent 1px 3px);pointer-events:none}
+.hero2{font-family:var(--ft);font-weight:300;letter-spacing:-.055em;line-height:.94}
+.lat{font-family:var(--fe);font-weight:300;text-transform:uppercase}
+.ftx{display:flex;justify-content:space-between;font-family:var(--fe);font-weight:400;text-transform:uppercase}
+.lcard{background:var(--card);border:1px solid var(--hair);border-radius:18px;padding:24px;box-shadow:0 18px 44px -24px rgba(30,30,30,.25)}
+#login,.fx,.sec2,.brandp,.srcband,.startsec{scroll-margin-top:76px}
+.hvis{display:flex;justify-content:center;padding:26px 0 8px}
+.hbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.hbtns .btn{justify-content:center;padding:13px;border-radius:12px;font-size:15px}
+.startsec{margin-top:64px}
+.startsec h2{font-size:24px;letter-spacing:-.03em;font-weight:800;margin-bottom:6px}
+.startsec .d{font-size:14.5px;color:var(--ink2);margin-bottom:16px}
+.lcard h2{font-size:17px;font-weight:800;letter-spacing:-.02em;margin-bottom:14px}
+.lcard .inp{width:100%;min-width:0;padding:11px 13px;font-size:14px}
+.lcard .btn{width:100%;justify-content:center;padding:12px;font-size:14.5px}
+.err{font-size:12px;color:var(--danger,#C8322B);margin-top:6px;display:none}
+.err.on{display:block}
+.lnk{display:flex;justify-content:center;gap:18px;margin-top:12px}
+.lnk a{font-size:12.5px;color:var(--ink3);cursor:pointer}
+.lnk a:hover{color:var(--mangD)}
+.pick{max-width:480px;margin:40px auto 0}
+.prow{display:flex;align-items:center;gap:12px;padding:13px 14px;border:1px solid var(--hair);border-radius:14px;margin-bottom:9px;cursor:pointer;background:#fff;text-align:left;width:100%}
+.prow:hover{border-color:#BDBDBD}
+.prow .lg{width:40px;height:40px;border-radius:11px;background:#1E1E1E;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 auto}
+.prow b{font-size:14px;display:block}
+.prow .s{font-size:12px;color:var(--ink3)}
+.prow .arr{margin-left:auto;color:#BDBDBD;display:flex}
+/* 側欄：公司切換 */
+#brand{cursor:pointer;border-radius:10px;padding:8px 10px 10px;margin:0 0 8px}
+#brand:hover{background:var(--fill)}
+#brand b{display:flex;align-items:center;gap:6px}
+#brand b svg{margin-left:auto;color:var(--ink3)}
+#cosw{display:none;border:1px solid var(--hair);border-radius:12px;margin:0 0 10px;overflow:hidden;background:#fff}
+#cosw.show{display:block}
+#cosw button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:10px 12px;font-size:13px;border-bottom:1px solid var(--hair)}
+#cosw button:last-child{border-bottom:0}
+#cosw button:hover{background:var(--fill)}
+#cosw button.cur{font-weight:700}
+#cosw .lg2{width:26px;height:26px;border-radius:8px;background:#1E1E1E;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+@media(max-width:900px){
+ #land{padding:0 16px 40px;font-size:15.5px}
+ #land .lead{font-size:16.5px;line-height:1.7}
+ #land .fx .d,#land .sec2 .d{font-size:15px;line-height:1.75}
+ .fx .k,.sec2 .k{font-size:12.5px}
+ .goals{grid-template-columns:1fr;gap:0}
+ .gcard{padding:16px 0}
+ .gcard b{font-size:16px}
+ .mock.sm{height:250px}.mock.sm .mks{display:none}.mock.sm .mk{transform:scale(.42)}
+ .btn.sb{width:100%;justify-content:center;padding:13px;border-radius:12px;font-size:15px;background:#fff;color:var(--ink);border:1px solid #D9D9D9}
+ .btn.sb:hover{background:var(--fill)}
+ .lnav{gap:16px;padding:12px 0}.lnav a.hd{display:none}.lgw{width:78px}
+ .hero{grid-template-columns:1fr;gap:22px;padding:14px 0 0}
+ .hero h1{font-size:30px}.hero .lead{font-size:15px}
+ .hero>div:first-child{display:contents}
+ .hero .hd1{order:0}.hero .lcard{order:1;max-width:none}.hero .floww{order:2}
+ .flow{grid-template-columns:1fr;gap:14px;max-width:none;margin-top:8px}
+ .flow .cards{grid-template-columns:repeat(3,1fr);gap:8px}
+ .src{grid-template-columns:1fr;gap:6px;justify-items:center}
+ .src .lb{text-align:center;font-size:11px}.src .lb b{font-size:12px}.src .lb i{display:none}
+ .paper{width:104px;height:66px;padding:9px 9px}.paper i{height:4px;margin-bottom:4px}.paper i.t{height:6px;margin-bottom:6px}.paper .lg3{width:14px;height:14px;right:8px;top:8px}
+ .flow svg.ln{display:none}
+ .flow .dn{display:flex;justify-content:center;color:#BDBDBD}
+ .sec2{margin-top:64px}.sec2 h2{font-size:24px}.sec2 .d{font-size:14px}
+ .mock{height:300px}.mock .mk{transform:scale(.42)}
+ .fx{grid-template-columns:minmax(0,1fr);gap:18px;margin-top:48px}
+ .fx .fxv{order:-1}
+ .fx h3{font-size:22px}.fx .d{font-size:14.5px}
+ .fxv{min-height:0;padding:14px}.fxv table{font-size:11.5px}.fxv td,.fxv th{white-space:nowrap;padding:7px 6px}
+ .plans{grid-template-columns:1fr}
+ .pain{grid-template-columns:1fr}
+ .goals{grid-template-columns:1fr}
+ .srcband{padding:20px 14px}
+ .srcband .srcrow,.srcrow{grid-template-columns:repeat(2,1fr);gap:14px}
+ .brandp{grid-template-columns:1fr;padding:26px 20px;gap:6px;margin-top:64px}
+ .brandp h2{font-size:22px}
+ .fan{height:230px}
+ .hicons span{width:36px;height:36px}
+ .pl .amt b{font-size:40px}
+ .cta{margin-top:64px;padding:40px 22px}.cta h2{font-size:24px}}
+@media(max-width:520px){.mock{height:250px}.mock .mk{transform:scale(.34)}.flow .cards{gap:8px}}
+/* 表單：看得見的標籤 */
+.fld{display:block}
+.fld label{display:block;font-size:11.5px;font-weight:600;color:var(--ink3);margin-bottom:5px}
+.fld .inp{width:100%;min-width:0}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px}
+.fgrid .inp{padding:8px 11px;font-size:13px}
+/* 危險操作：一定要多一步 */
+.danger{background:#FBE9E8;border:1px solid #F2C2BE;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0 10px}
+.danger b{font-size:13px;color:#A3271F;display:block}
+.btn.red{background:#C8322B}.btn.red:hover{background:#A3271F}
+/* 結帳 */
+.ck{display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap}
+.ck .l{flex:1;min-width:320px;max-width:660px}
+.ck .r{flex:0 0 292px;position:sticky;top:20px}
+.stepn{background:var(--fill);color:var(--ink)}
+.stepn{width:24px;height:24px;border-radius:50%;background:var(--ink);color:#fff;font-family:var(--fe);font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+.opt{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--hair);border-radius:12px;cursor:pointer;background:#fff;width:100%;text-align:left;margin-bottom:8px}
+.opt.on{border-color:var(--mang);background:var(--mangS)}
+.opt.off{opacity:.5;cursor:not-allowed}
+.opt .rd{width:18px;height:18px;border-radius:50%;border:2px solid #BDBDBD;flex:0 0 auto;position:relative}
+.opt.on .rd{border-color:var(--mang)}.opt.on .rd:after{content:'';position:absolute;inset:3px;border-radius:50%;background:var(--mang)}
+.opt b{font-size:13.5px;display:block}
+.stp{display:inline-flex;align-items:center;border:1px solid var(--hair);border-radius:10px;overflow:hidden}
+.stp button{width:38px;height:38px;background:var(--fill);font-size:18px;color:var(--ink2)}
+.stp button:disabled{opacity:.35}
+.stp .v{width:74px;text-align:center;font-family:var(--fe);font-weight:700;font-size:16px}
+.stp .v small{font-size:11px;color:var(--ink3);font-weight:400;font-family:var(--ft)}
+.sumrow{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:6px 0}
+.sumrow.tot{border-top:1px solid var(--hair);margin-top:6px;padding-top:12px;font-weight:700}
+.sumrow.tot b{font-family:var(--fe);font-size:20px}
+/* NFC 卡面預覽（85.6 × 54） */
+.cardpv{aspect-ratio:1.585;border-radius:12px;position:relative;overflow:hidden;background:linear-gradient(135deg,#2A2A31,#1E1E1E 55%,#26262C);box-shadow:0 12px 30px -14px rgba(0,0,0,.5)}
+.cardpv:after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(100deg,rgba(255,255,255,.028) 0 1px,transparent 1px 3px);pointer-events:none}
+.cardpv img{width:100%;height:100%;object-fit:cover;display:block}
+.cardpv .nfcm{position:absolute;right:6%;bottom:8%;width:13%;aspect-ratio:1;border:1.5px dashed rgba(255,255,255,.6);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:9px;font-weight:700;letter-spacing:.05em}
+.cardpv .safe{position:absolute;inset:6%;border:1px dashed rgba(255,255,255,.35);border-radius:8px;pointer-events:none}
+.cardpv .hcm{position:absolute;left:6%;bottom:8%;font-family:var(--fe);font-size:10px;letter-spacing:.08em;color:rgba(255,255,255,.5)}
+.cardpv.port{aspect-ratio:.631;width:63%;margin-inline:auto}
+.cardpv.empty{background:var(--fill);box-shadow:none;border:1.5px dashed #D9D9D9}
+.cardpv.empty:after{display:none}
+.cardpv.empty .nfcm{border-color:#BDBDBD;color:#565656}.cardpv.empty .safe{border-color:#BDBDBD}
+.cardpv.empty .ph{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--ink3);font-size:12.5px;text-align:center;padding:20px}
+.spec{display:flex;gap:6px;flex-wrap:wrap}
+.spec span{font-size:11px;font-weight:600;background:var(--fill);color:var(--ink2);padding:3px 9px;border-radius:99px}
+textarea.pr{width:100%;height:150px;background:var(--fill);border:1px solid var(--hair);border-radius:10px;padding:11px 12px;font:12.5px/1.65 var(--ft);resize:vertical;color:var(--ink)}
+@media(max-width:900px){
+ .ck .r{position:static;flex:1 1 100%}
+ .fgrid{grid-template-columns:1fr}
+ #shell{display:block}
+ #side{position:static;height:auto;flex-direction:row;overflow-x:auto;width:100%;
+  border-right:0;border-bottom:1px solid var(--hair);padding:12px 14px;gap:6px;align-items:center}
+ #brand{padding:0 8px 0 4px;white-space:nowrap}
+ #brand span{display:none}
+ #cosw.show{position:fixed;left:12px;z-index:40;width:min(300px,calc(100vw - 24px));box-shadow:0 18px 44px -18px rgba(30,30,30,.35)}
+ html,body{overflow-x:hidden}
+ .nv{white-space:nowrap;padding:8px 12px}
+ #sfoot{margin:0;padding:0;display:flex;align-items:center;gap:6px;flex:0 0 auto}
+ #sfoot .btn{width:auto!important;margin:0!important;white-space:nowrap}
+ .nv2{white-space:nowrap}
+ .ngrp{white-space:nowrap;padding:0 4px}
+ #main{padding:20px 16px 60px}
+ .grid4{grid-template-columns:repeat(2,1fr)}
+ #drawer{width:100vw;max-width:100vw}
+}
+</style>
+
+<div id="land"></div>
+<div id="shell">
+ <nav id="side">
+  <div id="brand"><b>黑卡智能</b><span>Heycard Business</span></div>
+  <div id="cosw"></div>
+  <button class="nv" data-pg="ov"></button>
+  <div class="ngrp">公司</div>
+  <button class="nv" data-pg="mem"></button>
+  <button class="nv" data-pg="card"></button>
+  <button class="nv" data-pg="lib"></button>
+  <button class="nv" data-pg="ai"></button>
+  <button class="nv" data-pg="nfc"></button>
+  <button class="nv" data-pg="ppl"></button>
+  <div class="ngrp">活動</div>
+  <button class="nv" data-pg="evs"></button>
+  <button class="nv" data-pg="exh"></button>
+  <div class="ngrp">帳務</div>
+  <button class="nv" data-pg="bill"></button>
+  <div id="sfoot">
+   <button class="nv2" data-pg="edge"></button>
+   <button class="nv2" id="logout"></button>
+   <button class="btn tt sm" id="rst" style="width:100%;margin-top:8px">重置模擬資料</button></div>
+ </nav>
+ <main id="main"></main>
+</div>
+<div id="ovl"></div>
+<aside id="drawer"></aside>
+<div id="toast"></div>
+
+<script>
+/* ═════ 小工具 ═════ */
+const $=(s,r)=>(r||document).querySelector(s);
+const $$=(s,r)=>[...(r||document).querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let _tt;function note(m){const t=$('#toast');if(!t)return;t.textContent=m;t.classList.add('show');
+ clearTimeout(_tt);_tt=setTimeout(()=>t.classList.remove('show'),1900)}
+function pulse(sel){$$(sel).forEach(el=>{el.classList.remove('pulse');void el.offsetWidth;el.classList.add('pulse')})}
+/* 直接複製：execCommand 在沙箱裡也能用（要在點擊手勢內同步呼叫） */
+function copyText(t){
+ try{const ta=document.createElement('textarea');ta.value=t;ta.setAttribute('readonly','');
+  ta.style.cssText='position:fixed;top:-1000px;left:-1000px;opacity:0';document.body.appendChild(ta);
+  ta.select();ta.setSelectionRange(0,t.length);const ok=document.execCommand('copy');document.body.removeChild(ta);
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(t).catch(()=>{});
+  return ok}catch(e){return false}}
+const IC={ov:'M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z',
+ mem:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+ lib:'M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5z',
+ ttl:'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z',
+ ev:'M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z',
+ edge:'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10',
+ warn:'M12 3l9 16H3zM12 9v5M12 17v.5',ck:'M20 6L9 17l-5-5',x:'M6 6l12 12M18 6L6 18',
+ arr:'M9 6l6 6-6 6',back:'M15 18l-6-6 6-6',
+ evs:'M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM4 10h16M8.5 3v4M15.5 3v4',
+ ai:'M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z',
+ exh:'M3 9l1.6-5h14.8L21 9M4 9v11h16V9M4 9h16M9.5 20v-6h5v6',
+ ppl:'M12 2l8 4v6c0 5-3.4 9-8 10-4.6-1-8-5-8-10V6zM12 8v4M12 15v.5',
+ nfc:'M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM8.5 13.5a5 5 0 0 1 7 0M10.5 11.5a2.5 2.5 0 0 1 3 0M12 15.5v.01',
+ bill:'M6 2h9l5 5v15H6zM14 2v6h6M9 13h6M9 17h6',cp:'M9 9h10v12H9zM5 15V3h10',up:'M12 16V4M6 10l6-6 6 6M4 20h16',
+ chk:'M6 2h9l5 5v15H6zM14 2v6h6M9 13h6M9 17h6',dn:'M6 9l6 6 6-6',
+ card:'M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 10h18M7 15h4',
+ bank:'M3 10l9-6 9 6M5 10v9M19 10v9M9 10v9M15 10v9M3 19h18',
+ tap:'M5 9a9 9 0 0 1 14 0M8 12.5a5 5 0 0 1 8 0M12 16.5v.01'};
+const ico=(k,z,w)=>'<svg width="'+(z||16)+'" height="'+(z||16)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+(w||2)+'" stroke-linecap="round" stroke-linejoin="round"><path d="'+IC[k]+'"/></svg>';
+
+/* ═════ 狀態（localStorage，可重置） ═════ */
+function seed(){
+ const wk=[14,19,23,17,28,31,26,34];       /* 近 8 週全公司換卡 */
+ return {
+  /* 企業名片欄位歸屬：職稱、公司 Email＝公司管理；姓名、手機＝員工自填（必填，未填完卡片不啟用） */
+  members:[
+   {id:'m1',name:'郭小錠',nameEn:'Tim Kuo',        title:'創辦人',  cem:'tim@heycard.app',   ph:'0912 345 678',n:38,co:31,reply:42,join:24,push:5, last:'今天'},
+   {id:'m2',name:'陳雅婷',nameEn:'Yating Chen',    title:'業務經理',cem:'yating@heycard.app',ph:'0928 111 222',n:52,co:40,reply:31,join:18,push:8, last:'今天'},
+   {id:'m3',name:'林建宏',nameEn:'Chien-Hung Lin', title:'業務專員',cem:'chlin@heycard.app', ph:'0933 456 789',n:87,co:44,reply:9, join:6, push:0, last:'昨天'},
+   {id:'m4',name:'王思穎',nameEn:'Szu-Ying Wang',  title:'商務開發',cem:'swang@heycard.app', ph:'0955 234 567',n:29,co:26,reply:48,join:31,push:11,last:'今天'},
+   {id:'m5',name:'張哲瑋',nameEn:'Che-Wei Chang',  title:'客戶成功',cem:'cwchang@heycard.app',ph:'',            n:21,co:18,reply:39,join:22,push:4, last:'3 天前'},
+   {id:'m6',name:'李孟儒',nameEn:'Meng-Ju Lee',    title:'業務專員',cem:'mjlee@heycard.app', ph:'0910 987 654',n:33,co:27,reply:27,join:15,push:2, last:'昨天'}],
+  /* 邀請：寄到員工的 Heycard Email（登入用，可與公司信箱不同）；卡片上顯示的是公司 Email */
+  invited:[],
+  /* 公司資訊（卡片預設，全員一致）：公司改，所有成員卡片即時連動 */
+  coCard:{name:'黑卡智能股份有限公司',short:'黑卡智能',addr:'台北市信義區松仁路 100 號 12 樓',tax:'12345678',tel:'02-2720-0000',logo:1,
+   /* 企業卡設計：跟 App 同一套（材質＋直橫式）。這是員工 App 裡的數位企業卡；印刷 NFC 卡另外下單，不一定同款 */
+   design:{ori:'land',mat:'steel'}},
+  /* AI 建議行動：判讀只用名片面資料與系統事件，不讀訊息內容 */
+  aiTasks:[
+   {id:'t1',who:'陳雅婷',mid:'m2',target:'張維中 · 立昇電子',topic:'約下週回訪，聊 Q4 自動化採購',why:'對方兩週內看了名片 3 次',st:'todo'},
+   {id:'t2',who:'王思穎',mid:'m4',target:'林怡君 · 元睿創投',topic:'發 8 月產品進度，問年底佈局',why:'Demo Day 後互動停了 1 週',st:'todo'},
+   {id:'t3',who:'林建宏',mid:'m3',target:'周永昌 · 大甲精機',topic:'寄公司介紹，約帶樣品拜訪',why:'NFC 一碰後沒有後續',st:'todo'},
+   {id:'t4',who:'張哲瑋',mid:'m5',target:'蔡明真 · 宏遠銀行',topic:'把導入案例傳給她',why:'金融線最會回，宏遠還沒開發',st:'todo'}],
+  pending:[{who:'林建宏',id:'m3',from:'業務專員',to:'資深業務專員'},
+           {who:'李孟儒',id:'m6',from:'業務專員',to:'業務副理'}],
+  /* lib 欄位：[姓名,公司,職稱,產業,日期,場合,經手,產業修正者,來源]
+     來源＝這筆是怎麼收進來的：紙本掃描／Heycard 交換／NFC 感應／公開頁留 Email。
+     歸戶規則：跟「身分」走，不跟「方法」走——成員以企業認證名片的身分收到的，一律進公司庫 */
+  lib:[
+   ['張維中','立昇電子','採購經理','製造','08-12','自動化展','陳雅婷','','紙本'],
+   ['李佩珊','速倉科技','營運總監','科技','08-15','客戶拜訪','郭小錠','','Heycard'],
+   ['黃國豪','鴻程資訊','技術副理','科技','08-18','產業論壇','林建宏','','紙本'],
+   ['吳雅雯','元睿創投','投資經理','金融','08-20','Demo Day','王思穎','','Heycard'],
+   ['劉承翰','好日子咖啡','展店經理','餐飲','08-22','商圈參訪','陳雅婷','','NFC'],
+   ['周永昌','大甲精機','廠長','製造','08-22','自動化展','林建宏','','NFC'],
+   ['許嘉玲','昕采生技','行銷總監','生技','08-23','產業論壇','王思穎','王思穎','紙本'],
+   ['高子翔','雲杰物流','營運經理','物流','08-24','客戶引薦','陳雅婷','','Heycard'],
+   ['鄭文彥','立昇電子','研發處長','製造','08-24','回訪','郭小錠','','NFC'],
+   ['蔡明真','宏遠銀行','企金襄理','金融','08-25','商會月會','張哲瑋','','紙本'],
+   ['謝俊宏','速倉科技','資訊經理','科技','08-25','客戶拜訪','李孟儒','','Heycard'],
+   ['ken.liu@transtech.tw','僅 Email · AI 補全中','—','—','08-25','公開頁留 Email','陳雅婷','','公開頁'],
+   ['楊淑芬','品好食品','採購主任','製造','08-26','供應商日','林建宏','林建宏','紙本'],
+   ['洪國峰','鼎新電腦','顧問','科技','08-26','研討會','陳雅婷','','紙本'],
+   ['林怡君','元睿創投','分析師','金融','08-27','Demo Day','王思穎','','Heycard'],
+   ['邱志豪','將林營造','專案經理','營造','08-27','工地會勘','李孟儒','','NFC']],
+  wk:wk,
+  myEx:null, draft:{},
+  /* 企業 NFC 卡：公司資產，不印名字。綁定＝感應時打開該同事的企業名片；人走卡留，解綁後給下一位 */
+  nfc:{cards:[
+    {uid:'HC-3A1F-01',m:'m1',taps:23,mo:9},{uid:'HC-3A1F-02',m:'m2',taps:41,mo:17},
+    {uid:'HC-3A1F-03',m:'m3',taps:12,mo:4},{uid:'HC-3A1F-04',m:'m4',taps:35,mo:14},
+    {uid:'HC-3A1F-05',m:'',taps:0,mo:0},{uid:'HC-3A1F-06',m:'',taps:0,mo:0},{uid:'HC-3A1F-07',m:'',taps:0,mo:0},
+    {uid:'HC-3A1F-08',m:'',taps:7,mo:0,st:'off'}],
+   orders:[{d:'8/05',n:8,st:'done'}]},
+  /* 帳務：方案、付款方式、訂購資訊、帳單 */
+  billing:{seats:8,yearly:0,next:'10/01',card:'4242',
+   co:{name:'黑卡智能股份有限公司',tax:'12345678',title:'黑卡智能股份有限公司',addr:'台北市信義區松仁路 100 號 12 樓',
+       cn:'林佳蓉',cem:'acct@heycard.app',cph:'02-2720-0000'},
+   invoices:[
+    {id:'HC-2026-0901',d:'9/01',item:'企業版 8 席 · 月繳（9/01 – 9/30）',amt:2392,pay:'信用卡 •••• 4242',inv:'AB-10023456',st:'paid'},
+    {id:'HC-2026-0805',d:'8/05',item:'企業 NFC 卡 · 標準 × 8',amt:3120,pay:'信用卡 •••• 4242',inv:'AB-10021873',st:'paid'},
+    {id:'HC-2026-0801',d:'8/01',item:'企業版 8 席 · 月繳（8/01 – 8/31）',amt:2392,pay:'信用卡 •••• 4242',inv:'AB-10021102',st:'paid'}]},
+  cart:null,
+  /* 後台人員：登入＝Heycard 個人帳號，同一組帳密。角色決定看得到哪些區 */
+  staff:[{id:'u1',name:'郭小錠',em:'tim@heycard.app',role:'owner',st:'active',me:1},
+         {id:'u2',name:'陳雅婷',em:'yating@heycard.app',role:'admin',st:'active'},
+         {id:'u3',name:'王思穎',em:'sy.wang@heycard.app',role:'events',st:'active'},
+         {id:'u4',name:'林佳蓉',em:'acct@heycard.app',role:'viewer',st:'invited'}],
+  /* 多場列表制：歷史場的數據也是資產 */
+  evs:[
+   {id:'e1',name:'2026 春季自動化技術展',type:'展會',org:'台灣智慧製造協會',
+    date:'3/18 – 3/20',venue:'台北世貿一館',intro:'年度自動化與機器人應用展。',
+    logo:'',banner:'',st:'done',entry:'HEY-SPR26',joined:412,pool:64,
+    dirCfg:[{k:'desc',label:'一句介紹',on:1},{k:'info',label:'公司介紹',on:1},{k:'launch',label:'本場新品／新技術',on:1}],
+    booths:[
+     {n:'大甲精機',desc:'CNC 加工與自動化夾治具',loc:'A05',info:'',launch:'',
+      leads:21,src:{dir:5,qr:11,meet:5},st:'open',code:'B-A11X',ppl:['周永昌 廠長']},
+     {n:'雲杰物流',desc:'冷鏈與跨境物流',loc:'B02',info:'',launch:'',
+      leads:14,src:{dir:3,qr:8,meet:3},st:'open',code:'B-C22Y',ppl:['高子翔 營運經理']}]},
+   {id:'e2',name:'2026 智慧製造展',date:'9/24 – 9/26',venue:'南港展覽館 1 館',
+    org:'台灣智慧製造協會',intro:'聚焦產線自動化與感測技術的年度展會，300+ 參展品牌。',
+    type:'展會',logo:EV_LOGO,banner:EV_BAN,
+    st:'approved',entry:'HEY-MFG26',joined:186,pool:37,
+    dirCfg:[{k:'desc',label:'一句介紹',on:1},
+            {k:'info',label:'公司介紹',on:1},
+            {k:'launch',label:'本場新品／新技術',on:1}],
+    booths:[
+     {n:'立昇電子',desc:'工業感測器與自動化控制模組',loc:'A12',
+      info:'十五年工業感測經驗，產線溫濕度與震動監測模組出貨超過 200 條產線。',
+      launch:'新一代無線震動感測器 VS-300：免佈線、電池壽命五年，本場首發。',
+      leads:12,src:{dir:3,qr:6,meet:3},st:'open',code:'B-3F82',ppl:['王志遠 業務經理','林佳蓉 業務專員']},
+     {n:'速倉科技',desc:'倉儲管理系統 WMS',loc:'B08',
+      info:'中小型倉儲的 WMS 導入專家，兩週上線。',
+      launch:'與 AGV 廠商整合的撿貨方案，現場實機展示。',
+      leads:8,src:{dir:2,qr:4,meet:2},st:'open',code:'B-9K41',ppl:['張明哲 資深顧問']},
+     {n:'鴻程資訊',desc:'ERP 導入與系統整合',loc:'B15',
+      info:'',launch:'',
+      leads:5,src:{dir:1,qr:3,meet:1},st:'open',code:'B-2M77',ppl:['陳思婷 客戶經理','劉育誠 業務']},
+     {n:'昕采生技',desc:'',loc:'C03',info:'',launch:'',em:'sales@shincai.tw',leads:0,src:{dir:0,qr:0,meet:0},st:'invited',code:'B-5T09',ppl:[]}]}]}}
+/* 每家公司一份資料：席次、NFC 卡、人脈庫、帳單都是「公司」層級——換公司就換整份 */
+const ST_K='hcadmin19';
+function stKey(){const a=AU();const c=a&&a.cos[a.cur];return ST_K+'|'+(c?c.n:'黑卡智能')}
+/* 新建的公司：Demo 模式——帶完整示範資料讓人看得到後台長什麼樣，公司名與擁有者換成他的；
+   綁卡開始試用後資料照留，正式版再清成真的 */
+function freshSeed(coName){
+ const o=seed(),a=AU()||{},nm=a.name||'擁有者';
+ const old='郭小錠';
+ o.members[0]=Object.assign(o.members[0],{name:nm,nameEn:'',title:'負責人',cem:a.em||''});
+ o.lib.forEach(r=>{if(r[6]===old)r[6]=nm;if(r[7]===old)r[7]=nm});
+ o.staff[0]=Object.assign(o.staff[0],{name:nm,em:a.em||''});
+ o.billing.card='';o.billing.invoices=[];o.billing.yearly=0;
+ o.billing.co=Object.assign(o.billing.co,{name:coName,title:coName,cn:nm,cem:a.em||''});
+ o.coCard=Object.assign(o.coCard,{name:coName,short:coName});
+ o.nfc.orders=[];
+ return o}
+function ST(){const k=stKey();
+ try{const s=JSON.parse(localStorage.getItem(k));if(s&&s.members&&s.evs&&s.nfc&&s.billing&&s.coCard&&s.coCard.design&&s.aiTasks)return s}catch(e){}
+ const a=AU(),c=a&&a.cos[a.cur];
+ return (!c||c.n==='黑卡智能')?seed():freshSeed(c.n)}
+function save(o){try{localStorage.setItem(stKey(),JSON.stringify(o))}catch(e){}return o}
+/* 名錄完成度：主辦方開的欄位裡，這一攤還缺幾格 */
+function dirMiss(ev,b){return (ev.dirCfg||[]).filter(f=>f.on&&!(b[f.k]||'').trim()).length}
+
+/* ═════ 登入狀態：帳號＝Heycard App 同一組帳密；登入後直接進後台 ═════ */
+const AUTH_K='hcauth1';
+function AU(){try{const a=JSON.parse(localStorage.getItem(AUTH_K));if(a&&a.em)return a}catch(e){}return null}
+/* 帳號註冊表：登出再登入，公司還在——已有帳戶的人不會再被帶去「建立公司」 */
+const REG_K='hcusers1';
+function regAll(){try{return JSON.parse(localStorage.getItem(REG_K))||{}}catch(e){return{}}}
+function auSave(a){try{localStorage.setItem(AUTH_K,JSON.stringify(a));
+ if(a.em){const r=regAll();r[a.em.toLowerCase()]={name:a.name||'',cos:a.cos||[],inv:a.inv||[]};localStorage.setItem(REG_K,JSON.stringify(r))}}catch(e){}}
+/* 原型：先查註冊表（真的登入過的帳號），沒有才用 Email 網域模擬 */
+function lookup(em){
+ const r=regAll()[em.toLowerCase()];
+ if(r)return {name:r.name,own:r.cos||[],inv:r.inv||[],known:1};
+ const d=(em.split('@')[1]||'').toLowerCase();
+ if(d==='heycard.app')return {name:'郭小錠',own:[{n:'黑卡智能',role:'擁有者'}],inv:[{n:'昕采生技',by:'許嘉玲'}]};
+ if(d==='shincai.tw')return {name:'許安妮',own:[],inv:[{n:'昕采生技',by:'許嘉玲'}]};
+ return {name:'',own:[],inv:[]}}
+let LP='land', LPUB='', lOtp=0, lSent=0, lEm='', lNm='', lMode='in';
+let NC={name:'',country:'TW',tax:'',autoJoin:1};
+const LIC={card:'M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 10h18M7 15h4',
+ nfcw:'M5 9a9 9 0 0 1 14 0M8 12.5a5 5 0 0 1 8 0M12 16.5v.01',ai:'M12 3l1.8 4.6L18 9l-4.2 1.4L12 15l-1.8-4.6L6 9l4.2-1.4zM19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z',
+ ppl2:'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+ dn:'M6 9l6 6 6-6',plus:'M12 5v14M5 12h14',out:'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9',
+ mail:'M3 5h18v14H3zM3 7l9 6 9-6'};
+const lico=(k,z,w)=>'<svg width="'+(z||16)+'" height="'+(z||16)+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="'+(w||2)+'" stroke-linecap="round" stroke-linejoin="round"><path d="'+LIC[k]+'"/></svg>';
+
+const LOGO=`<svg viewBox="0 0 4167 1073" preserveAspectRatio="xMidYMid meet" style="width:100%;height:auto;display:block"><g transform="translate(0,1073) scale(0.025,-0.025)" fill="currentColor"><path d="M0 25020 l0 -17900 1759 0 1760 0 10 7470 11 7470 107 293 c151 414
+332 699 636 1004 297 297 655 523 1037 654 260 89 261 89 3720 99 1903 6 5818
+-5 8700 -24 5802 -37 5362 -15 5920 -296 651 -328 1110 -876 1366 -1630 71
+-211 74 -524 85 -7630 l10 -7410 1760 0 1759 0 -10 17890 -10 17890 -1750 10
+-1750 11 0 -8821 c0 -4851 -9 -8820 -19 -8820 -11 0 -474 281 -1030 623 -1132
+698 -1937 1115 -2685 1391 -915 337 -1983 578 -2946 664 -630 57 -7672 56
+-8348 -1 -1396 -118 -2712 -477 -3952 -1079 -264 -128 -964 -531 -1556 -895
+-593 -365 -1083 -663 -1091 -663 -8 0 -10 3956 -4 8790 l11 8790 -1750 10
+-1750 11 0 -17901z M163040 35493 l0 -7426 -260 410 c-1565 2469 -3883 4080
+-6700 4658 -936 192 -1455 239 -2620 239 -1165 0 -1684 -47 -2620 -239 -1651
+-339 -3205 -1051 -4635 -2125 -547 -411 -1470 -1298 -1936 -1859 -1660 -2003
+-2718 -4525 -3049 -7271 -88 -728 -122 -2530 -64 -3340 148 -2041 593 -3703
+1450 -5420 415 -831 740 -1356 1273 -2060 1956 -2579 4566 -4130 7781 -4621
+798 -122 2402 -152 3257 -62 1415 151 2618 481 3863 1062 1539 719 2957 1953
+4010 3490 l249 365 11 -2077 10 -2077 1810 -10 1810 -11 0 17901 0 17900
+-1820 0 -1820 0 0 -7427z m-7500 -5388 c1067 -161 1864 -405 2760 -843 1003
+-490 1735 -1016 2462 -1769 1287 -1333 2026 -2852 2342 -4813 87 -541 129
+-3943 58 -4788 -190 -2280 -1024 -4224 -2460 -5728 -1355 -1420 -3332 -2364
+-5462 -2608 -618 -71 -1920 -61 -2520 20 -2094 281 -3790 1115 -5183 2550
+-1559 1605 -2508 3845 -2740 6472 -71 800 -27 2507 82 3222 464 3047 1854
+5408 4084 6940 1138 781 2496 1250 4097 1415 361 37 2096 -11 2480 -70z
+M135600 33454 c-55 -8 -235 -33 -400 -57 -739 -105 -1783 -452 -2466 -821
+-2513 -1356 -4287 -3843 -4861 -6816 l-89 -460 -13 -9090 -13 -9090 1801 0
+1800 0 10 10390 11 10390 94 280 c308 911 806 1578 1399 1869 l265 131 5361
+20 5361 20 10 1630 11 1630 -4091 -5 c-2249 -3 -4135 -13 -4190 -21z M42720
+33356 c-1714 -95 -3274 -488 -4660 -1174 -1880 -930 -3318 -2196 -4480 -3942
+-680 -1023 -1073 -1834 -1481 -3060 -612 -1841 -862 -3640 -805 -5800 38
+-1444 169 -2477 470 -3700 1191 -4840 4543 -8185 9116 -9097 1553 -310 3448
+-370 5084 -160 4390 562 7723 3121 8916 6844 117 364 320 1160 320 1253 0 64
+-3358 54 -3377 -10 -365 -1274 -945 -2179 -1963 -3058 -1245 -1076 -2510
+-1618 -4380 -1878 -628 -88 -2333 -99 -2960 -20 -966 121 -1769 330 -2528 656
+-1688 726 -3095 2080 -3964 3814 -665 1329 -1132 3144 -1215 4726 l-25 490
+10430 0 10431 0 -21 1570 c-21 1614 -49 1974 -229 2930 -298 1586 -957 3258
+-1789 4540 -418 644 -829 1142 -1489 1803 -1393 1395 -2834 2270 -4580 2780
+-947 277 -1904 430 -3093 496 -783 44 -890 43 -1728 -3z m2400 -3252 c1629
+-226 2885 -761 4020 -1711 866 -725 1482 -1530 2019 -2640 513 -1062 810
+-2133 977 -3523 l22 -190 -8619 0 c-7129 0 -8619 9 -8619 53 0 29 36 253 80
+497 314 1743 993 3332 1954 4570 499 643 1283 1358 1986 1810 989 636 2298
+1059 3680 1188 535 49 1978 18 2500 -54z M90072 33361 c-3075 -179 -5695
+-1281 -7747 -3261 -2192 -2115 -3545 -5015 -3931 -8420 -81 -720 -69 -2994 20
+-3720 332 -2718 1306 -5163 2861 -7180 1442 -1872 3555 -3312 5810 -3962 2494
+-717 5585 -693 8112 65 2634 789 4814 2403 6183 4577 482 765 934 1889 1135
+2822 81 380 205 1234 205 1420 l0 98 -1735 0 -1736 0 -28 -223 c-43 -349 -205
+-974 -338 -1311 -758 -1907 -2298 -3381 -4344 -4158 -1799 -683 -4398 -766
+-6358 -202 -1225 352 -2260 958 -3234 1892 -1537 1476 -2514 3595 -2894 6282
+-101 712 -101 2873 0 3620 512 3806 2398 6594 5247 7754 1085 442 2212 633
+3719 630 1270 -3 2239 -144 3219 -468 2349 -779 4181 -2863 4664 -5306 l69
+-350 1737 0 1738 0 -27 230 c-56 476 -222 1294 -360 1773 -1081 3763 -4220
+6434 -8455 7195 -1002 180 -2471 264 -3532 203z M112220 33354 c-3188 -333
+-5989 -2460 -7130 -5413 -380 -986 -551 -1827 -597 -2951 l-26 -630 1643 0
+1642 0 27 330 c92 1130 415 2063 1018 2942 935 1362 2443 2262 4103 2447 503
+56 6651 54 6963 -2 781 -142 1471 -793 1677 -1585 51 -193 60 -691 60 -3140
+l0 -2912 -4018 0 c-2466 0 -4215 -16 -4530 -42 -1230 -101 -2192 -288 -3210
+-622 -2678 -879 -4412 -2608 -5042 -5024 -323 -1242 -366 -2734 -117 -4120
+542 -3015 2659 -5153 5908 -5967 1067 -268 1548 -320 2949 -323 832 -1 1365
+16 1620 52 1770 250 3126 769 4300 1647 699 523 1555 1504 1968 2255 l152 276
+20 -1736 20 -1736 1720 0 1720 0 0 9260 c0 10274 19 9505 -259 10582 -779
+3023 -3152 5397 -6172 6176 -959 247 -1067 255 -3669 265 -1309 5 -2542 -8
+-2740 -29z m9380 -15487 c0 -2192 -47 -2782 -306 -3807 -378 -1501 -1257
+-2767 -2514 -3619 -805 -546 -1955 -957 -3200 -1145 -584 -88 -1964 -100
+-2540 -21 -1762 240 -3100 918 -3981 2018 -339 423 -707 1157 -836 1670 -264
+1046 -232 2283 84 3227 338 1012 1020 1894 1924 2492 802 530 1647 804 2989
+971 66 8 1979 18 4250 21 l4130 6 0 -1813z M54880 33350 c0 -5 1682 -4636
+3738 -10290 l3737 -10280 1866 -10 c1487 -9 1862 -1 1849 40 -10 27 -1501
+4662 -3314 10299 l-3296 10249 -2290 1 c-1259 1 -2290 -3 -2290 -9z M75459
+33230 c-33 -71 -2803 -6520 -6155 -14330 l-6094 -14200 1845 -24 c1015 -13
+1851 -19 1858 -14 18 14 13167 28651 13167 28676 0 12 -1026 22 -2281 22
+l-2280 0 -60 -130z M62452 2933 c-14 -37 -301 -708 -636 -1490 l-611 -1423
+1765 -10 c971 -6 1778 3 1794 20 16 16 335 692 709 1500 l680 1470 -1838 0
+c-1683 0 -1840 -6 -1863 -67z"/></g></svg>`;
+const GR='url("data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter><rect width="140" height="140" filter="url(#n)"/></svg>')+'")';
+const MAT={
+ silver:{n:'銀霧',bg:'linear-gradient(163deg,#FCFCFD 0%,#EAEAEC 26%,#C6C6CA 60%,#E2E2E5 84%,#F4F4F6 100%)',sh:'radial-gradient(150% 90% at 18% -12%,rgba(255,255,255,.72),transparent 52%)',ink:'#191A1C',sub:'rgba(25,26,28,.52)',mut:'rgba(25,26,28,.34)',mark:'rgba(25,26,28,.17)',gr:.09},
+ mist:{n:'晨霧',bg:'linear-gradient(163deg,#F8F8F9 0%,#EFEFF1 48%,#E2E2E5 100%)',sh:'radial-gradient(150% 90% at 18% -12%,rgba(255,255,255,.7),transparent 50%)',ink:'#1E1E20',sub:'rgba(30,30,32,.48)',mut:'rgba(30,30,32,.30)',mark:'rgba(30,30,32,.14)',gr:.07},
+ steel:{n:'曜黑',bg:'linear-gradient(163deg,#3D3D42 0%,#26262A 28%,#131316 62%,#232327 86%,#303035 100%)',sh:'radial-gradient(150% 90% at 18% -12%,rgba(255,255,255,.20),transparent 52%)',ink:'#F2F2F4',sub:'rgba(242,242,244,.52)',mut:'rgba(242,242,244,.32)',mark:'rgba(242,242,244,.16)',gr:.13},
+ aurora:{n:'極光',bg:'linear-gradient(178deg,#FBFBFD 0%,#E9E9F4 30%,#B6B6F2 62%,#6E6EFF 88%,#5050EA 100%)',sh:'radial-gradient(150% 90% at 18% -12%,rgba(255,255,255,.62),transparent 48%)',ink:'#1A1A26',sub:'rgba(26,26,38,.52)',mut:'rgba(26,26,38,.32)',mark:'rgba(26,26,38,.16)',gr:.08},
+ mang:{n:'錳藍',bg:'linear-gradient(163deg,#7B7BFF 0%,#5C5CFF 34%,#3E3ED8 68%,#5050EA 88%,#6B6BFB 100%)',sh:'radial-gradient(150% 90% at 18% -12%,rgba(255,255,255,.34),transparent 52%)',ink:'#FFFFFF',sub:'rgba(255,255,255,.62)',mut:'rgba(255,255,255,.40)',mark:'rgba(255,255,255,.22)',gr:.10}};
+/* 企業卡設計：與 App 同一套。企業版＝App Pro 全開（色調、字色、字體、去 Heycard 標記） */
+function hexRGB(h){h=String(h||'').replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const v=parseInt(h,16);return [v>>16&255,v>>8&255,v&255]}
+function rgbaC(h,a){const c=hexRGB(h);return 'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')'}
+const CFONTS={modern:{n:'現代',css:"'Taipei Sans TC','Noto Sans TC',system-ui,sans-serif"},classic:{n:'經典',css:"'Noto Serif TC','Songti TC','PMingLiU',serif"},light:{n:'簡約',css:"'Noto Sans TC',system-ui,sans-serif"}};
+const CO_PRESETS=[
+ ['銀霧','silver',0],['曜黑','steel',0],['極光','aurora',0],['錳藍','mang',0],
+ ['玫瑰金','silver',330],['香檳','silver',42],['墨綠','steel',128],['湖水','mist',182],['暮紫','aurora',288]];
+const INK_SETS={
+ silver:[['預設','#16171A'],['深錳','#3838C8'],['深藍','#162A56'],['赭','#6B4A2E'],['墨綠','#1F3F36']],
+ mist:  [['預設','#232326'],['深錳','#3838C8'],['深藍','#162A56'],['赭','#6B4A2E'],['深灰','#4A4A52']],
+ aurora:[['預設','#15152B'],['錳','#5C5CFF'],['純白','#FFFFFF'],['深藍','#162A56'],['墨黑','#0F0F14']],
+ steel: [['預設','#F4F1EA'],['銀','#C9C9CE'],['淡錳','#B4B4FF'],['金','#D9B86A'],['純白','#FFFFFF']],
+ mang:  [['預設','#FBFAF2'],['淡錳','#E6E6FF'],['墨黑','#141422'],['金','#F0D28A'],['薄荷','#B8F5E6']]};
+/* 跟 App 的 cardHTML 同一個版式：品牌記號在右上、名字置中、歸屬在下、Hey to Connect 收尾。land=橫式 */
+function appCard(c,w,land){
+ const M0=MAT[c.material]||MAT.silver;
+ const M=c.ink?Object.assign({},M0,{ink:c.ink,sub:rgbaC(c.ink,.56),mut:rgbaC(c.ink,.34),mark:rgbaC(c.ink,.18)}):M0;
+ const hue=+c.hue||0,grey=/^(silver|mist|steel)$/.test(c.material||'silver');
+ const fnt=(c.font&&c.font!=='modern'&&CFONTS[c.font])?';font-family:'+CFONTS[c.font].css:'';
+ const H=Math.round(land?w/1.586:w*1.586),k=(land?w/1.586:w)/320,z=v=>Math.round(v*k*100)/100;
+ const nm=c.name||'　',big=nm.length>=5?34:nm.length===4?38:44;
+ const sub=[c.dept,c.title].filter(Boolean).join('　');
+ const shell='<div class="acard" style="width:'+w+'px;height:'+H+'px;border-radius:'+z(16)+'px;box-shadow:var(--shc,0 2px 5px rgba(18,18,24,.10),0 18px 36px -14px rgba(18,18,24,.30))'+fnt+'">'
+ +'<div style="position:absolute;inset:0;background:'+M.bg+(hue?';filter:hue-rotate('+hue+'deg) saturate(1.1)':'')+'"></div>'
+ +((hue&&grey)?'<div style="position:absolute;inset:0;background:hsl('+hue+' 72% '+(c.material==='steel'?'46':'62')+'% / '+(c.material==='steel'?'.34':'.28')+');mix-blend-mode:color;pointer-events:none"></div>':'')
+ +'<div class="g" style="background:'+M.sh+'"></div><div class="bm"></div><div class="gr" style="opacity:'+M.gr+';background-image:'+GR+'"></div><div class="ed" style="border-radius:'+z(16)+'px"></div>';
+ const brand=c.hideBrand?'<span></span>':'<div style="width:'+z(50)+'px;color:'+M.mark+';flex:0 0 auto">'+LOGO+'</div>';
+ const tag=c.tag?'<span style="font-size:'+z(8.5)+'px;font-weight:700;letter-spacing:.06em;color:'+M.sub+';border:1px solid '+M.mut+';border-radius:99px;padding:'+z(2)+'px '+z(7)+'px">'+esc(c.tag)+'</span>':'<span></span>';
+ if(!land)return shell
+  +'<div style="position:relative;height:100%;padding:'+z(24)+'px '+z(23)+'px;display:flex;flex-direction:column">'
+  +'<div style="display:flex;align-items:center;justify-content:space-between;min-height:'+z(19)+'px">'+tag+brand+'</div>'
+  +'<div style="flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0">'
+  +'<div class="hero2" style="font-size:'+z(big)+'px;color:'+M.ink+'">'+esc(nm)+'</div>'
+  +(c.nameEn?'<div class="lat" style="font-size:'+z(12)+'px;letter-spacing:.22em;color:'+M.sub+';margin-top:'+z(9)+'px">'+esc(c.nameEn)+'</div>':'')+'</div>'
+  +'<div>'+(sub?'<div style="font-size:'+z(11.5)+'px;color:'+M.sub+';margin-bottom:'+z(2)+'px">'+esc(sub)+'</div>':'')
+  +(c.company?'<div style="font-size:'+z(12.5)+'px;color:'+M.ink+';letter-spacing:-.01em">'+esc(c.company)+'</div>':'')
+  +(c.hideBrand?'':'<div class="ftx" style="font-size:'+z(6.5)+'px;letter-spacing:.24em;color:'+M.mut+';margin-top:'+z(13)+'px"><span>Hey</span><span>to</span><span>Connect</span></div>')
+  +'</div></div></div>';
+ /* 橫式：同樣的元素，名字靠左置中、歸屬在右下 */
+ return shell
+  +'<div style="position:relative;height:100%;padding:'+z(20)+'px '+z(24)+'px;display:flex;flex-direction:column">'
+  +'<div style="display:flex;align-items:center;justify-content:space-between;min-height:'+z(19)+'px">'+tag+brand+'</div>'
+  +'<div style="flex:1;display:flex;align-items:center;gap:'+z(18)+'px;min-height:0">'
+  +'<div class="hero2" style="font-size:'+z(big*.86)+'px;color:'+M.ink+'">'+esc(nm)+'</div>'
+  +(c.nameEn?'<div class="lat" style="font-size:'+z(11)+'px;letter-spacing:.22em;color:'+M.sub+';align-self:flex-end;padding-bottom:'+z(4)+'px">'+esc(c.nameEn)+'</div>':'')+'</div>'
+  +'<div style="display:flex;align-items:flex-end;justify-content:space-between;gap:'+z(12)+'px">'
+  +'<div>'+(sub?'<div style="font-size:'+z(11)+'px;color:'+M.sub+'">'+esc(sub)+'</div>':'')+(c.company?'<div style="font-size:'+z(12.5)+'px;color:'+M.ink+';letter-spacing:-.01em">'+esc(c.company)+'</div>':'')+'</div>'
+  +(c.hideBrand?'':'<div class="ftx" style="font-size:'+z(6.5)+'px;letter-spacing:.24em;color:'+M.mut+';gap:'+z(10)+'px"><span>Hey</span><span>to</span><span>Connect</span></div>')
+  +'</div></div></div>'}
+
+function loginCard(){const up=lMode==='up';
+ return '<div class="lcard" id="login">'
+ +'<div class="seg" style="margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr"><button data-lm="in"'+(up?'':' class="on"')+'>登入</button><button data-lm="up"'+(up?' class="on"':'')+'>註冊</button></div>'
+ +(up?'<div class="fld"><label for="lnm">姓名</label><input class="inp" id="lnm" placeholder="你的名字" value="'+esc(lNm)+'"></div>':'')
+ +'<div class="fld"><label for="lem">Email</label><input class="inp" id="lem" type="email" inputmode="email" placeholder="you@company.com" value="'+esc(lEm)+'"></div>'
+ +(!up&&lOtp?(lSent?'<div class="fld"><label for="lcode">驗證碼 · 已寄到 '+esc(lEm)+'</label><input class="inp" id="lcode" inputmode="numeric" maxlength="6" placeholder="6 位數字"></div>':'')
+       :'<div class="fld"><label for="lpw">密碼</label><input class="inp" id="lpw" type="password" placeholder="'+(up?'8 碼以上，含英文與數字':'••••••••')+'"></div>')
+ +'<div class="err" id="lerr"></div>'
+ +'<button class="btn" id="lgo" style="margin-top:8px">'+(up?'建立帳號':lOtp&&!lSent?'寄驗證碼給我':lOtp?'驗證並登入':'登入')+'</button>'
+ +(up?'':'<div class="lnk"><a id="lotp">'+(lOtp?'改用密碼':'改用驗證碼')+'</a><a id="lfpw">忘記密碼</a></div>')
+ +'<div class="tip" style="text-align:center;margin-top:12px;padding-top:12px;border-top:1px solid var(--hair)">'+(up?'這也是你的 Heycard 帳號，App 直接登入':'與 Heycard App 同一組帳密')+'</div>'
+ +'</div>'}
+function consoleMock(sm){
+ const nav=[['ov','總覽',1],['mem','成員'],['lib','公司人脈庫'],['nfc','企業 NFC 卡'],['ppl','人員與權限'],['evs','我主辦的活動'],['exh','我參展的活動'],['bill','方案與帳單']];
+ return '<div class="mock'+(sm?' sm':'')+'"><div class="bar"><i></i><i></i><i></i><span>business.heycard.app</span></div>'
+ +'<div class="mk"><aside class="mks"><div style="padding:0 10px 18px"><b style="font-size:17px;font-weight:800;display:block">黑卡智能</b><span style="font-size:11px;color:var(--ink3)">Heycard Business · 擁有者</span></div>'
+ +nav.map(n=>'<div class="nv'+(n[2]?' on':'')+'">'+ico(n[0],16)+esc(n[1])+'</div>').join('')+'</aside>'
+ +'<main class="mkm">'+pgOv()+'</main></div></div>'
+ +(sm?'':'<div class="mockcap"><span><b>成員</b> 誰換了多少</span><span><b>人脈庫</b> 自動歸戶</span><span><b>NFC 卡</b> 綁定同事</span><span><b>活動</b> 名錄與 leads</span><span><b>帳務</b> 席次與發票</span></div>')}
+let landYr=0,lastMob=null;
+const isMob=()=>window.innerWidth<900;
+window.addEventListener('resize',()=>{if(AU())return;const m=isMob();if(lastMob!==null&&m!==lastMob)drawLand();lastMob=m});
+function libVis(){const o=ST(),rows=o.lib.slice(-4).reverse();
+ return '<div class="lib"><div class="h">'+ico('lib',15)+'公司人脈庫<span>今天 +'+rows.length+'</span></div>'
+ +rows.map((x,i)=>'<div class="r'+(i===0?' new':'')+'"><span class="av">'+esc(x[0][0])+'</span><span class="who">'+esc(x[0])+'<i>'+esc(x[1])+' · '+esc(x[2])+'</i></span><span class="by">經手 '+esc(x[6])+'</span></div>').join('')+'</div>'}
+function srcs(w){
+ const paper='<div class="paper" style="width:'+w+'px;height:'+Math.round(w/1.586)+'px"><span class="lg3"></span><i class="t"></i><i class="s"></i><i class="m"></i><i class="s"></i><span class="scan"></span></div>';
+ const other=appCard({name:'張維中',nameEn:'Wei-Chung Chang',title:'採購經理',company:'立昇電子',material:'silver'},w,1);
+ const nfc=appCard({name:'周永昌',nameEn:'Yung-Chang Chou',title:'廠長',company:'大甲精機',material:'steel',tag:'NFC'},w,1);
+ const src=(v,t,sub)=>'<div class="src">'+v+'<div class="lb"><b>'+t+'</b><i>'+sub+'</i></div></div>';
+ return [src(paper,'紙本名片','拍一下，AI 辨識'),src(other,'對方的 Heycard','一鍵交換'),src(nfc,'NFC 一碰','實體卡感應')]}
+function srcMail(w){
+ return '<div class="src"><div class="mailc" style="width:'+w+'px;height:'+Math.round(w/1.586)+'px">'
+ +'<div class="inb">ken.liu@transtech.tw</div><div class="bb">留 Email 領取名片</div></div>'
+ +'<div class="lb"><b>公開頁留 Email</b><i>沒裝 App 也算</i></div></div>'}
+function flowVis(){
+ const m=isMob(),w=m?104:150;
+ return '<div class="floww"><div class="flow">'
+ +'<div class="cards">'+srcs(w).join('')+'</div>'
+ +'<svg class="ln" viewBox="0 0 96 300" preserveAspectRatio="none" aria-hidden="true"><path d="M0 50 C48 50 48 150 96 150M0 150 C48 150 48 150 96 150M0 250 C48 250 48 150 96 150" fill="none" stroke="#BDBDBD" stroke-width="1.5" stroke-dasharray="4 4"/><circle cx="96" cy="150" r="4" fill="#5C5CFF"/></svg>'
+ +'<div class="dn">'+ico('dn',20)+'</div>'
+ +libVis()+'</div></div>'}
+function priceCards(){const yr=landYr,seat=yr?Math.round(SEAT*10/12):SEAT;
+ return '<div class="plans">'
+ +'<div class="pl hi"><div class="nm">Heycard Business</div><div class="amt"><b>NT$'+seat+'</b><span>／席／月</span></div><div class="sub2">'+(yr?'年繳 '+money(SEAT*10)+'／席':'月繳，隨時加減席次')+'</div>'
+ +'<ul>'+['換到的名片進公司庫','企業名片一人一張','活動主辦、參展免費','統編開電子發票'].map(x=>'<li><span>'+ico('ck',14,2.6)+'</span>'+x+'</li>').join('')+'</ul>'
+ +'<button class="btn" data-lgo="login">開始使用</button><div class="tip" style="text-align:center;margin-top:8px">與 Heycard App 同一組帳密</div></div>'
+ +'<div class="pl"><div class="nm">加購 · NFC 企業卡</div><div class="amt"><b>NT$390</b><span>／張</span></div><div class="sub2">標準黑卡 5 張起，客製 NT$450</div>'
+ +'<ul>'+['不印名字，人走卡留','後台綁定同事','客製卡面，AI 生圖'].map(x=>'<li><span>'+ico('ck',14,2.6)+'</span>'+x+'</li>').join('')+'</ul>'
+ +'<button class="btn ghost" data-lgo="login">登入後訂購</button></div></div>'}
+const POSTS=[
+ {id:'what',dt:'2026/08/12',t:'電子名片是什麼？和紙本名片差在哪',ex:'電子名片是一張可以隨時更新、用 NFC 或連結交換的數位名片。這篇用三分鐘講清楚它取代的是什麼、留下的是什麼。',
+  body:['電子名片（數位名片）是存在手機裡的名片：一個連結、一個 QR code，或一張 NFC 實體卡。對方不用裝 App，點開就能看到你的姓名、公司、職稱與聯絡方式，並且一鍵存進通訊錄。',
+   '和紙本名片最大的差別不是環保，是「會更新」。你換了職稱、換了公司，所有拿過你名片的人看到的都是新的；紙本名片印出去那一刻就開始過期。',
+   '對企業來說，電子名片的另一個意義是資產化：業務在外面換到的每一張名片，可以自動回到公司的人脈庫，而不是留在個人的抽屜和手機裡。這正是 Heycard Business 在做的事。']},
+ {id:'expo',dt:'2026/08/20',t:'展會收到 200 張名片，然後呢？',ex:'展後名片輸入是業務最痛的一天。這篇整理三個做法，把展會 leads 變成公司可以跟進的名單。',
+  body:['一場三天的展會，一個攤位平均收到一兩百張名片。多數公司的做法是展後找人手打進 Excel——通常拖到下週，錯字一堆，然後就沒有然後了。',
+   '比較好的做法有三個層次：第一，現場就數位化——用拍照辨識把紙本名片當場存檔；第二，來源標記——記下這張名片是掃攤位、翻名錄還是面談換到的，展後跟進的優先順序完全不同；第三，直接進公司帳——名片不要停在個人手機，讓它自動進公司的人脈庫，誰該跟進一目了然。',
+   'Heycard 的活動系統把這三層做在一起：主辦與參展免費，攤位 QR 一掃就進帳，展後不用再打一次。']},
+ {id:'leave',dt:'2026/08/26',t:'業務離職，客戶名單怎麼留下來？',ex:'名單跟著人走，是台灣中小企業最常見的損失。可以從名片這一層開始解。',
+  body:['業務離職時帶走的，往往不是檔案，是關係：LINE 好友、手機通訊錄、口袋裡的名片。這些從來沒有進過公司的系統，所以也談不上交接。',
+   '解法不是監控，是分層：公司發的名片（企業認證名片）換到的人脈，自動進公司人脈庫，人離開了名單留下；員工個人名片換到的，仍然是他自己的。邊界清楚，員工才願意用。',
+   '這也是 Heycard Business 的設計原則：公司拿回該是公司的，個人保留該是個人的。']}];
+function pgAbout(){
+ return landNav()
+ +'<div class="page"><h1>關於我們</h1>'
+ +'<div class="sub3">黑卡智能（Heycard）是一家台灣的人脈管理公司。我們相信名片交換只是開始——每一次握手都應該留下可以持續的關係。</div>'
+ +'<p>Heycard 從一張會思考的數位名片出發：多重身分、NFC 一碰交換、AI 洞察你的人脈。Heycard Business 把它帶進公司——業務在外面換到的每一張名片（紙本、Heycard、NFC），都自動回到公司的人脈庫；對方更新跟著更新，同事離職名單留下。</p>'
+ +'<p>我們是產品公司，也是設計公司。從 App、後台到實體卡的金屬質感，都由同一套設計系統長出來。</p>'
+ +'<h2>聯絡</h2><p>黑卡智能股份有限公司 · 台北市信義區松仁路 100 號 12 樓<br>hello@heycard.app</p>'
+ +'</div>'+landFoot()}
+function pgBlog(){
+ return landNav()
+ +'<div class="page"><h1>部落格</h1><div class="sub3">名片、人脈與展會的實戰筆記。</div>'
+ +POSTS.map(x=>'<button class="post" data-post="'+x.id+'"><span class="dt">'+x.dt+'</span><b>'+esc(x.t)+'</b><div class="ex">'+esc(x.ex)+'</div></button>').join('')
+ +'</div>'+landFoot()}
+function pgPost(id){const x=POSTS.find(p2=>p2.id===id)||POSTS[0];
+ return landNav()
+ +'<div class="page"><a class="bk" data-pub="blog">'+ico('back',14)+'部落格</a>'
+ +'<h1 style="font-size:26px;margin-top:10px">'+esc(x.t)+'</h1><div class="dt" style="font-family:var(--fe);font-size:12px;color:var(--ink3);margin-top:8px">'+x.dt+' · Heycard</div>'
+ +x.body.map(t2=>'<p>'+esc(t2)+'</p>').join('')
+ +'<div class="cta rv in" style="margin-top:48px;padding:36px 24px"><div class="k">準備好開始了嗎？</div><h2 style="font-size:22px">立即透過 Heycard 將企業人脈活化運用</h2><a class="btn" data-pub="" data-lgo="reg" style="margin-top:16px">免費註冊 Heycard Business</a></div>'
+ +'</div>'+landFoot()}
+function landNav(){
+ return '<div class="lnav"><b class="lg" style="cursor:pointer" data-pub=""><span class="lgw">'+LOGO+'</span><span>Business</span></b><span class="sp"></span><a class="lgn" data-pub="" data-lgo="login">登入</a><a class="go" data-pub="" data-lgo="reg">免費註冊</a></div>'}
+function landFoot(){
+ return '<div class="lfoot"><span class="lgw" style="width:72px;color:var(--ink2)">'+LOGO+'</span><span>黑卡智能</span><span style="flex:1"></span><a data-pub="about">關於我們</a><a data-pub="blog">部落格</a><span>Heycard App</span><span>隱私</span><span>條款</span></div>'}
+function pgLand(){const o=ST();
+ const libRows=o.lib.slice(0,5);
+ const T=xs=>'<div class="fxt">'+xs.map(x=>'<span>'+x+'</span>').join('')+'</div>';
+ if(LPUB==='about')return pgAbout();
+ if(LPUB==='blog')return pgBlog();
+ if(LPUB&&LPUB.indexOf('post:')===0)return pgPost(LPUB.slice(5));
+ return '<div class="lnav"><b class="lg"><span class="lgw">'+LOGO+'</span><span>Business</span></b>'
+ +'<a class="hd" data-lgo="console">後台</a><a class="hd" data-lgo="goals">目標</a><a class="hd" data-lgo="sources">收名片</a><a class="hd" data-lgo="price">價格</a>'
+ +'<span class="sp"></span><a class="lgn" data-lgo="login">登入</a><a class="go" data-lgo="reg">免費註冊</a></div>'
+
+ /* 1 承諾 */
+ +'<div class="hero"><div>'
+ +'<div class="hd1"><h1>運用 Heycard<br>管理<em>企業人脈</em></h1>'
+ +'<div class="hicons"><span>'+lico('card',19)+'</span><span>'+ico('tap',19)+'</span><span>'+ico('nfc',19)+'</span><span>'+lico('mail',19)+'</span></div>'
+ +'<div class="lead">讓業務在外交換的每一份人脈，都能系統化回到公司，集中累積於客戶與人脈資料庫。</div></div>'
+ +'</div>'+loginCard()+'</div>'
+
+ /* 2 後台：集中一處管理（圖左文右） */
+ +'<div class="fx rv alt" id="console"><div><div class="k">企業管理後台</div><h3>集中一處，<br>管理公司的所有人脈</h3>'
+ +'<div class="d">業務在外換到的每一張名片，都自動回到公司人脈庫。誰換了誰、來源與場合、哪些該回訪，打開就知道；成員離職，名單留下。</div>'
+ +'<a class="btn sb" data-lgo="reg">開始使用</a></div>'
+ +'<div class="fxv">'+consoleMock(1)+'</div></div>'
+
+ /* 3 目標卡片 */
+ +'<div class="sec2 rv" id="goals"><h2>在同一個地方，<br>實現各種人脈目標</h2>'
+ +'<div class="d">無論你的目標為何，Heycard Business 都有對應的做法。</div>'
+ +'<a class="btn sb" data-lgo="reg">開始使用</a></div>'
+ +'<div class="goals rv">'
+ +[[ico('lib',19),'收回業務換到的名片','看名片怎麼回庫','sources'],
+   [lico('card',19),'給每位同事一張企業名片','認識企業認證名片','brandsec'],
+   [ico('exh',19),'在展會現場收 leads','主辦、參展都免費','reg'],
+   [ico('nfc',19),'用 NFC 卡一碰交換','加購企業 NFC 卡','price'],
+   [lico('ai',19),'讓 AI 自動歸戶','看自動化怎麼運作','ai'],
+   [ico('cp',19),'名單匯出到 CRM','一鍵匯出 CSV','reg']]
+  .map(g=>'<div class="gcard"><span class="gi">'+g[0]+'</span><b>'+g[1]+'</b><a class="gl" data-lgo="'+g[3]+'">'+g[2]+ico('arr',14)+'</a></div>').join('')
+ +'</div>'
+
+ /* 4 收名片：四種方式全收 */
+ +'<div class="sec2 rv" id="sources"><div class="k">收名片</div><h2>對方遞名片的每一種方式，<br>都收得進來</h2>'
+ +'<div class="d">紙本拍一下、Heycard 一鍵、NFC 一碰；對方沒裝 App，在公開頁留個 Email 也收。每一筆都自動歸戶。</div>'
+ +'<a class="btn sb" data-lgo="reg">開始使用</a></div>'
+ +'<div class="srcband rv"><div class="srcrow">'+srcs(130).join('')+srcMail(130)+'</div>'
+ +'<div class="dn2">'+ico('dn',20)+'</div>'
+ +'<div style="max-width:560px;margin:0 auto">'+libVis()+'</div></div>'
+
+ /* 5 自動化（文左圖右） */
+ +'<div class="fx rv" id="ai"><div><div class="k">自動化</div><h3>運用 AI，<br>把歸戶自動化</h3>'
+ +'<div class="d">紙本名片拍一下，AI 辨識姓名、公司、職稱；只留 Email 的，之後自動補全；對方換了職稱，庫裡跟著更新。團隊只管換名片，剩下交給系統。</div>'
+ +'<a class="btn sb" data-lgo="reg">開始使用</a></div>'
+ +'<div class="fxv"><div class="stage">'+srcs(130)[0]
+ +'<div class="chips"><span><i></i>AI 辨識紙本，直接成一筆</span><span><i></i>僅 Email 的自動補全</span><span><i></i>對方更新自動同步</span><span><i></i>來源、場合、經手都標記</span></div></div></div></div>'
+
+ /* 6 企業認證名片（品牌面板：圖左文右） */
+ +'<div class="brandp rv" id="brandsec"><div class="fan">'
+ +[['steel',-1],['mang',0],['silver',1]].map(r=>'<div style="position:absolute;top:50%;left:50%;transform:translate(calc(-50% + '+(r[1]*56)+'px),-50%) rotate('+(r[1]*7)+'deg);z-index:'+(r[1]===0?3:1)+'">'+appCard({name:'陳雅婷',nameEn:'Yating Chen',title:'業務經理',company:'黑卡智能',material:r[0],tag:r[1]===0?'企業認證':''},128)+'</div>').join('')
+ +'</div><div><h2>一張帶得出場的<br>企業名片</h2>'
+ +'<div class="d">公司統一發、職稱由公司審核、離職即收回。NFC、QR、連結都能換，對方不用裝 App，個人名片不受影響。</div>'
+ +'<a class="btn sb" data-lgo="reg">開始使用</a></div></div>'
+
+ /* 4 價格 */
+ +'<div class="sec2 rv" id="price"><div class="k">價格</div><h2>一位員工，一席。</h2><div class="d">5 席起。前 14 天不扣款。</div>'
+ +'<div class="ptg"><button data-yr="0"'+(landYr?'':' class="on"')+'>月繳</button><button data-yr="1"'+(landYr?' class="on"':'')+'>年繳<small>省 2 個月</small></button></div></div>'
+ +'<div class="rv" id="plansw">'+priceCards()+'</div>'
+
+ /* 5 常見問題 */
+ +'<div class="sec2 ctr rv"><div class="k">常見問題</div><h2>你可能想問</h2></div>'
+ +'<div class="faq rv">'
+ +[['需要另外註冊帳號嗎？','不用。Heycard App 與企業版是同一個帳號；在這裡註冊，App 也能直接登入。'],
+   ['同事用個人名片換到的，公司看得到嗎？','看不到。公司人脈庫只收企業認證名片換到的名片；後台的每一個數字，同事本人在 App 都查得到。'],
+   ['紙本名片怎麼進系統？','同事在 Heycard App 裡拍一下，AI 自動辨識姓名、公司、職稱，當場就進公司人脈庫，記下時間與場合。收名片在 App、管理在後台——後台不需要也不會有掃描功能。'],
+   ['對方沒裝 App，只留了 Email 呢？','也會進。訪客在同事企業名片的公開頁留 Email 領取名片，這筆就以「公開頁」來源進公司人脈庫，先掛在經手同事名下；等對方補上名片或註冊，資料自動補全。'],
+   ['同事離職了怎麼辦？','企業名片即時收回，換到的名單留在公司；他的個人帳號與個人名片不受影響。'],
+   ['20 席以上怎麼付款？','可對公匯款、開報價單，統編開立電子發票。20 席以下用信用卡，前 14 天不扣款。']]
+  .map(q=>'<details><summary>'+q[0]+ico('dn',16)+'</summary><div class="a">'+q[1]+'</div></details>').join('')
+ +'</div>'
+
+ +'<div class="cta rv"><div class="k">準備好開始了嗎？</div><h2>立即透過 Heycard<br>將企業人脈活化運用</h2><a class="btn" data-lgo="reg">免費註冊 Heycard Business</a></div>'
+ +landFoot()
+ +'<div class="tip" style="text-align:center;margin-top:16px">原型：試 <b>tim@heycard.app</b>（有公司）、<b>amy@shincai.tw</b>（被邀請）、或任一 Email（建立新公司）；密碼隨便打</div>'}
+
+/* 登入後：只有一家 → 直接進後台；多家或有邀請 → 選；沒有 → 建公司 */
+function pgPick(a){
+ return '<div class="lnav"><b class="lg"><span class="lgw">'+LOGO+'</span><span>Business</span></b><span class="sp"></span><a id="logout2">'+esc(a.em)+' · 登出</a></div>'
+ +'<div class="pick"><h1 style="font-size:20px">'+(a.name?'嗨，'+esc(a.name):'嗨')+'</h1><div class="sub" style="margin-bottom:18px">選一家公司進後台。</div>'
+ +a.cos.map((c,i)=>'<button class="prow" data-pick="'+i+'"><span class="lg">'+esc(c.n[0])+'</span><div><b>'+esc(c.n)+'</b><div class="s">'+esc(c.role)+'</div></div><span class="arr">'+ico('arr',16)+'</span></button>').join('')
+ +a.inv.map((c,i)=>'<button class="prow" data-join="'+i+'"><span class="lg" style="background:var(--mangS);color:var(--mangD)">'+esc(c.n[0])+'</span><div><b>'+esc(c.n)+' <span class="chip" style="font-size:10.5px;padding:1px 7px;background:var(--mangS);color:var(--mangD)">邀請你</span></b><div class="s">'+esc(c.by)+' 邀請你加入後台</div></div><span class="arr">'+ico('arr',16)+'</span></button>').join('')
+ +'<button class="prow" id="lcreate" style="border-style:dashed"><span class="lg" style="background:var(--fill);color:var(--ink2)">'+lico('plus',18)+'</span><div><b>建立公司</b><div class="s">'+(a.cos.length?'另外開一家':'NT$299／席／月 · 5 席起')+'</div></div><span class="arr">'+ico('arr',16)+'</span></button>'
+ +'</div>'}
+function pgNewco(a){const dom=(a.em.split('@')[1]||'').toLowerCase(),bizDom=dom&&!/gmail|yahoo|hotmail|outlook|icloud|msn/.test(dom);
+ const C=[['TW','台灣'],['JP','日本'],['SG','新加坡'],['US','美國'],['XX','其他地區']];
+ return '<div class="lnav"><b class="lg"><span class="lgw">'+LOGO+'</span><span>Business</span></b><span class="sp"></span><a id="logout2">'+esc(a.em)+' · 登出</a></div>'
+ +'<div class="pick"><h1 style="font-size:20px">建立公司</h1><div class="sub" style="margin-bottom:14px">建好直接進後台，看得到所有功能。</div>'
+ +'<div class="lcard" style="max-width:none">'
+ +'<div class="fld"><label for="ncName">公司名稱</label><input class="inp" id="ncName" placeholder="例：黑卡智能股份有限公司" value="'+esc(NC.name)+'"></div>'
+ +'<div class="fld"><label for="ncCty">國家／地區</label><select class="inp" id="ncCty">'+C.map(c=>'<option value="'+c[0]+'"'+(NC.country===c[0]?' selected':'')+'>'+c[1]+'</option>').join('')+'</select></div>'
+ +(NC.country==='TW'?'<div class="fld"><label for="ncTax">統一編號 <span style="font-weight:400">選填，開發票用，之後可補</span></label><input class="inp" id="ncTax" placeholder="8 碼" inputmode="numeric" value="'+esc(NC.tax)+'"></div>':'')
+ +(bizDom?'<div style="display:flex;align-items:center;gap:12px;margin-top:6px;padding-top:12px;border-top:1px solid var(--hair)"><div style="flex:1"><b style="font-size:13.5px">@'+esc(dom)+' 的同事自動看到「加入」</b><div class="tip">用公司信箱的人不用一個一個邀。</div></div><button class="sw'+(NC.autoJoin?' on':'')+'" id="ncAj" style="width:44px;height:26px;border-radius:99px;background:'+(NC.autoJoin?'var(--mang)':'#D9D9D9')+';position:relative;flex:0 0 auto"><i style="position:absolute;top:3px;left:'+(NC.autoJoin?'21px':'3px')+';width:20px;height:20px;border-radius:99px;background:#fff"></i></button></div>':'')
+ +'<div class="err" id="ncErr"></div>'
+ +'<button class="btn" id="ncGo" style="margin-top:14px">建立公司，進入後台</button>'
+ +'<div class="tip" style="text-align:center;margin-top:8px">免費看所有功能；要開始 14 天試用再綁卡。</div>'
+ +'<div class="lnk"><a id="ncBack">'+(a.cos.length||a.inv.length?'返回':'登出')+'</a></div></div></div>'}
+function drawLand(){const a=AU();lastMob=isMob();
+ $('#land').innerHTML=!a?pgLand():LP==='newco'?pgNewco(a):pgPick(a);
+ window.scrollTo(0,0);
+ if(!a&&'IntersectionObserver' in window){const io=new IntersectionObserver(es=>{es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{rootMargin:'0px 0px -8% 0px'});
+  $$('#land .rv').forEach(el=>io.observe(el))}else $$('#land .rv').forEach(el=>el.classList.add('in'))}
+function curCo(){const a=AU();return a&&a.cos[a.cur]||null}
+function planOf(){const c=curCo();return c?(c.plan||'paid'):'paid'}
+function startTrial(){const a=AU();if(!a)return;const c=a.cos[a.cur];if(!c)return;const d=new Date();d.setDate(d.getDate()+14);
+ c.plan='trial';c.trialEnd=(d.getMonth()+1)+'/'+d.getDate();auSave(a);
+ const o=ST();o.billing.card='4242';o.billing.next=c.trialEnd;save(o);
+ draw();note('已綁卡（模擬）——14 天免費試用開始，'+c.trialEnd+' 前隨時取消')}
+function enter(a,i){a.cur=i;auSave(a);LP='land';document.body.classList.remove('out');PG='ov';draw();note('歡迎回來，'+(a.name||a.em))}
+function doLogout(){localStorage.removeItem(AUTH_K);LP='land';lOtp=0;lSent=0;lMode='in';document.body.classList.add('out');drawLand()}
+function afterLogin(a){auSave(a);
+ if(a.cos.length===1&&!a.inv.length){enter(a,0);return}
+ LP=(a.cos.length||a.inv.length)?'pick':'newco';document.body.classList.add('out');drawLand()}
+
+/* ═════ 導覽 ═════ */
+const PAGES={ov:'總覽',mem:'成員',card:'企業名片',lib:'公司人脈庫',ai:'AI 洞察',nfc:'企業 NFC 卡',ppl:'人員與權限',evs:'我主辦的活動',exh:'我參展的活動',bill:'方案與帳單',chk:'結帳',edge:'資料邊界'};
+let PG='ov', sortK='n', sortD=-1, libWho='', libInd='', libQ='', libSrc='';
+/* 行內輸入的開關（Artifact 沙箱擋 prompt()，一律用行內輸入，也更合設計原則） */
+let askDF=0, askInv=0, askPpl=0, askMem=0, locEdit=-1, coEdit=0, ccAdv=0;
+let askStaff=0, roleEdit='', xferOpen=0, xferTo='';
+let nfcBind='', nfcQ='', nfcOffC=-1, rmC='', seatEdit=0, seatNew=0, ckFrom='nfc', nfcSpecOpen=0;
+/* 角色：像 Meta 企業平台——一個人一個角色，角色決定區域 */
+const ROLES={
+ owner:{n:'擁有者',d:'全部＋帳務＋權限，可轉移擁有權',a:['成員','人脈庫','審核','NFC 卡','活動','帳務','權限'],c:['#1E1E1E','#fff']},
+ admin:{n:'管理員',d:'公司與活動全開，不碰帳務與擁有權',a:['成員','人脈庫','審核','NFC 卡','活動'],c:['var(--mangS)','var(--mangD)']},
+ events:{n:'活動管理員',d:'只管活動：主辦、參展、名錄',a:['活動'],c:['#E2F9F4','#00806E']},
+ viewer:{n:'檢視者',d:'只看數據與人脈庫，不能改',a:['人脈庫（唯讀）'],c:['var(--fill)','var(--ink2)']}};
+const roleChip=r=>{const R=ROLES[r]||ROLES.viewer;return '<span class="chip" style="background:'+R.c[0]+';color:'+R.c[1]+'">'+R.n+'</span>'};
+/* 窗口：字串＝已是 Heycard 用戶；物件 {n,ok:0}＝已邀請、待本人加入 */
+const pplName=p=>typeof p==='string'?p:p.n;
+const pplOk=p=>typeof p==='string'?1:!!p.ok;
+const metaLine=(a)=>a.filter(Boolean).join(' · ');
+
+function navDraw(){
+ const o=ST(),a=AU();
+ if(a&&a.cos[a.cur]){const c=a.cos[a.cur];$('#brand').innerHTML='<b>'+esc(c.n)+lico('dn',14)+'</b><span>Heycard Business · '+esc(c.role)+'</span>';
+  $('#cosw').innerHTML=a.cos.map((x,i)=>'<button data-cosel="'+i+'"'+(i===a.cur?' class="cur"':'')+'><span class="lg2">'+esc(x.n[0])+'</span>'+esc(x.n)+'</button>').join('')
+   +(a.inv||[]).map((x,i)=>'<button data-cojoin="'+i+'"><span class="lg2" style="background:var(--mangS);color:var(--mangD)">'+esc(x.n[0])+'</span>'+esc(x.n)+' <span class="tip">· 邀請你</span></button>').join('')
+   +'<button id="conew" style="color:var(--mangD);font-weight:700;background:var(--mangS)"><span class="lg2" style="background:#fff;color:var(--mangD)">＋</span>建立公司</button>';
+  $('#cosw').classList.remove('show');
+  const lo=$('#logout');if(lo)lo.innerHTML=lico('out',13)+'登出 · '+esc(a.em)}
+ $$('#side .nv').forEach(b=>{
+  const k=b.dataset.pg;if(!k)return;
+  b.className='nv'+(PG===k?' on':'');
+  b.innerHTML=ico(k,16)+esc(PAGES[k])
+   +(k==='ppl'&&o.pending.length?'<span class="n">'+o.pending.length+'</span>':'')});
+ $$('.nv2').forEach(b=>{const k=b.dataset.pg;if(!k)return;
+  b.className='nv2'+(PG===k?' on':'');
+  b.innerHTML=ico(k,13)+esc(PAGES[k])})}
+
+/* ═════ 總覽 ═════ */
+function pgOv(){
+ const o=ST();
+ const tot=o.members.reduce((a,m)=>a+m.n,0);
+ const rep=Math.round(o.members.reduce((a,m)=>a+m.reply*m.n,0)/tot);
+ const inds={};o.lib.forEach(x=>{inds[x[3]]=(inds[x[3]]||0)+1});
+ const pairs=Object.entries(inds).sort((a,b)=>b[1]-a[1]);
+ const mx=pairs.length?pairs[0][1]:1, wmax=Math.max(1,...o.wk);
+ /* 待辦優先：後台是來做事的，不是來看報表的 */
+ const todos=[];
+ if(o.pending.length)todos.push({k:'ttl',t:'職稱申請待審核',n:o.pending.length,td:'ppl'});
+ o.evs.filter(ev=>ev.st==='approved').forEach(ev=>{
+  const miss=ev.booths.filter(bb=>dirMiss(ev,bb)>0).length;
+  if(miss)todos.push({k:'evs',t:'「'+ev.name+'」名錄待補齊',n:miss,td:'evs:'+ev.id});
+  const inv=ev.booths.filter(bb=>bb.st==='invited').length;
+  if(inv)todos.push({k:'evs',t:'「'+ev.name+'」參展商邀請中',n:inv,td:'evs:'+ev.id})});
+ o.evs.filter(ev=>ev.st==='pending').forEach(ev=>
+  todos.push({k:'evs',t:'「'+ev.name+'」送審中',n:'',td:'evs:'+ev.id}));
+ if(o.invited.length)todos.push({k:'mem',t:'成員邀請待接受',n:o.invited.length,td:'mem'});
+ {const stock=o.nfc.cards.filter(c=>!c.m&&c.st!=='off').length;
+  const noCard=o.members.filter(m=>!o.nfc.cards.some(c=>c.m===m.id&&c.st!=='off')).length;
+  if(stock&&noCard)todos.push({k:'nfc',t:'成員還沒有 NFC 卡（庫存 '+stock+' 張）',n:noCard,td:'nfc'});
+  const ship=o.nfc.orders.filter(x=>x.st==='ship').length;
+  if(ship)todos.push({k:'nfc',t:'NFC 卡出貨中',n:'',td:'nfc'})}
+ return '<h1>總覽</h1><div class="sub">先做事，再看數。所有指標皆為系統事件，訊息內容不在任何畫面與匯出中。</div>'
+ +'<div class="sec" style="margin-top:16px">待你處理</div>'
+ +'<div class="card" style="max-width:640px;padding:4px 16px">'
+ +(todos.length?todos.map((td,i)=>'<div data-td="'+td.td+'" style="display:flex;align-items:center;gap:12px;padding:12px 2px;cursor:pointer;'+(i<todos.length-1?'border-bottom:1px solid var(--hair)':'')+'">'
+   +'<span style="display:flex;color:var(--mangD)">'+ico(td.k==='evs'?'evs':td.k,15)+'</span>'
+   +'<span style="flex:1;font-size:13.5px">'+esc(td.t)+'</span>'
+   +(td.n!==''?'<span class="chip" style="background:var(--mangS);color:var(--mangD);font-weight:700">'+td.n+'</span>':'')
+   +ico('arr',14)+'</div>').join('')
+  :'<div style="display:flex;align-items:center;gap:10px;padding:14px 2px;color:#00806E;font-size:13.5px">'+ico('ck',15)+'目前沒有待辦——都處理完了。</div>')
+ +'</div>'
+ +(function(){const pend=o.aiTasks?o.aiTasks.filter(t=>t.st!=='sent').length:0;
+   return '<div class="card" style="max-width:640px;margin-top:10px;padding:12px 16px;display:flex;align-items:center;gap:12px;background:var(--mangS);border-color:transparent">'
+   +'<span style="display:flex;color:var(--mangD)">'+lico('ai',18)+'</span>'
+   +'<span style="flex:1;font-size:13px;color:var(--ink)">AI 看了目前的人脈結構：<b>待跟進偏高、金融線最會回</b>'+(pend?'，有 '+pend+' 個建議行動可以直接指派給成員':'')+'。</span>'
+   +'<button class="btn sm" data-nav2="ai" style="flex:0 0 auto">看 AI 洞察</button></div>'})()
+ +'<div class="grid4">'
+ +[[tot,'本月收進名片（張）'],[o.lib.length,'公司人脈庫（筆）'],[rep+'%','互動率'],[o.pending.length,'待審職稱']]
+   .map(x=>'<div class="card tile"><div class="v">'+x[0]+'</div><div class="l">'+x[1]+'</div></div>').join('')
+ +'</div>'
+ +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px" class="two">'
+ +'<div class="card"><div class="sec" style="margin-top:0">近 8 週換卡<span>全公司</span></div>'
+ +'<div class="cols">'+o.wk.map((v,i)=>'<div class="col'+(i<o.wk.length-1?' mut':'')+'">'
+   +'<span class="tipv">'+v+' 張</span><i style="height:'+Math.max(4,Math.round(v/wmax*84))+'px"></i><b>W'+(i+1)+'</b></div>').join('')
+ +'</div><div class="tip" style="margin-top:8px">最新一週上色，其餘淡色——重點在現在。</div></div>'
+ +'<div class="card"><div class="sec" style="margin-top:0">產業分佈<span>公司庫 '+o.lib.length+' 筆</span></div>'
+ +pairs.map(p=>'<div class="bar"><div class="bl">'+esc(p[0])+'</div>'
+   +'<div class="btr" style="margin-right:34px"><div class="bf" style="width:'+Math.round(p[1]/mx*100)+'%"></div>'
+   +'<span class="bv">'+p[1]+'</span></div></div>').join('')
+ +'</div></div>'
+ +'<style>@media(max-width:900px){.two{grid-template-columns:1fr!important}}</style>'
+ +'<div class="sec">最近進庫<span>點成員頁可看個別明細</span></div>'
+ +'<div class="card" style="padding:6px 14px">'
+ +tableLib(ST().lib.slice(-5).reverse(),true)+'</div>'}
+
+/* ═════ 成員（依任一指標排序） ═════ */
+/* 企業卡預覽（用擁有者的名字） */
+function ccPvHTML(o){
+ const cc=o.coCard||{},dz=cc.design||{ori:'land',mat:'steel'},au=AU()||{};
+ const owner=o.members.find(m=>m.cem===au.em)||o.members[0]||{name:'擁有者'};
+ return appCard({name:owner.name,nameEn:owner.nameEn,title:owner.title,company:cc.short||cc.name,material:dz.mat,hue:dz.hue,ink:dz.ink,font:dz.font,hideBrand:dz.hideBrand,tag:'企業認證'},dz.ori==='land'?236:146,dz.ori==='land'?1:0)}
+
+/* ═════ 企業名片：一頁只做一件事——把公司的卡定下來 ═════ */
+function ccOriHTML(dz){
+ return '<div class="seg"><button data-ccori="port"'+(dz.ori==='land'?'':' class="on"')+'>直式</button><button data-ccori="land"'+(dz.ori==='land'?' class="on"':'')+'>橫式</button></div>'}
+function ccCtlHTML(o){
+ const cc=o.coCard||{},dz=cc.design||{ori:'land',mat:'steel'};
+ const au=AU()||{};
+ const owner=o.members.find(m=>m.cem===au.em)||o.members[0]||{name:'擁有者'};
+ const inkSet=INK_SETS[dz.mat]||INK_SETS.silver;
+ const curInk=(dz.ink||inkSet[0][1]).toLowerCase();
+ return '<div class="dlb">挑一個款式</div>'
+ +'<div style="display:flex;gap:12px;flex-wrap:wrap">'
+ +CO_PRESETS.map((p,i)=>{const on=dz.mat===p[1]&&(+dz.hue||0)===p[2];
+   return '<button data-ccp="'+i+'" style="text-align:center;flex:0 0 auto"><div style="border-radius:8px;overflow:hidden;'+(on?'box-shadow:0 0 0 2px var(--mang)':'')+'">'+appCard({name:owner.name,material:p[1],hue:p[2],hideBrand:1},78,1)+'</div><div style="font-size:11.5px;margin-top:5px;font-weight:'+(on?700:400)+'">'+p[0]+'</div></button>'}).join('')+'</div>'
+ +'<button class="btn ghost sm" id="ccAdv" style="margin-top:18px">'+(ccAdv?'收起進階自訂':'進階自訂——顏色、字色、字體、去標記')+'</button>'
+ +(ccAdv
+   ?'<div style="display:grid;gap:16px;margin-top:16px;padding-top:16px;border-top:1px solid var(--hair)">'
+    +'<div><div class="dlb">材質</div><div class="seg">'+Object.keys(MAT).map(m2=>'<button data-ccmat="'+m2+'"'+(dz.mat===m2?' class="on"':'')+'>'+MAT[m2].n+'</button>').join('')+'</div></div>'
+    +'<div><div class="dlb">色調（拖一下換色，0＝原色）</div><input id="ccHue" type="range" min="0" max="350" step="2" value="'+(+dz.hue||0)+'" style="width:100%;max-width:320px"></div>'
+    +'<div><div class="dlb">字色</div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
+    +inkSet.map(s2=>{const on=curInk===s2[1].toLowerCase();
+      return '<button data-ccink="'+s2[1]+'" title="'+s2[0]+'" style="width:32px;height:32px;border-radius:9px;background:'+MAT[dz.mat].bg+';display:flex;align-items:center;justify-content:center;'+(on?'box-shadow:0 0 0 2px var(--mang)':'border:1px solid var(--hair)')+'"><span style="font-size:15px;font-weight:300;color:'+s2[1]+'">永</span></button>'}).join('')
+    +'<input type="color" id="ccInkPick" value="'+esc(dz.ink||inkSet[0][1])+'" aria-label="自訂字色" style="width:36px;height:32px;border:1px solid var(--hair);border-radius:8px;padding:2px;background:#fff"><span class="tip">自訂</span></div></div>'
+    +'<div style="display:flex;gap:28px;flex-wrap:wrap;align-items:flex-start">'
+    +'<div><div class="dlb">字體</div><div class="seg">'+Object.keys(CFONTS).map(f2=>'<button data-ccfont="'+f2+'"'+((dz.font||'modern')===f2?' class="on"':'')+'>'+CFONTS[f2].n+'</button>').join('')+'</div></div>'
+    +'<div><div class="dlb">Heycard 標記</div><div class="seg"><button data-ccbrand="0"'+(dz.hideBrand?'':' class="on"')+'>顯示</button><button data-ccbrand="1"'+(dz.hideBrand?' class="on"':'')+'>隱藏</button></div></div>'
+    +'</div></div>'
+   :'')
+ +'<div class="tip" style="margin-top:14px">跟 App 同一套設計器；企業版已含 App 最高階（Pro）全部功能，去 Heycard 標記也內含。</div>'}
+/* 局部重繪：只動預覽與控制區，不重畫整頁、不捲動 */
+function ccRefresh(){const o=ST();
+ const pv=$('#ccPv'),ct=$('#ccCtl'),orw=$('#ccOri');
+ if(!pv&&!ct){draw();return}
+ if(pv)pv.innerHTML=ccPvHTML(o);
+ if(ct)ct.innerHTML=ccCtlHTML(o);
+ if(orw)orw.innerHTML=ccOriHTML((o.coCard||{}).design||{ori:'land',mat:'steel'})}
+function pgCard(){
+ const o=ST();
+ const cc=o.coCard||{};
+ const dz=cc.design||{ori:'land',mat:'steel'};
+ const CC_F=[['name','公司名稱'],['short','卡面顯示名稱'],['tel','公司電話'],['tax','統一編號 / Tax ID'],['addr','公司地址',1]];
+ return '<h1>企業名片</h1><div class="sub">挑一個款式、選直式或橫式，就定案了。改任何東西，全員的卡即時跟著換。</div>'
+
+ +'<div class="card" style="max-width:900px;margin-top:16px"><div style="display:flex;gap:32px;align-items:flex-start;flex-wrap:wrap">'
+ +'<div style="flex:0 0 auto;width:250px;position:sticky;top:16px">'
+ +'<div style="display:flex;justify-content:center;min-height:160px;align-items:center" id="ccPv">'+ccPvHTML(o)+'</div>'
+ +'<div style="display:flex;justify-content:center;margin-top:14px" id="ccOri">'+ccOriHTML(dz)+'</div>'
+ +'<div class="tip" style="text-align:center;margin-top:10px">預覽用擁有者的名片；每位成員套同一版型、各自的名字。</div></div>'
+ +'<div style="flex:1;min-width:300px" id="ccCtl">'+ccCtlHTML(o)+'</div>'
+ +'</div></div>'
+
+ /* 卡片上的公司資訊 */
+ +'<div class="sec">卡片上的公司資訊<span>全員一致；改了即時連動所有成員的卡</span></div>'
+ +'<div class="card" style="max-width:900px">'
+ +(coEdit
+   ?'<div class="fgrid">'+CC_F.map(f=>'<div class="fld"'+(f[2]?' style="grid-column:1/-1"':'')+'><label for="cc-'+f[0]+'">'+f[1]+'</label><input class="inp" id="cc-'+f[0]+'" data-cocard="'+f[0]+'" value="'+esc(cc[f[0]]||'')+'"></div>').join('')
+    +'<div class="fld"><label>Logo</label><div style="display:flex;align-items:center;gap:10px"><span style="width:70px;color:var(--ink)">'+LOGO+'</span><span class="tip">原型：正式版可上傳</span></div></div></div>'
+    +'<div style="display:flex;gap:8px;margin-top:12px"><button class="btn sm" id="ccSave">儲存，同步全員卡片</button><button class="btn tt sm" id="ccNo">取消</button></div>'
+   :'<div class="fgrid">'+CC_F.map(f=>'<div class="fld"'+(f[2]?' style="grid-column:1/-1"':'')+'><label>'+f[1]+'</label><div style="font-size:13.5px;padding:2px 0">'+esc(cc[f[0]]||'—')+'</div></div>').join('')
+    +'<div class="fld"><label>Logo</label><span style="width:70px;display:block;color:var(--ink)">'+LOGO+'</span></div></div>'
+    +'<button class="btn ghost sm" id="ccEd" style="margin-top:10px">編輯公司資訊</button>')
+ +'</div>'
+ +'<div class="tip" style="margin-top:12px">要印刷的 NFC 卡到「企業 NFC 卡」下單，不一定印這張。欄位歸屬：公司資訊、卡片設計、職稱、公司 Email＝公司管理；姓名（中／英）＝公司可先填、可修正；手機＝員工本人填。</div>'}
+
+/* ═════ 成員：只看數據、只管人 ═════ */
+function pgMem(){
+ const o=ST();
+ /* 公司視角的三件事：收了多少名片、多少變成互動、還剩多少沒跟進 */
+ const cols=[['name','成員',0],['title','職稱',0],['n','收進名片',1],['co','接觸公司',1],
+  ['act','互動中',1],['todo','待跟進',1],['last','最後活動',0]];
+ let rows=o.members.map(m=>{const act=Math.round(m.n*m.reply/100);return Object.assign({},m,{act:act,todo:m.n-act})})
+  .sort((a,b)=>{const x=a[sortK],y=b[sortK];
+  return (typeof x==='number'? x-y : String(x).localeCompare(String(y)))*sortD});
+ return '<h1>成員</h1><div class="sub">公司要看的三件事：收了多少名片、多少在互動、還剩多少沒跟進。點欄位標題排序；點成員看他經手的名單。</div>'
+ +'<div class="card" style="margin-top:16px"><div style="overflow-x:auto"><table><thead><tr>'
+ +cols.map(c=>'<th data-k="'+c[0]+'" class="'+(c[2]?'num':'')+'">'+c[1]
+   +(sortK===c[0]?'<span class="ar">'+(sortD<0?'▼':'▲')+'</span>':'')+'</th>').join('')
+ +'</tr></thead><tbody>'
+ +rows.map(m=>{
+   return '<tr data-m="'+m.id+'">'
+   +'<td><b>'+esc(m.name)+'</b>'+(m.ph?'':' <span class="chip warn" style="font-size:10px;padding:1px 6px">待補手機</span>')+'</td>'
+   +'<td style="color:var(--ink2)">'+esc(m.title)+'</td>'
+   +'<td class="num">'+m.n+'</td><td class="num">'+m.co+'</td>'
+   +'<td class="num" style="color:#00806E;font-weight:700">'+m.act+'</td>'
+   +'<td class="num" style="color:'+(m.todo>=40?'#B98900;font-weight:700':'var(--ink2)')+'">'+m.todo+'</td>'
+   +'<td style="color:var(--ink3);font-size:12px">'+esc(m.last)+'</td></tr>'}).join('')
+ +'</tbody></table></div></div>'
+ +'<div class="tip" style="margin-top:10px">收進名片＝他經手存進公司庫的張數；接觸公司＝這些名片來自幾家公司；互動中＝交換後雙方有過訊息或回訪；待跟進＝收進來了、還沒有任何後續。</div>'
+
+ +'<div style="margin-top:16px">'
+ +(askMem
+    ?'<div class="card" style="max-width:640px;padding:16px"><b style="font-size:13.5px">邀請成員</b>'
+     +'<div class="tip" style="margin:4px 0 12px">公司先填好職稱與公司 Email；邀請寄到他的 Heycard Email（登入用，可以跟公司信箱不同）。他接受後補上姓名與手機（必填），卡片就啟用。</div>'
+     +'<div class="fgrid">'
+     +'<div class="fld"><label for="memIn">Heycard Email（寄邀請、登入用）</label><input class="inp" id="memIn" placeholder="他個人的 Heycard 帳號 Email"></div>'
+     +'<div class="fld"><label for="memCem">公司 Email（卡片上顯示）</label><input class="inp" id="memCem" placeholder="name@heycard.app"></div>'
+     +'<div class="fld"><label for="memNm">中文姓名（公司先填，避免亂填）</label><input class="inp" id="memNm" placeholder="例：王小明"></div>'
+     +'<div class="fld"><label for="memNmEn">英文姓名（選填）</label><input class="inp" id="memNmEn" placeholder="例：Hsiao-Ming Wang"></div>'
+     +'<div class="fld"><label for="memTtl">職稱（公司填寫）</label><input class="inp" id="memTtl" placeholder="例：業務專員"></div>'
+     +'</div>'
+     +'<div class="err" id="memErr"></div>'
+     +'<div style="display:flex;gap:8px;margin-top:12px"><button class="btn sm" id="memGo">寄出邀請</button><button class="btn tt sm" id="memNo">取消</button></div></div>'
+    :'<button class="btn" id="invite">邀請成員</button>')
+ +'</div>'
+ +(o.invited.length?'<div class="card" style="max-width:640px;margin-top:10px;padding:6px 16px">'
+   +o.invited.map((iv,ix)=>'<div style="display:flex;align-items:center;gap:10px;padding:9px 0;'+(ix<o.invited.length-1?'border-bottom:1px solid var(--hair);':'')+'font-size:13px">'
+     +'<b>'+esc(iv.name||iv.em||iv)+'</b>'+(iv.name?'<span class="tip">'+esc(iv.em)+'</span>':'')
+     +(iv.title?'<span class="tip">'+esc(iv.title)+'</span>':'')
+     +(iv.cem?'<span class="tip">卡片顯示 '+esc(iv.cem)+'</span>':'')
+     +'<span style="flex:1"></span><span class="chip warn">'+(iv.name?'待接受 · 待補手機':'待接受 · 待補姓名手機')+'</span></div>').join('')
+   +'</div>':'')}
+
+/* ═════ AI 洞察：數字與圖帶路，字越少越好 ═════ */
+function pgAI(){
+ const o=ST();
+ const tot=o.members.reduce((a2,m)=>a2+m.n,0);
+ const act=o.members.reduce((a2,m)=>a2+Math.round(m.n*m.reply/100),0);
+ const todo=tot-act;
+ const lin=o.members.find(m=>m.id==='m3')||{n:0,reply:0,name:'—'};
+ const linTodo=lin.n-Math.round(lin.n*lin.reply/100);
+ /* 產業分佈（庫） */
+ const ind={};o.lib.forEach(x=>{if(x[3]&&x[3]!=='—')ind[x[3]]=(ind[x[3]]||0)+1});
+ const indTop=Object.entries(ind).sort((x,y)=>y[1]-x[1]).slice(0,4);
+ const indMax=indTop.length?indTop[0][1]:1;
+ /* 同公司多窗口 */
+ const byCo={};o.lib.forEach(x=>{if(x[1]&&x[1].indexOf('僅 Email')<0){(byCo[x[1]]=byCo[x[1]]||new Set()).add(x[0])}});
+ const keyCos=Object.entries(byCo).filter(x=>x[1].size>=2).slice(0,3);
+ const aiTag=t=>'<div style="display:flex;align-items:center;gap:7px;margin-bottom:12px"><span style="display:flex;color:var(--mangD)">'+lico('ai',15)+'</span><b style="font-size:13px">'+t+'</b></div>';
+ const doLine=t=>'<div style="display:flex;gap:7px;align-items:flex-start;margin-top:12px;padding-top:10px;border-top:1px solid var(--hair);font-size:12.5px;color:var(--mangD);font-weight:700"><span style="display:flex;padding-top:1px">'+ico('arr',13)+'</span>'+t+'</div>';
+ const av=n=>'<span style="width:22px;height:22px;border-radius:50%;background:var(--mangS);color:var(--mangD);display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">'+esc(n[0])+'</span>';
+ return '<h1>AI 洞察</h1><div class="sub">只讀名片面資料與系統事件，不讀訊息。判讀給你參考，決定還是你的。</div>'
+
+ +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;max-width:960px;margin-top:16px">'
+ /* ① 跟進 */
+ +'<div class="card" style="padding:18px">'+aiTag('跟進趕不上收卡')
+ +'<div style="display:flex;align-items:baseline;gap:14px"><div><span style="font-family:var(--fe);font-size:34px;font-weight:800;letter-spacing:-.03em;color:#B98900">'+todo+'</span><span class="tip" style="margin-left:5px">待跟進</span></div>'
+ +'<div><span style="font-family:var(--fe);font-size:20px;font-weight:800;color:#00806E">'+act+'</span><span class="tip" style="margin-left:5px">互動中</span></div></div>'
+ +'<div style="display:flex;height:8px;border-radius:99px;overflow:hidden;margin-top:12px;background:var(--fill)"><i style="flex:'+act+';background:#00D6B3"></i><i style="flex:'+todo+';background:#F0C24B"></i></div>'
+ +'<div class="tip" style="margin-top:10px">'+esc(lin.name)+' 一人占 '+linTodo+' 筆——最會收，顧不上跟</div>'
+ +doLine('把他超過兩週沒動的名單，分給互動率高的同事')
+ +'</div>'
+ /* ② 產業 */
+ +'<div class="card" style="padding:18px">'+aiTag('產業重心與最會回的線')
+ +'<div style="display:grid;gap:7px">'
+ +indTop.map(x=>{const fin=x[0]==='金融';
+   return '<div style="display:flex;align-items:center;gap:9px;font-size:12.5px"><span style="width:34px;color:'+(fin?'var(--mangD)':'var(--ink2)')+';font-weight:'+(fin?700:400)+'">'+esc(x[0])+'</span>'
+   +'<div style="flex:1;height:8px;border-radius:99px;background:var(--fill);overflow:hidden"><i style="display:block;height:100%;width:'+Math.round(x[1]/indMax*100)+'%;background:'+(fin?'var(--mang)':'#BDBDBD')+'"></i></div>'
+   +'<span class="num" style="font-family:var(--fe);font-size:12px;color:var(--ink3);width:14px;text-align:right">'+x[1]+'</span>'
+   +(fin?'<span class="chip" style="font-size:10px;padding:1px 7px;background:var(--mangS);color:var(--mangD)">回覆 48%</span>':'')+'</div>'}).join('')
+ +'</div>'
+ +'<div class="tip" style="margin-top:10px">量在製造與科技，回覆最好的是金融——王思穎的線</div>'
+ +doLine('Q4 開金融線：王思穎帶線、其他人陪訪')
+ +'</div>'
+ /* ③ 重點客戶 */
+ +'<div class="card" style="padding:18px">'+aiTag('重點客戶浮出來了')
+ +'<div style="display:grid;gap:8px">'
+ +keyCos.map(x=>'<div style="display:flex;align-items:center;gap:9px;font-size:13px"><b>'+esc(x[0])+'</b><span style="flex:1"></span>'
+   +'<span style="display:inline-flex">'+[...x[1]].slice(0,2).map((n,i)=>'<span style="'+(i?'margin-left:-6px;':'')+'display:inline-flex">'+av(n)+'</span>').join('')+'</span>'
+   +'<span class="chip" style="font-size:10.5px;padding:1px 7px">'+x[1].size+' 位窗口</span></div>').join('')
+ +'</div>'
+ +'<div class="tip" style="margin-top:10px">同一家公司兩位以上窗口＝值得公司層級經營</div>'
+ +doLine('窗口整合同一頁，回訪節奏拉齊')
+ +'</div>'
+ +'</div>'
+
+ /* 建議行動 */
+ +'<div class="sec">建議行動<span>指令會出現在該成員 App 的待辦</span></div>'
+ +'<div class="card" style="max-width:960px;padding:4px 18px">'
+ +o.aiTasks.map(t=>'<div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--hair)">'
+   +'<div style="width:34px;height:34px;border-radius:50%;background:var(--mangS);color:var(--mangD);display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 auto">'+esc(t.who[0])+'</div>'
+   +'<div style="flex:1;min-width:0">'
+   +'<div style="display:flex;align-items:center;gap:7px;font-size:13.5px;flex-wrap:wrap"><b>'+esc(t.who)+'</b><span style="display:flex;color:#BDBDBD">'+ico('arr',13)+'</span><b>'+esc(t.target.split(' · ')[0])+'</b><span class="tip">'+esc(t.target.split(' · ')[1]||'')+'</span></div>'
+   +'<div style="font-size:13px;color:var(--ink2);margin-top:2px">'+esc(t.topic)+'<span class="tip" style="margin-left:8px">'+esc(t.why)+'</span></div></div>'
+   +(t.st==='sent'
+     ?'<span class="chip" style="background:#E2F9F4;color:#00806E;flex:0 0 auto">已指派</span>'
+     :'<button class="btn sm" data-aigo="'+t.id+'" style="flex:0 0 auto">指派</button>')
+   +'</div>').join('')
+ +'<div style="display:flex;align-items:center;gap:10px;padding:12px 0">'
+ +(o.aiTasks.some(t=>t.st!=='sent')?'<button class="btn tt sm" id="aiAll">全部指派</button>':'<span class="tip">都指派完了。</span>')
+ +'<span class="tip">原型：指派＝模擬推播到成員 App。</span></div>'
+ +'</div>'}
+
+/* ═════ 公司人脈庫 ═════ *//* ═════ 公司人脈庫 ═════ */
+/* 來源 chip：紙本掃描／Heycard 交換／NFC 感應／公開頁留 Email */
+const SRC_C={'紙本':['var(--fill)','var(--ink2)'],'Heycard':['var(--mangS)','var(--mangD)'],'NFC':['#E2F9F4','#00806E'],'公開頁':['#FBF3DF','#8A6500']};
+function srcChip(s){if(!s)return '';const c=SRC_C[s]||SRC_C['紙本'];
+ return '<span class="chip" style="font-size:10.5px;padding:1px 8px;background:'+c[0]+';color:'+c[1]+'">'+esc(s)+'</span>'}
+function tableLib(rows,mini){
+ return '<div style="overflow-x:auto"><table><thead><tr><th>姓名</th><th>公司</th><th>職稱</th>'
+ +'<th>產業</th><th>來源</th>'+(mini?'':'<th>場合</th>')+'<th>經手</th><th class="num">日期</th></tr></thead><tbody>'
+ +rows.map(x=>'<tr><td><b>'+esc(x[0])+'</b></td><td'+(x[8]==='公開頁'?' style="color:var(--ink3)"':'')+'>'+esc(x[1])+'</td>'
+   +'<td style="color:var(--ink2)">'+esc(x[2])+'</td>'
+   +'<td>'+esc(x[3])+(x[7]?' <span class="fixnote">由 '+esc(x[7])+' 修正</span>':'')+'</td>'
+   +'<td>'+srcChip(x[8])+'</td>'
+   +(mini?'':'<td style="color:var(--ink2)">'+esc(x[5])+'</td>')
+   +'<td style="color:var(--mangD)">'+esc(x[6])+'</td>'
+   +'<td class="num" style="color:var(--ink3)">'+esc(x[4])+'</td></tr>').join('')
+ +'</tbody></table></div>'}
+
+/* 空狀態：用四個來源圖示帶路——收名片是 App 的事，後台沒有也不需要「新增」 */
+function libBody(rows){
+ if(rows.length)return tableLib(rows);
+ const filtered=libQ||libWho||libInd||libSrc;
+ return '<div style="text-align:center">'
+ +'<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:16px">'
+ +[[lico('card',18),'紙本掃描'],[ico('tap',18),'Heycard 交換'],[ico('nfc',18),'NFC 感應'],[lico('mail',18),'公開頁 Email']]
+   .map(x=>'<div style="width:104px"><div style="width:44px;height:44px;border-radius:13px;background:var(--fill);color:var(--ink3);display:flex;align-items:center;justify-content:center;margin:0 auto">'+x[0]+'</div><div class="tip" style="margin-top:7px">'+x[1]+'</div></div>').join('')
+ +'</div>'
+ +'<b style="font-size:14.5px">'+(filtered?'這個條件下沒有名片':'還沒有名片進來')+'</b>'
+ +'<div class="tip" style="margin-top:5px">'+(filtered?'換個條件試試':'成員用企業名片在外面收到的，會自動出現在這裡')+'</div></div>'}
+function pgLib(){
+ const o=ST();
+ const who=[...new Set(o.lib.map(x=>x[6]))];
+ const inds=[...new Set(o.lib.map(x=>x[3]))];
+ const rows=o.lib.filter(x=>(!libWho||x[6]===libWho)&&(!libInd||x[3]===libInd)&&(!libSrc||x[8]===libSrc)
+  &&(!libQ||x.join(' ').includes(libQ))).reverse();
+ return '<h1>公司人脈庫</h1><div class="sub">歸戶跟「身分」走：成員以企業認證名片收到的每一筆——紙本掃描、Heycard 交換、NFC 感應、公開頁留 Email——都自動回到這裡。個人名片換到的不會進來；成員的備註與訊息內容，這個庫裡也不存在。</div>'
+ +'<div class="chiprow" style="margin-top:16px">'
+ +'<input class="inp" id="q" placeholder="搜尋姓名、公司…" value="'+esc(libQ)+'">'
+ +'<span class="chip'+(libWho?'':' on')+'" data-who="">全部成員</span>'
+ +who.map(w=>'<span class="chip'+(libWho===w?' on':'')+'" data-who="'+esc(w)+'">'+esc(w)+'</span>').join('')
+ +'<span style="width:1px;height:18px;background:var(--hair)"></span>'
+ +'<span class="chip'+(libSrc?'':' on')+'" data-src="">全部來源</span>'
+ +['紙本','Heycard','NFC','公開頁'].map(s2=>'<span class="chip'+(libSrc===s2?' on':'')+'" data-src="'+s2+'">'+s2+'</span>').join('')
+ +'<select class="inp" id="indSel" style="min-width:110px">'
+ +'<option value="">全部產業</option>'+inds.map(i=>'<option'+(libInd===i?' selected':'')+'>'+esc(i)+'</option>').join('')
+ +'</select>'
+ +'<span style="flex:1"></span><button class="btn tt" id="csv">匯出 CSV（'+rows.length+' 筆）</button></div>'
+ +'<div class="card" style="padding:'+(rows.length?'6px 14px':'34px 24px')+'">'+libBody(rows)+'</div>'
+ +'<div class="tip" style="margin-top:12px">「公開頁」來源＝對方沒裝 App，在成員企業名片的公開頁留下 Email 領取名片；等他之後補資料或註冊，這筆會自動補全。「由○○修正」＝產業分類由第一線成員更正過，保留痕跡（Q-32）。庫是活的：對方名片更新，這裡跟著更新（Q-31）。</div>'}
+
+/* 職稱審核已整併進「人員與權限」（pgPpl） */
+
+/* ═════ 活動：主辦方 ⇄ 參展商 兩個視角 ═════ */
+function qrSVG(seed,sz){
+ /* 假 QR：定位框＋雜訊格，看得出是 QR 就好 */
+ let h=0;for(const c of seed)h=(h*31+c.charCodeAt(0))>>>0;
+ const N=17,cell=(sz||120)/N;let px='';
+ const rng=()=>{h^=h<<13;h^=h>>>17;h^=h<<5;h>>>=0;return h/4294967296};
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+  const fp=(x<5&&y<5)||(x>=N-5&&y<5)||(x<5&&y>=N-5);
+  if(fp)continue;
+  if(rng()>0.52)px+='<rect x="'+(x*cell)+'" y="'+(y*cell)+'" width="'+cell+'" height="'+cell+'"/>'}
+ const F=(ox,oy)=>'<rect x="'+(ox*cell)+'" y="'+(oy*cell)+'" width="'+(5*cell)+'" height="'+(5*cell)+'" fill="none" stroke="#1E1E1E" stroke-width="'+cell+'"/>'
+  +'<rect x="'+((ox+2)*cell)+'" y="'+((oy+2)*cell)+'" width="'+cell+'" height="'+cell+'"/>';
+ return '<svg width="'+(sz||120)+'" height="'+(sz||120)+'" viewBox="0 0 '+(sz||120)+' '+(sz||120)+'" fill="#1E1E1E" style="background:#fff;border-radius:8px;padding:0">'+px+F(0,0)+F(12,0)+F(0,12)+'</svg>'}
+
+/* 種子活動的 Logo 與 Banner（示範「有上傳」長什麼樣；沒上傳就空著，畫面自動收合） */
+const EV_LOGO='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80"><rect width="80" height="80" rx="18" fill="#5C5CFF"/><path d="M24 55V25h8v11h16V25h8v30h-8V44H32v11z" fill="#fff"/></svg>');
+const EV_BAN='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#26265E"/><stop offset="1" stop-color="#5C5CFF"/></linearGradient></defs><rect width="800" height="200" fill="url(#g)"/><g fill="none" stroke="#9F9FFF" stroke-opacity=".3" stroke-width="2"><circle cx="640" cy="55" r="75"/><circle cx="706" cy="150" r="42"/><circle cx="90" cy="175" r="65"/></g><text x="46" y="116" font-family="sans-serif" font-size="42" font-weight="700" fill="#fff">2026 智慧製造展</text></svg>');
+
+/* ═════ 活動（多場列表制）═════ */
+let selEv=null, evNew=0;
+function EV(o){return o.evs.find(x=>x.id===selEv)}
+function evSum(ev){const op=ev.booths.filter(b=>b.st==='open');
+ return {b:ev.booths.length,o:op.length,l:op.reduce((a,x)=>a+x.leads,0)}}
+const EV_STC={pending:['審核中','#FBF3DF','#8A6500'],approved:['進行中','#E2F9F4','#00806E'],done:['已結束','var(--fill)','var(--ink3)']};
+const stChip=st=>{const c=EV_STC[st]||EV_STC.pending;
+ return '<span class="chip" style="background:'+c[1]+';color:'+c[2]+'">'+c[0]+'</span>'};
+const backBar='<a id="evBack" class="bk">'+ico('back',14)+'返回活動列表</a>';
+
+/* 活動資訊條：必要五樣＋（可空的）Logo 與 Banner */
+function evStrip(ev){
+ const bURL=(ev.banner||'').replace(/\(/g,'%28').replace(/\)/g,'%29').replace(/'/g,'%27');
+ return '<div class="card" style="max-width:680px;border:0;color:#fff;padding:16px 20px;margin-bottom:14px;'
+ +(ev.banner?"background:linear-gradient(rgba(20,20,26,.72),rgba(20,20,26,.9)),url('"+bURL+"') center/cover"
+            :'background:#1E1E1E')+'">'
+ +'<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'
+ +(ev.logo?'<img src="'+ev.logo+'" style="width:36px;height:36px;border-radius:10px;flex:0 0 auto">':'')
+ +'<div style="font-size:16px;font-weight:800">'+esc(ev.name)+'</div>'
+ +(ev.type?'<span style="font-size:10.5px;font-weight:700;background:rgba(255,255,255,.18);border-radius:99px;padding:2px 9px">'+esc(ev.type)+'</span>':'')
+ +(metaLine([ev.date,ev.venue])?'<div style="font-size:12px;color:#BDBDBD">'+esc(metaLine([ev.date,ev.venue]))+'</div>':'')+'</div>'
+ +(ev.intro?'<div style="font-size:12.5px;color:#D9D9D9;margin-top:6px">'+esc(ev.intro)+'</div>':'')
+ +(ev.org?'<div style="font-size:11px;color:#BDBDBD;margin-top:7px">主辦　'+esc(ev.org)+'</div>':'')
+ +'</div>'}
+
+/* ── 我主辦的活動：列表 → 建立 → 單場管理 ── */
+function pgEvs(){
+ const o=ST();
+ if(evNew)return evCreate(o);
+ if(selEv&&EV(o))return pgEvDetail(o);
+ selEv=null;
+ return '<h1>我主辦的活動</h1><div class="sub">一場活動＝一個連結。報名照你們原本的系統，Heycard 只做人脈這一層。</div>'
+ +'<div style="margin-top:16px;max-width:760px">'
+ +(o.evs.length?o.evs.slice().reverse().map(ev=>{
+   const su=evSum(ev);
+   return '<div class="card evrow" data-ev="'+ev.id+'" style="display:flex;align-items:center;gap:14px;margin-bottom:10px;cursor:pointer;padding:14px 18px">'
+   +(ev.logo?'<img src="'+ev.logo+'" style="width:40px;height:40px;border-radius:11px;flex:0 0 auto">'
+            :'<div style="width:40px;height:40px;border-radius:11px;background:#1E1E1E;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 auto">'+esc((ev.name||'？')[0])+'</div>')
+   +'<div style="flex:1;min-width:0">'
+   +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b style="font-size:14.5px">'+esc(ev.name)+'</b>'
+   +(ev.type?'<span class="chip" style="font-size:11px;padding:2px 8px">'+esc(ev.type)+'</span>':'')
+   +stChip(ev.st)+'</div>'
+   +'<div class="tip">'+esc(metaLine([ev.date,ev.venue]))+'</div></div>'
+   +'<div style="text-align:right;flex:0 0 auto"><div class="num" style="font-size:16px;font-weight:700">'+su.l+'</div>'
+   +'<div class="tip" style="font-size:11px">leads · '+su.o+'/'+su.b+' 攤</div></div>'
+   +'<span style="color:#BDBDBD;display:flex">'+ico('arr',15)+'</span></div>'}).join('')
+  :'<div class="card" style="text-align:center;padding:40px">'
+   +'<div style="font-size:14.5px;font-weight:700">還沒有活動</div>'
+   +'<div class="tip" style="margin-top:6px">建立第一場，拿到給參觀者與參展商的活動連結。</div></div>')
+ +'<button class="btn" id="evCreate" style="margin-top:6px">＋ 建立活動</button></div>'}
+
+/* ── 建立活動：左表單、右參觀者手機即時模擬 ── */
+function evCreate(o){
+ const d=o.draft||{};
+ const vn=d._evName||'',vo=d._evOrg||'',vd=d._evDate||'',vv=d._evVenue||'',vi=d._evIntro||'';
+ const pv='<div style="flex:0 0 400px;max-width:100%">'
+ +'<div class="tip" style="margin-bottom:8px;text-align:center;font-size:12.5px">參觀者打開連結看到的</div>'
+ +'<div style="background:#fff;border:1px solid var(--hair);border-radius:32px;padding:18px 16px 24px;box-shadow:0 18px 44px -20px rgba(20,20,28,.3)">'
+ +'<div style="width:76px;height:5px;border-radius:99px;background:var(--hair);margin:0 auto 16px"></div>'
+ +'<div style="background:#1E1E1E;border-radius:16px;overflow:hidden;color:#fff;text-align:center">'
+ +(d.banner?'<img id="pvBan" src="'+d.banner+'" style="width:100%;height:88px;object-fit:cover;display:block">':'')
+ +'<div style="padding:'+(d.banner?'0 18px 22px':'22px 18px')+'">'
+ +(d.logo?'<img src="'+d.logo+'" style="width:48px;height:48px;border-radius:14px;display:block;margin:'+(d.banner?'-24px':'0')+' auto 9px;border:3px solid #1E1E1E;background:#fff">':'')
+ +'<div style="font-size:12px;color:#8C8C8C">受邀加入・'+esc(d.type||'展會')+'</div>'
+ +'<div id="pvName" style="font-size:19px;font-weight:800;margin-top:6px;color:'+(vn?'#fff':'#565656')+'">'+esc(vn||'活動名稱')+'</div>'
+ +'<div id="pvDV" style="font-size:13px;margin-top:6px;color:'+((vd||vv)?'#BDBDBD':'#565656')+'">'+esc(vd||'日期')+' · '+esc(vv||'地點')+'</div>'
+ +'<div id="pvIntro" style="font-size:12.5px;color:#8C8C8C;margin-top:9px;line-height:1.65;display:'+(vi?'block':'none')+'">'+esc(vi)+'</div>'
+ +'<div id="pvOrg" style="font-size:11px;color:#565656;margin-top:10px;display:'+(vo?'block':'none')+'">主辦　'+esc(vo)+'</div>'
+ +'</div></div>'
+ +'<div style="border:1px solid var(--hair);border-radius:13px;padding:3px 13px;margin-top:12px">'
+ +[0,1,2].map(x=>'<div style="display:flex;gap:10px;align-items:center;padding:11px 0;'+(x<2?'border-bottom:1px solid var(--hair)':'')+'">'
+   +'<span style="width:14px;height:14px;border-radius:5px;background:var(--fill)"></span>'
+   +'<span style="flex:1;height:9px;border-radius:5px;background:var(--fill);max-width:'+(96-x*18)+'px"></span>'
+   +'<span style="width:'+(68+x*13)+'px;height:9px;border-radius:5px;background:var(--fill)"></span></div>').join('')
+ +'</div>'
+ +'<div style="background:var(--mang);border-radius:12px;color:#fff;text-align:center;font-size:14px;font-weight:700;padding:12px;margin-top:13px">同意並加入</div>'
+ +'</div></div>';
+ return '<h1>建立活動</h1><div class="sub">一場活動、一個連結，現場換的名片自動歸檔。</div>'
+ +'<div style="margin:14px 0 0">'+backBar+'</div>'
+ +'<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">'
+ +'<div class="card" style="flex:1;min-width:300px;max-width:520px">'
+ +'<div style="display:grid;gap:8px">'
+ +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+ +['展會','論壇','演講','交流會','研討會','發表會'].map(tp=>
+   '<span class="chip'+((d.type||'展會')===tp?' on':'')+'" data-evt="'+tp+'" style="cursor:pointer">'+tp+'</span>').join('')+'</div>'
+ +'<input class="inp" id="evName" placeholder="活動名稱" style="width:100%" value="'+esc(vn)+'">'
+ +'<input class="inp" id="evOrg" placeholder="主辦單位" style="width:100%" value="'+esc(vo)+'">'
+ +'<div style="display:flex;gap:8px">'
+ +'<input class="inp" id="evDate" placeholder="日期，例：9/24 – 9/26" style="flex:1;min-width:0" value="'+esc(vd)+'">'
+ +'<input class="inp" id="evVenue" placeholder="地點" style="flex:1;min-width:0" value="'+esc(vv)+'"></div>'
+ +'<input class="inp" id="evIntro" placeholder="一句介紹：這是什麼活動、給誰的" style="width:100%" value="'+esc(vi)+'">'
+ +'<div style="display:flex;gap:8px">'
+ +'<label class="btn tt sm" style="flex:1;justify-content:center;cursor:pointer">'
+  +(d.logo?'<img src="'+d.logo+'" style="width:20px;height:20px;border-radius:6px">更換 Logo':'上傳 Logo（可空）')
+  +'<input type="file" id="evLogoF" accept="image/*" style="display:none"></label>'
+ +'<label class="btn tt sm" style="flex:1;justify-content:center;cursor:pointer">'
+  +(d.banner?'更換 Banner':'上傳 Banner（可空）')
+  +'<input type="file" id="evBanF" accept="image/*" style="display:none"></label></div>'
+ +'<button class="btn" id="evApply">送出申請</button></div></div>'
+ +pv
+ +'</div>'}
+
+/* ── 單場管理 ── */
+function pgEvDetail(o){
+ const ev=EV(o),live=ev.st==='approved';
+ const head='<h1 style="display:flex;align-items:center;gap:10px">'+esc(ev.name)+stChip(ev.st)+'</h1>'
+ +'<div class="sub">'+esc(metaLine([ev.type,ev.date,ev.venue]))+(ev.org?' · 主辦 '+esc(ev.org):'')+'</div>'
+ +'<div style="margin:12px 0 0">'+backBar+'</div>';
+
+ if(ev.st==='pending')
+  return head
+  +'<div class="card" style="max-width:520px;text-align:center;padding:34px;margin-top:4px">'
+  +'<div style="font-size:15px;font-weight:800">「'+esc(ev.name)+'」審核中</div>'
+  +'<div class="tip" style="margin-top:8px">我們會人工審核主辦方資格。</div>'
+  +'<button class="btn" id="evPass" style="margin-top:14px">（模擬）通過審核</button></div>';
+
+ const t=ev.booths.filter(x=>x.st==='open').reduce((a,x)=>a+x.leads,0);
+ return head
+ +'<div class="card" style="padding:0;overflow:hidden;margin-top:4px">'
+ +(ev.banner?'<img src="'+ev.banner+'" style="width:100%;height:96px;object-fit:cover;display:block">':'')
+ +'<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;padding:18px 20px">'
+ +'<div>'+qrSVG('event:'+ev.entry,120)+'<div class="tip" style="text-align:center;margin-top:4px">活動頁連結</div></div>'
+ +'<div style="flex:1;min-width:240px">'
+ +'<div class="tip">heycard.app/e/<b>'+esc(ev.entry.toLowerCase())+'</b></div>'
+ +(ev.intro?'<div style="font-size:12.5px;color:var(--ink2);margin-top:5px">'+esc(ev.intro)+'</div>':'')
+ +(live
+   ?'<div style="display:flex;align-items:center;gap:6px;margin-top:10px;flex-wrap:wrap"><span class="tip">連結放在：</span>'
+    +'<span class="chip">報名確認信</span><span class="chip">識別證</span><span class="chip">入口立牌</span>'
+    +'<span class="tip" style="margin-left:4px">報名照你們原本的系統</span></div>'
+   :'<div class="tip" style="margin-top:10px">活動已結束——數據保留，可隨時回看與匯出。</div>')
+ +'</div>'
+ +'<div style="display:flex;gap:12px">'
+ +'<div class="card tile" style="background:var(--fill);border:0;min-width:110px"><div class="v">'+(ev.joined||0)+'</div><div class="l">加入人脈空間</div></div>'
+ +'<div class="card tile" style="background:var(--fill);border:0;min-width:110px"><div class="v" id="tLeads">'+t+'</div><div class="l">leads 合計</div></div>'
+ +'<div class="card tile" style="background:var(--fill);border:0;min-width:110px"><div class="v" id="tPool">'+ev.pool+'</div><div class="l">非用戶待領池</div></div>'
+ +'</div></div></div>'
+
+ +(live
+   ?'<div class="sec">名錄資訊設定<span>沒填的 AI 自動補</span></div>'
+   +'<div class="card" style="max-width:640px;padding:14px 16px">'
+   +(ev.dirCfg||[]).map((f,i)=>'<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--hair)">'
+     +'<span class="chip'+(f.on?' on':'')+'" data-dft="'+i+'" style="cursor:pointer">'+(f.on?'開':'關')+'</span>'
+     +'<b style="font-size:13px">'+esc(f.label)+'</b>'
+     +'<span class="tip" style="flex:1">'+({desc:'名錄列表上的那一行',info:'點開攤位頁看到的段落',launch:'買家最想看的——設成開，參展商填寫率自然高'}[f.k]||'自訂欄位')+'</span></div>').join('')
+   +'<div style="margin-top:10px;display:flex;gap:8px;align-items:center">'
+   +(askDF
+     ?'<input class="inp" id="dfIn" placeholder="欄位名稱，例：徵才職缺、想找的合作對象" style="flex:1;max-width:320px">'
+      +'<button class="btn sm" id="dfGo">加入</button>'
+     :'<button class="btn tt sm" id="dfadd">＋ 自訂欄位</button>')
+   +'</div></div>'
+   :'')
+
+ +'<div class="sec">參展商<span>點任一列看這一攤的完整資料與名錄頁</span></div>'
+ +'<div class="card" style="padding:6px 14px"><div style="overflow-x:auto"><table><thead><tr>'
+ +'<th>參展商</th><th>名錄</th><th>攤位</th><th>狀態</th><th>邀請</th><th class="num">leads</th><th></th></tr></thead><tbody>'
+ +ev.booths.map((b,i)=>{const ms=dirMiss(ev,b);return '<tr data-bth="'+i+'" style="cursor:pointer">'
+  +'<td><b>'+esc(b.n)+'</b><div class="tip" style="font-size:11px">'+esc(b.desc||'')+'</div></td>'
+  +'<td>'+(ms===0?'<span class="chip" style="background:#E2F9F4;color:#00806E">已填齊</span>'
+      :'<span class="chip" style="background:#FBF3DF;color:#8A6500">缺 '+ms+'・AI 墊底</span>'
+       +(live?(b.nudged?'<div class="tip" style="font-size:11px;margin-top:3px">已提醒</div>'
+                 :'<div><a data-nudge="'+i+'" style="cursor:pointer;font-size:11.5px;color:var(--mang);font-weight:700">催填</a></div>'):''))+'</td>'
+  +'<td>'+(locEdit===i&&live
+     ?'<span style="display:inline-flex;gap:5px"><input class="inp" id="locIn" value="'+esc(b.loc)+'" placeholder="A12" style="min-width:64px;width:64px;padding:4px 8px;font-size:12px"><button class="btn sm" id="locGo">✓</button></span>'
+     :(live?'<a data-locset="'+i+'" style="cursor:pointer;color:'+(b.loc?'var(--ink)':'var(--mang)')+';font-weight:'+(b.loc?'600':'700')+'">'+esc(b.loc||'配位置')+'</a>'
+           :'<span>'+esc(b.loc||'—')+'</span>'))+'</td>'
+  +'<td>'+(b.st==='open'?'<span class="chip" style="background:#E2F9F4;color:#00806E">已開攤</span>'
+      :'<span class="chip">邀請中</span>')+'</td>'
+  +'<td style="color:var(--ink3)"><div class="num" style="font-size:12px">/b/'+esc(b.code.toLowerCase())+'</div>'
+   +(b.em?'<div class="tip" style="font-size:11px">'+esc(b.em)+(b.st==='invited'?' · 已寄':'')+'</div>':'')
+   +(live?'<div><a data-cpc="'+i+'" style="cursor:pointer;font-size:11.5px;color:var(--mang);font-weight:700;font-family:var(--ft)">複製邀請</a></div>':'')+'</td>'
+  +'<td class="num" data-leads="'+i+'">'+(b.st==='open'?b.leads:'—')+'</td>'
+  +'<td>'+(live&&b.st==='open'?'<button class="btn tt sm" data-scan="'+i+'">模擬：參觀者掃攤</button>':'')+'</td></tr>'}).join('')
+ +'</tbody></table></div></div>'
+ +(live
+   ?'<div class="tip" style="margin-top:8px">攤位編號（如 A12）配了之後，參觀者名錄裡就有「攤位 A12 · 入口進來左側」的找路指引。</div>'
+   +'<div style="margin-top:12px;display:flex;gap:8px;align-items:center">'
+   +(askInv
+     ?'<span style="display:inline-flex;gap:6px;flex-wrap:wrap"><input class="inp" id="invIn" placeholder="參展商名稱" style="min-width:150px"><input class="inp" id="invEm" placeholder="窗口 Email" style="min-width:190px"><button class="btn sm" id="invGo">寄出邀請連結</button></span>'
+     :'<button class="btn" id="evInv">邀請參展商</button>')
+   +'<button class="btn tt sm" id="pmail">模擬：非用戶留 Email</button>'
+   +'<span style="flex:1"></span>'
+   +'<a class="btn tt sm" href="https://claude.ai/code/artifact/5438b463-c27d-40eb-bc3c-ebbc8bc48d4a" target="_blank" rel="noopener" style="text-decoration:none">看參展商收到的開攤頁 ↗</a></div>'
+   :'')
+ +'<div class="tip" style="margin-top:12px">主辦方只看數量，明細屬於各參展商。</div>'}
+
+/* ── 我參展的活動（免費網頁版：憑邀請連結開攤，不需企業版） ── */
+function pgExh(){
+ const o=ST();
+ const head='<h1>我參展的活動</h1><div class="sub">免費開攤，不需企業版。收到主辦方的邀請信，點連結就會到這裡。</div>';
+ if(o.myEx){
+  const ev=o.evs.find(x=>x.id===o.myEx.e),b=ev&&ev.booths[o.myEx.b];
+  if(b){
+   const sr=b.src||{dir:0,qr:0,meet:0};
+   return head+'<div style="margin-top:14px">'+evStrip(ev)+'</div>'
+   +'<div class="card" style="max-width:680px">'
+   +'<div class="sec" style="margin-top:0">我的攤位</div>'
+   +'<div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">'
+   +'<div>'+qrSVG('booth:'+b.code,104)+'<div class="tip" style="text-align:center;margin-top:4px">攤位 QR（立牌用）</div></div>'
+   +'<div style="flex:1;min-width:220px">'
+   +'<div style="display:flex;align-items:center;gap:8px"><div style="font-size:16px;font-weight:800">'+esc(b.n)+'</div>'
+   +'<span class="chip" style="background:var(--mangS);color:var(--mangD)">攤位 '+esc(b.loc||'待配')+'</span>'
+   +'<span class="tip">位置由主辦方配</span></div>'
+   +(ev.dirCfg||[]).filter(f=>f.on).map(f=>{
+     const PH={desc:'你們在做什麼，一句話',info:'這一場你們想被記住的兩三句話',launch:'這場發表什麼新品或新技術'};
+     const v=b[f.k]||'',one=(f.k==='desc');
+     return '<div style="display:flex;align-items:center;gap:8px;margin:10px 0 4px"><span class="tip" style="font-weight:700;color:var(--ink2)">'+esc(f.label)+'</span>'
+     +(v.trim()?'<span class="chip" style="background:#E2F9F4;color:#00806E;font-size:11px;padding:2px 8px">你的版本</span>'
+              :'<span class="chip" style="font-size:11px;padding:2px 8px">未填・AI 墊底中</span>')+'</div>'
+     +(one?'<input class="inp" data-bf="'+f.k+'" style="width:100%" value="'+esc(v)+'" placeholder="'+esc(PH[f.k]||f.label)+'">'
+         :'<textarea class="inp" data-bf="'+f.k+'" style="width:100%;height:52px;resize:none;font:inherit" placeholder="'+esc(PH[f.k]||f.label)+'">'+esc(v)+'</textarea>')}).join('')
+   +'</div></div>'
+   +'<div class="sec">攤位頁的窗口<span>本人加入 Heycard 後才會出現在名錄、才能被收錄</span></div>'
+   +'<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'
+   +(b.ppl||[]).map((p,j)=>pplOk(p)
+     ?'<span class="chip" style="gap:6px;background:#E2F9F4;color:#00806E">'+esc(pplName(p))
+      +'<a data-pdel="'+j+'" style="cursor:pointer;font-weight:800;color:#00806E">×</a></span>'
+     :'<span class="chip warn" style="gap:6px">'+esc(pplName(p))+' · 已邀請'
+      +'<a data-pok="'+j+'" style="cursor:pointer;font-weight:700;text-decoration:underline">（模擬）本人完成加入</a>'
+      +'<a data-pdel="'+j+'" style="cursor:pointer;font-weight:800">×</a></span>').join('')
+   +(askPpl
+     ?'<span style="display:inline-flex;gap:6px"><input class="inp" id="ppIn" placeholder="姓名＋職稱，例：吳沛儒 業務代表" style="min-width:220px;padding:5px 10px;font-size:12px">'
+      +'<button class="btn sm" id="ppGo">寄出邀請</button></span>'
+     :'<button class="btn tt sm" id="padd">＋ 邀請窗口</button>')+'</div>'
+   +'<div class="sec">本場 leads<span>展後先跟進「面談」</span></div>'
+   +'<div class="grid4" style="grid-template-columns:repeat(4,1fr)">'
+   +'<div class="card tile" style="background:var(--fill);border:0"><div class="v" id="bl-total">'+b.leads+'</div><div class="l">合計</div></div>'
+   +'<div class="card tile" style="background:var(--fill);border:0"><div class="v" id="bl-dir" style="color:var(--ink2)">'+sr.dir+'</div><div class="l">名錄加入</div></div>'
+   +'<div class="card tile" style="background:var(--fill);border:0"><div class="v" id="bl-qr" style="color:var(--ink2)">'+sr.qr+'</div><div class="l">現場掃攤</div></div>'
+   +'<div class="card tile" style="background:var(--fill);border:0"><div class="v" id="bl-meet" style="color:var(--ink2)">'+sr.meet+'</div><div class="l">面談</div></div>'
+   +'</div>'
+   +'<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">'
+   +'<button class="btn tt sm" data-bsim="dir">模擬：名錄加入</button>'
+   +'<button class="btn tt sm" data-bsim="qr">模擬：被掃攤位 QR</button>'
+   +'<button class="btn tt sm" data-bsim="meet">模擬：面對面換到</button>'
+   +'<span style="flex:1"></span>'
+   +'<button class="btn tt sm" id="bleave">退出攤位（換一家試）</button></div>'
+   +'<div class="tip" style="margin-top:12px">升級企業版後直接併入公司人脈庫 · 邀請碼 '+esc(b.code)+'</div>'
+   +'</div>'}}
+ const anyOpen=o.evs.some(x=>x.st==='approved');
+ return head
+ +'<div class="card" style="max-width:520px;margin-top:16px"><div class="sec" style="margin-top:0">加入活動</div>'
+ +'<div class="tip" style="margin-bottom:12px">邀請信裡的連結點開會直接到這裡——原型用邀請碼代替點連結。</div>'
+ +'<div style="display:flex;gap:8px"><input class="inp" id="bcode" placeholder="攤位邀請碼，例：B-5T09" style="flex:1">'
+ +'<button class="btn" id="bjoin">加入</button></div>'
+ +(anyOpen?'<div class="tip" style="margin-top:10px">試試種子那組待領的：<b>B-5T09</b>（昕采生技 @ 2026 智慧製造展）</div>'
+          :'<div class="tip" style="margin-top:10px">目前沒有進行中的活動——先到「我主辦的活動」建一場。</div>')
+ +'</div>'}
+
+/* ═════ 人員與權限（Meta 企業平台式：帳號＝個人帳號，角色＝區域） ═════ */
+/* ═════ 企業 NFC 卡 ═════ */
+const NFC_PRICE=390, NFC_CUSTOM=450, NFC_CUSTOM_MIN=20, SEAT=299;
+function nfcSt(c){return c.st==='off'?'off':c.m?'on':'stock'}
+/* 綁定成員下拉：搜尋；沒卡的排上面，已有卡的排下面（同一人可綁多張，開同一個網址） */
+function nbListHTML(i){
+ const o=ST(),q=nfcQ.trim();
+ const cnt=m=>o.nfc.cards.filter(c=>c.m===m.id&&c.st!=='off').length;
+ let ms=o.members.filter(m=>!q||(m.name+' '+m.title).includes(q));
+ ms=ms.filter(m=>!cnt(m)).concat(ms.filter(m=>cnt(m)));
+ return ms.length?ms.map(m=>{const n=cnt(m);
+  return '<button data-nto="'+i+':'+m.id+'" style="display:flex;align-items:center;gap:8px;width:100%;text-align:left;padding:8px 10px;border-bottom:1px solid var(--hair);font-size:13px;background:#fff;cursor:pointer">'
+  +'<b>'+esc(m.name)+'</b><span class="tip">'+esc(m.title)+'</span><span style="flex:1"></span>'
+  +(n?'<span class="chip" style="font-size:10.5px;padding:1px 7px">已有 '+n+' 張</span>':'<span class="chip" style="font-size:10.5px;padding:1px 7px;background:var(--mangS);color:var(--mangD)">還沒卡</span>')
+  +'</button>'}).join('')
+ :'<div class="tip" style="padding:10px">找不到「'+esc(q)+'」</div>'}
+function pgNfc(){
+ const o=ST(),N=o.nfc,cards=N.cards;
+ const on=cards.filter(c=>nfcSt(c)==='on'),stock=cards.filter(c=>nfcSt(c)==='stock'),off=cards.filter(c=>nfcSt(c)==='off');
+ const taps=cards.reduce((a,c)=>a+(c.mo||0),0);
+ const mem=id=>o.members.find(m=>m.id===id)||{name:'（已離開）',title:''};
+ const free=o.members.filter(m=>!cards.some(c=>c.m===m.id&&c.st!=='off'));
+ const stChipN=k=>k==='on'?'<span class="chip" style="background:#E2F9F4;color:#00806E">使用中</span>':k==='stock'?'<span class="chip">庫存</span>':'<span class="chip" style="background:#FBE9E8;color:#C8322B">已停用</span>';
+ return '<h1>企業 NFC 卡</h1><div class="sub">卡是公司的，不印名字。一感應，打開這位同事的企業名片；人走卡留，解除綁定就能給下一位。同一位成員可以綁多張卡——都開同一個名片網址。</div>'
+ +'<div class="grid4">'
+ +[[on.length,'使用中'],[stock.length,'庫存'],[off.length,'已停用'],[taps,'本月感應']]
+   .map(x=>'<div class="card tile"><div class="v">'+x[0]+'</div><div class="l">'+x[1]+'</div></div>').join('')
+ +'</div>'
+ +'<div class="card" style="margin-top:14px"><div style="overflow-x:auto"><table><thead><tr><th>卡號</th><th>綁定成員</th><th class="num">感應</th><th>狀態</th><th></th></tr></thead><tbody>'
+ /* 未綁定（庫存）排上面，已綁定其次，停用最後 */
+ +cards.map((c,i)=>({c:c,i:i})).sort((x,y)=>({stock:0,on:1,off:2})[nfcSt(x.c)]-({stock:0,on:1,off:2})[nfcSt(y.c)]||x.i-y.i)
+ .map(({c,i})=>{const k=nfcSt(c),m=c.m?mem(c.m):null,binding=nfcBind===c.uid;
+   if(nfcOffC===i)return '<tr data-nrow="'+i+'"><td colspan="5" style="padding:8px 10px"><div class="danger" style="margin:0"><div style="flex:1"><b>停用 '+esc(c.uid)+'？</b><span class="tip">停用後感應不再打開任何名片'+(m?'；'+esc(m.name)+' 會失去這張卡':'')+'。找回可再放回庫存。</span></div><button class="btn red sm" data-noffgo="'+i+'">停用</button><button class="btn tt sm" data-noffno="1">取消</button></div></td></tr>';
+   return '<tr data-nrow="'+i+'">'
+   +'<td style="font-family:var(--fe);font-weight:700">'+esc(c.uid)+'</td>'
+   +'<td>'+(m?'<b>'+esc(m.name)+'</b> <span class="tip">'+esc(m.title)+'</span>'
+      :k==='stock'
+       ?(binding
+         ?'<div style="max-width:300px;padding:4px 0"><input class="inp" id="nbq" data-ni="'+i+'" placeholder="搜尋成員姓名或職稱…" value="'+esc(nfcQ)+'" style="width:100%;padding:7px 10px;font-size:13px">'
+          +'<div id="nbList" style="max-height:176px;overflow:auto;border:1px solid var(--hair);border-radius:10px;background:#fff;margin-top:6px">'+nbListHTML(i)+'</div>'
+          +'<a data-nbind="" style="cursor:pointer;color:var(--ink3);font-size:12px;display:inline-block;margin-top:6px">取消</a></div>'
+         :'<a data-nbind="'+c.uid+'" style="cursor:pointer;color:var(--mangD);display:inline-flex;align-items:center;gap:4px">綁定成員'+ico('dn',12)+'</a>')
+       :'<span class="tip">—</span>')+'</td>'
+   +'<td class="num" data-taps="'+i+'">'+c.taps+'</td>'
+   +'<td>'+stChipN(k)+'</td>'
+   +'<td style="white-space:nowrap;text-align:right">'
+   +(k==='on'?'<button class="btn tt sm" data-ntap="'+i+'">'+ico('tap',13)+' 模擬感應</button> <button class="btn tt sm" data-nfree="'+i+'">解除綁定</button> <a data-noff="'+i+'" style="cursor:pointer;color:var(--ink3);font-size:12px;margin-left:6px">遺失停用</a>'
+     :k==='stock'?'<a data-noff="'+i+'" style="cursor:pointer;color:var(--ink3);font-size:12px">停用</a>'
+     :'<a data-nback="'+i+'" style="cursor:pointer;color:var(--ink3);font-size:12px">找回，放回庫存</a>')
+   +'</td></tr>'}).join('')
+ +'</tbody></table></div></div>'
+
+ +'<div class="sec">訂購<span>NT$'+NFC_PRICE+'／張 · 寄到公司地址 · 開統編發票</span></div>'
+ +'<div class="card" style="padding:14px 16px;max-width:640px">'
+ +(N.orders.length?'<div style="margin-bottom:12px">'+N.orders.map((od,i)=>'<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--hair);font-size:13px"><span style="color:var(--ink3);width:44px">'+esc(od.d)+'</span><b>'+od.n+' 張</b><span class="tip">NT$'+(od.n*(od.custom?NFC_CUSTOM:NFC_PRICE)).toLocaleString()+'</span><span style="flex:1"></span>'
+    +(od.ori==='port'?'<span class="chip">直式</span>':'')
+    +(od.custom?'<span class="chip">客製'+(od.img>=2?' · 校稿中':' · 待設計檔 '+(2-(od.img||0))+' 面')+'</span>':'')
+    +(od.st==='wait'?'<span class="chip warn">待匯款</span> <button class="btn tt sm" data-npaid="'+i+'">原型：模擬入帳</button>'
+      :od.st==='ship'?'<span class="chip" style="background:var(--mangS);color:var(--mangD)">出貨中</span> <button class="btn tt sm" data-narr="'+i+'">原型：模擬到貨</button>':'<span class="chip" style="background:#E2F9F4;color:#00806E">已到貨</span>')+'</div>').join('')+'</div>':'')
+ +'<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'
+ +'<button class="btn" data-ck="nfc">訂購 NFC 卡</button>'
+ +'<span class="tip">標準黑卡 NT$'+NFC_PRICE+'／張 · 客製卡面 NT$'+NFC_CUSTOM+'／張（'+NFC_CUSTOM_MIN+' 張起）'+(free.length>stock.length?' · 還有 '+(free.length-stock.length)+' 位成員沒卡':'')+'</span>'
+ +'<span style="flex:1"></span><button class="btn ghost sm" id="specTg">'+(nfcSpecOpen?'收起規範':'設計規範')+'</button>'
+ +'</div>'+(nfcSpecOpen?'<div style="border-top:1px solid var(--hair);margin-top:14px;padding-top:14px">'+specHTML()+'</div>':'')+'</div>'
+ +'<div class="tip" style="margin-top:12px">成員自己買的個人 NFC 卡開的是他的個人名片，跟這裡的企業卡是兩張卡、兩件事。離職：解除綁定即可，卡留公司，他的個人帳號不受影響。</div>'}
+
+function pgPpl(){
+ const o=ST(),st=o.staff||[];
+ const owners=st.filter(x=>x.role==='owner'&&x.st==='active');
+ const me=st.find(x=>x.me)||{};
+ const canXfer=me.role==='owner';
+ return '<h1>人員與權限</h1><div class="sub">登入用的是每個人自己的 Heycard 帳號。角色決定看得到哪些區；成員的職稱變更也在這裡審核。</div>'
+ +'<div style="margin-top:16px;max-width:760px">'
+
+ +'<div class="sec" style="margin-top:0">職稱審核'+(o.pending.length?'<span class="n" style="display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:99px;background:var(--mang);color:#fff;font-size:11px;font-weight:700;margin-left:8px;padding:0 5px">'+o.pending.length+'</span>':'')+'<span>核准後成員卡面即時更新；審核期間對外維持舊職稱</span></div>'
+ +(o.pending.length?o.pending.map((p,i)=>
+  '<div class="card" style="margin-bottom:10px;display:flex;align-items:center;gap:14px">'
+  +'<div style="flex:1"><b>'+esc(p.who)+'</b><div class="tip">「'+esc(p.from)+'」 → 「<b style="color:var(--ink)">'+esc(p.to)+'</b>」</div></div>'
+  +'<button class="btn sm" data-ok="'+i+'">'+ico('ck',13)+'核准</button>'
+  +'<button class="btn tt sm" data-no="'+i+'">退回</button></div>').join('')
+ :'<div class="card tip" style="margin-bottom:10px">沒有待審的申請。</div>')
+
+ +'<div class="sec">後台人員<span>誰能登入這個後台、能動哪些區</span></div>'
+ +'<div class="card" style="padding:4px 16px">'
+ +st.map(s=>{const R=ROLES[s.role]||ROLES.viewer,editing=roleEdit===s.id;
+   return '<div style="border-bottom:1px solid var(--hair)">'
+   +'<div style="display:flex;align-items:center;gap:12px;padding:12px 2px">'
+   +'<div style="width:36px;height:36px;border-radius:50%;background:'+(s.role==='owner'?'#1E1E1E':'var(--mangS)')+';color:'+(s.role==='owner'?'#fff':'var(--mangD)')+';display:flex;align-items:center;justify-content:center;font-weight:800;flex:0 0 auto">'+esc((s.name||s.em)[0])+'</div>'
+   +'<div style="flex:1;min-width:0"><div style="font-size:13.5px;font-weight:700">'+esc(s.name||s.em.split('@')[0])+(s.me?' <span class="tip">（你）</span>':'')+'</div>'
+   +'<div class="tip">'+esc(s.em)+(s.st==='invited'?' · 邀請中':'')+'</div></div>'
+   +(s.role==='owner'||!canXfer&&me.role!=='admin'
+     ?roleChip(s.role)
+     :'<a data-role="'+s.id+'" style="cursor:pointer;display:inline-flex;align-items:center;gap:4px">'+roleChip(s.role)+ico('arr',12)+'</a>')
+   +(s.role!=='owner'&&(me.role==='owner'||me.role==='admin')?'<a data-srm="'+s.id+'" style="cursor:pointer;color:var(--ink3);display:flex;margin-left:6px">'+ico('x',14)+'</a>':'<span style="width:20px"></span>')
+   +'</div>'
+   +(rmC===s.id
+     ?'<div class="danger"><div style="flex:1"><b>移除 '+esc(s.name||s.em)+' 的後台權限？</b><span class="tip">他將無法登入這個後台；個人帳號、個人名片與個人人脈不受影響。</span></div><button class="btn red sm" data-srmgo="'+s.id+'">移除</button><button class="btn tt sm" data-srmno="1">取消</button></div>':'')
+   +(editing
+     ?'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px;padding:0 2px 12px">'
+      +Object.keys(ROLES).filter(k=>k!=='owner').map(k=>{const Rk=ROLES[k],on=s.role===k;
+        return '<button data-setrole="'+s.id+':'+k+'" style="text-align:left;border:1.5px solid '+(on?'var(--mang)':'var(--hair)')+';background:'+(on?'var(--mangS)':'#fff')+';border-radius:12px;padding:10px 12px">'
+        +'<div style="display:flex;align-items:center;gap:8px"><b style="font-size:13px">'+Rk.n+'</b>'+(on?ico('ck',13):'')+'</div>'
+        +'<div class="tip" style="font-size:11.5px">'+Rk.d+'</div>'
+        +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:6px">'+Rk.a.map(x=>'<span class="chip" style="font-size:10.5px;padding:2px 7px">'+x+'</span>').join('')+'</div></button>'}).join('')
+      +'</div>':'')
+   +'</div>'}).join('')
+ +'<div style="padding:12px 2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
+ +(askStaff
+   ?'<input class="inp" id="sfEm" placeholder="對方的 Email" style="min-width:220px">'
+    +'<span style="display:inline-flex;gap:5px">'+['admin','events','viewer'].map(k=>'<span class="chip'+(xferTo===k?' on':'')+'" data-sfrole="'+k+'" style="cursor:pointer">'+ROLES[k].n+'</span>').join('')+'</span>'
+    +'<button class="btn sm" id="sfGo">寄出邀請</button>'
+   :'<button class="btn" id="sfAdd">邀請人員</button>')
+ +'</div></div>'
+
+ +'<div class="sec">擁有權<span>公司至少一位擁有者；離職前先轉移</span></div>'
+ +'<div class="card" style="padding:14px 16px">'
+ +'<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'
+ +'<div style="flex:1;min-width:200px"><b style="font-size:13.5px">'+owners.map(x=>esc(x.name)).join('、')+'</b>'
+ +'<div class="tip">擁有者能改帳務、改任何人的權限、關閉公司。管理員不能。</div></div>'
+ +(canXfer?'<button class="btn tt sm" id="xfer">轉移擁有權</button>':'<span class="tip">只有擁有者能轉移</span>')+'</div>'
+ +(xferOpen&&canXfer
+   ?'<div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--hair)">'
+    +'<div class="tip" style="margin-bottom:8px">轉給誰？轉移後你會變成管理員。</div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap">'
+    +st.filter(x=>!x.me&&x.st==='active').map(x=>'<span class="chip'+(xferTo===x.id?' on':'')+'" data-xto="'+x.id+'" style="cursor:pointer">'+esc(x.name)+'</span>').join('')
+    +'</div>'
+    +'<div style="display:flex;gap:8px;margin-top:10px"><button class="btn sm" id="xferGo"'+(xferTo?'':' disabled style="opacity:.5"')+'>確認轉移</button>'
+    +'<button class="btn tt sm" id="xferNo">取消</button></div></div>'
+   :'')
+ +'</div>'
+ +'<div class="tip" style="margin-top:12px">帳號＝Heycard 個人帳號。人離開公司：擁有者移除他的後台權限＋停用他的企業卡；他的個人帳號與個人人脈不受影響（Q-07）。</div>'
+ +'</div>'}
+
+/* ═════ 方案與帳單 ═════ */
+const money=n=>'NT$'+Math.round(n).toLocaleString();
+const BI_F=[['name','公司名稱'],['tax','統一編號 / Tax ID'],['title','發票抬頭'],['addr','公司地址'],['cn','帳單聯絡人'],['cem','帳單 Email'],['cph','聯絡電話']];
+function planLine(b){return '企業版 '+b.seats+' 席 · '+(b.yearly?'年繳 '+money(b.seats*SEAT*10)+'／年':'月繳 '+money(b.seats*SEAT)+'／月')}
+function usedSeats(o){return o.members.length}
+function daysLeft(){const d=new Date();return Math.max(1,30-d.getDate())}
+function pgBill(){
+ const o=ST(),b=o.billing,used=usedSeats(o);
+ const nw=seatNew||b.seats,diff=nw-b.seats;
+ const est=diff>0?'今天 '+money(diff*SEAT*(b.yearly?10:daysLeft()/30))+'（按剩餘 '+daysLeft()+' 天），之後 '+money(nw*SEAT*(b.yearly?10:1))+(b.yearly?'／年':'／月')
+          :diff<0?'下期生效，今天不收費':'已用 '+used+' 席，最少保留 '+used;
+ return '<h1>方案與帳單</h1><div class="sub">訂閱、付款方式、訂購資訊與每一期的發票。</div>'
+ +'<div style="max-width:860px;margin-top:18px">'
+ /* 方案 */
+ +'<div class="sect"><div class="sh"><b>方案</b><span class="s">'+(planOf()==='demo'?'Demo 模式':planOf()==='trial'?'試用中':'企業版 · '+(b.yearly?'年繳':'月繳'))+'</span>'
+ +'<div class="act">'+(planOf()==='demo'?'<button class="btn sm" id="trialGo2">綁卡，開始 14 天免費試用</button>':seatEdit?'':'<button class="btn ghost sm" id="seatEd">調整席次</button>'+(b.yearly?'':'<button class="btn ghost sm" data-ck="yearly">改為年繳</button>'))+'</div></div>'
+ +'<div class="sb"><div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap">'
+ +'<div><div class="kpi"><b>'+b.seats+'</b><span>席</span></div><div class="bar4" style="margin-top:10px"><i style="width:'+Math.min(100,Math.round(used/b.seats*100))+'%"></i></div></div>'
+ +'<div class="meta" style="margin:0">'
+ +'<span>已用 '+used+' 席</span><i></i><span>'+(b.yearly?money(Math.round(b.seats*SEAT*10/12))+'／月 · 年繳一次 '+money(b.seats*SEAT*10):money(b.seats*SEAT)+'／月')+'</span><i></i><span>'+(planOf()==='demo'?'尚未綁卡':planOf()==='trial'?'試用到 '+esc((curCo()||{}).trialEnd||b.next):'下次扣款 '+esc(b.next))+'</span>'+(b.yearly?'':'<i></i><span style="color:var(--mangD)">年繳折合 '+money(Math.round(SEAT*10/12))+'／席／月</span>')
+ +'</div></div></div>'
+ +(seatEdit
+   ?'<div class="sb" style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:#F5F5F6">'
+    +'<div class="stp"><button data-sq="-1"'+(nw<=used?' disabled':'')+'>−</button><div class="v">'+nw+' <small>席</small></div><button data-sq="1">+</button></div>'
+    +'<span class="tip" style="flex:1;min-width:200px">'+est+'</span>'
+    +'<button class="btn sm" data-ck="seats"'+(diff===0?' disabled style="opacity:.5"':'')+'>前往結帳</button><button class="btn ghost sm" id="seatNo">取消</button></div>'
+   :'')
+ +'</div>'
+ /* 付款方式 */
+ +'<div class="sect"><div class="sh"><b>付款方式</b><div class="act"><button class="btn ghost sm" id="cardSwap">更換卡片</button></div></div>'
+ +'<div class="sb" style="padding-top:6px;padding-bottom:6px">'
+ +'<div class="lrow"><span class="ic">'+ico('card',18)+'</span><div style="flex:1"><b>信用卡 •••• '+esc(b.card)+'</b><span class="tip">訂閱扣款</span></div><span class="chip">預設</span></div>'
+ +'<div class="lrow mute"><span class="ic">'+ico('bank',18)+'</span><div style="flex:1"><b>匯款（對公轉帳）</b><span class="tip">NFC 卡訂單結帳時可選</span></div></div>'
+ +'</div></div>'
+ /* 訂購資訊 */
+ +'<div class="sect"><div class="sh"><b>訂購資訊</b><span class="s">發票寄到帳單 Email</span><div class="act"><span class="tip" id="biMsg"></span><button class="btn ghost sm" id="biSave">儲存</button></div></div>'
+ +'<div class="sb"><div class="fgrid">'
+ +[['name','公司名稱'],['tax','統一編號 / Tax ID'],['title','發票抬頭'],['cph','聯絡電話'],['addr','公司地址',1],['cn','帳單聯絡人'],['cem','帳單 Email']]
+   .map(f=>'<div class="fld"'+(f[2]?' style="grid-column:1/-1"':'')+'><label for="bi-'+f[0]+'">'+f[1]+'</label><input class="inp" id="bi-'+f[0]+'" data-bi="'+f[0]+'" value="'+esc(b.co[f[0]]||'')+'"></div>').join('')
+ +'</div></div></div>'
+ /* 帳單 */
+ +'<div class="sect"><div class="sh"><b>帳單與發票</b><span class="s">'+b.invoices.length+' 筆</span></div>'
+ +'<div class="sb tbl"><div style="overflow-x:auto"><table><thead><tr><th>日期</th><th>單號</th><th>項目</th><th class="num">金額</th><th>付款</th><th>發票</th><th>狀態</th></tr></thead><tbody>'
+ +b.invoices.map((iv,i)=>'<tr data-inv="'+i+'" style="cursor:pointer"><td style="color:var(--ink3);white-space:nowrap">'+esc(iv.d)+'</td><td class="num" style="font-size:12px">'+esc(iv.id)+'</td><td>'+esc(iv.item)+'</td><td class="num">'+money(iv.amt)+'</td><td style="color:var(--ink2);font-size:12px;white-space:nowrap">'+esc(iv.pay)+'</td><td class="num" style="font-size:12px;color:var(--ink3)">'+esc(iv.inv||'—')+'</td>'
+   +'<td>'+(iv.st==='paid'?'<span class="chip" style="background:#E2F9F4;color:#00806E">已付款</span>':iv.st==='wait'?'<span class="chip warn">待匯款</span>':'<span class="chip">處理中</span>')+'</td></tr>').join('')
+ +'</tbody></table></div></div></div>'
+ +'</div>'}
+
+/* ═════ 結帳：席次增減、改年繳、NFC 卡訂購共用同一頁 ═════ */
+function cartNew(type,o){
+ const b=o.billing;
+ const c={type:type,pay:'card',co:Object.assign({},b.co)};
+ if(type==='nfc')c.d={qty:10,mode:'std',ori:'land',img:'',back:'',color:'#5C5CFF',style:'極簡',elem:'',notes:''};
+ if(type==='seats')c.seats=seatNew||b.seats;
+ return c}
+function cartLines(o){
+ const c=o.cart,b=o.billing,L=[];
+ if(c.type==='nfc'){const d=c.d,unit=d.mode==='custom'?NFC_CUSTOM:NFC_PRICE;
+  L.push({t:'企業 NFC 卡 · '+(d.mode==='custom'?'客製卡面':'標準黑卡')+' · '+(d.ori==='port'?'直式':'橫式')+' × '+d.qty,a:unit*d.qty});
+  L.push({t:'寄送（公司地址）',a:0})}
+ if(c.type==='seats'){const diff=c.seats-b.seats;
+  if(diff>0)L.push({t:'加 '+diff+' 席 · 本期按 '+daysLeft()+'／30 天計',a:diff*SEAT*(b.yearly?10:daysLeft()/30)});
+  else L.push({t:'減 '+(-diff)+' 席 · 下期生效',a:0})}
+ if(c.type==='yearly')L.push({t:'企業版 '+b.seats+' 席 · 年繳（12 個月收 10 個月）',a:b.seats*SEAT*10});
+ return L}
+function nfcPrompt(c){const d=c.d;
+ const po=d.ori==='port';
+ return '請為「'+(c.co.name||'我們公司')+'」設計一張 NFC 名片的正面圖，用途是實體卡片印刷。\n'
+ +'規格：尺寸 '+(po?'54 × 85.6 mm（直式，比例 1:1.585）':'85.6 × 54 mm（橫式，比例 1.585:1）')+'，四邊各留 3 mm 出血，300 dpi。\n'
+ +'設計：主色 '+d.color+'，風格「'+d.style+'」'+(d.elem?'，想放的元素：'+d.elem:'')+'。\n'
+ +'限制：整張卡不放任何文字、姓名、Logo 字樣或聯絡方式；右下角留出約 12 × 12 mm 的乾淨空白區（NFC 感應標記位置）；主要視覺不要貼近邊緣 5 mm 內。\n'
+ +'輸出：單張完整卡面、無邊框、無陰影、無立體或斜角效果，純平面設計圖，PNG。'}
+/* 設計規範：標「待確認」的數值等廠商回覆後填正式值 */
+const NFC_SPEC=[
+ {g:'尺寸',items:[['成品尺寸','85.6 × 54 mm（ISO 7810 ID-1）',1],['方向','橫式或直式皆可，下單時選擇；正反面同方向',1],['圓角','R 3.18 mm',1],['出血','四邊各 3 mm → 檔案 91.6 × 60 mm（直式 60 × 91.6）',1],['安全區','距成品邊 3 mm 內不放重要元素',1]]},
+ {g:'檔案',items:[['格式','PDF／AI（向量）或 PNG／JPG',1],['解析度','300 dpi 以上',1],['色彩','CMYK；特殊色另註',0],['正反面','各一檔，同一尺寸',1]]},
+ {g:'NFC 與材質',items:[['晶片區','卡面一角約 12 × 15 mm（位置待確認），避免燙金、金屬油墨、厚磨砂、凸字',0],['天線區','沿卡邊一圈約 5 mm，避免金屬材質與金屬箔',0],['卡體','PVC 0.84 mm；金屬卡不支援 NFC',0],['NFC 標記','右下角 12 × 12 mm 由我們加上，設計請留白',1]]}];
+function specHTML(){
+ const dia='<svg viewBox="0 0 300 200" width="100%" style="max-width:240px;display:block" role="img" aria-label="卡面版型：出血、成品、安全區、晶片區與 NFC 標記位置">'
+ +'<rect x="4" y="4" width="292" height="192" rx="12" fill="#fff" stroke="#BDBDBD" stroke-dasharray="4 3"/>'
+ +'<rect x="14" y="14" width="272" height="172" rx="10" fill="#F5F5F6" stroke="#1E1E1E" stroke-width="1.5"/>'
+ +'<rect x="24" y="24" width="252" height="152" rx="8" fill="none" stroke="#5C5CFF" stroke-dasharray="3 3"/>'
+ +'<rect x="26" y="26" width="42" height="52" rx="4" fill="#FBF3DF" stroke="#B98900" stroke-dasharray="3 2"/><text x="47" y="49" font-size="8" fill="#8A6500" text-anchor="middle" font-family="sans-serif">晶片區</text><text x="47" y="60" font-size="7" fill="#8A6500" text-anchor="middle" font-family="sans-serif">待確認</text>'
+ +'<rect x="234" y="134" width="40" height="40" rx="6" fill="#F0F0FF" stroke="#5C5CFF"/><text x="254" y="158" font-size="8" fill="#4A4AE0" text-anchor="middle" font-family="sans-serif" font-weight="700">NFC</text>'
+ +'<text x="150" y="10" font-size="7" fill="#565656" text-anchor="middle" font-family="sans-serif">出血 3 mm</text>'
+ +'<text x="150" y="106" font-size="8" fill="#565656" text-anchor="middle" font-family="sans-serif">安全區內放主要視覺</text>'
+ +'</svg>';
+ return '<div style="display:grid;grid-template-columns:240px 1fr;gap:20px;align-items:start" class="two specl">'
+ +'<div>'+dia+'<div class="tip" style="margin-top:6px">虛線＝出血 · 實線＝成品 · 藍虛線＝安全區</div></div>'
+ +'<div style="display:grid;gap:12px">'+NFC_SPEC.map(g=>'<div><div style="font-size:11.5px;font-weight:700;color:var(--ink3);margin-bottom:4px">'+esc(g.g)+'</div>'
+   +g.items.map(it=>'<div style="display:flex;gap:10px;font-size:12.5px;padding:4px 0;border-top:1px solid var(--hair)"><span style="width:64px;flex:0 0 auto;color:var(--ink2)">'+esc(it[0])+'</span><span style="flex:1">'+esc(it[1])+'</span>'+(it[2]?'':'<span class="chip warn" style="font-size:10.5px;padding:1px 7px">待確認</span>')+'</div>').join('')+'</div>').join('')
+ +'</div></div>'}
+function cardPreview(c){const d=c.d,P=d.ori==='port'?' port':'';
+ if(d.mode==='std')return '<div class="cardpv'+P+'"><span class="hcm">HEYCARD</span><span class="nfcm">NFC</span></div>';
+ const side=(img,lab)=>img&&img!=='pdf'?'<div class="cardpv'+P+'"><img src="'+img+'" alt="'+lab+'"><span class="safe"></span>'+(lab==='正面'?'<span class="nfcm">NFC</span>':'')+'</div>'
+  :img==='pdf'?'<div class="cardpv empty'+P+'"><span class="safe"></span><div class="ph">'+lab+' · PDF 已附上</div></div>'
+  :'<div class="cardpv empty'+P+'"><span class="safe"></span>'+(lab==='正面'?'<span class="nfcm">NFC</span>':'')+'<div class="ph">'+lab+'</div></div>';
+ return side(d.img,'正面')+'<div style="margin-top:10px">'+side(d.back,'背面')+'</div>'}
+function pgChk(){
+ const o=ST(),c=o.cart;if(!c)return pgBill();
+ const b=o.billing,L=cartLines(o),tot=L.reduce((a,x)=>a+x.a,0);
+ if(c.done){const iv=b.invoices[0];
+  return '<h1>'+(c.pay==='wire'?'訂單已建立':'付款完成')+'</h1>'
+  +'<div class="sect" style="max-width:520px;margin-top:18px"><div class="sb" style="text-align:center;padding:30px 24px">'
+  +'<div style="width:48px;height:48px;border-radius:50%;background:var(--mang);color:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 14px">'+ico('ck',22,2.6)+'</div>'
+  +'<div style="font-size:15px;font-weight:800">'+esc(iv.item)+'</div>'
+  +'<div class="tip" style="margin-top:4px">'+esc(iv.id)+' · '+money(iv.amt)+' · '+esc(iv.pay)+'</div>'
+  +(c.pay==='wire'?'<div style="background:var(--fill);border-radius:12px;padding:12px 14px;margin-top:16px;text-align:left"><b style="font-size:13px">匯款資訊</b><div class="tip">台北富邦 012 · 虛擬帳號 <b style="font-family:var(--fe);color:var(--ink)">9103 2200 4581 7'+String(b.invoices.length).padStart(3,'0')+'</b> · '+money(iv.amt)+'<br>3 個工作天內匯款，入帳後出貨並開立發票。</div></div>'
+     :'<div class="tip" style="margin-top:8px">電子發票已寄到 '+esc(c.co.cem)+'</div>')
+  +(c.type==='nfc'&&c.d.mode==='custom'?'<div class="tip" style="margin-top:6px">'+(c.d.img&&c.d.back?'正反面設計檔已收到，1 個工作天內回覆校稿。':'還缺'+(c.d.img?'':'正面')+(c.d.back?'':'背面')+'設計檔——到「企業 NFC 卡」補上後才排印。')+'</div>':'')
+  +'<div style="display:flex;gap:8px;justify-content:center;margin-top:20px"><button class="btn" data-nav2="bill">看帳單</button><button class="btn ghost" data-nav2="'+(c.type==='nfc'?'nfc':'bill')+'">'+(c.type==='nfc'?'回 NFC 卡':'回方案')+'</button></div></div></div>'}
+
+ const sh=(n,t,s2,act)=>'<div class="sh"><span class="stepn">'+n+'</span><b>'+t+'</b>'+(s2?'<span class="s">'+s2+'</span>':'')+(act?'<div class="act">'+act+'</div>':'')+'</div>';
+ let sec1='',sec1b='';
+ if(c.type==='nfc'){const d=c.d,unit=d.mode==='custom'?NFC_CUSTOM:NFC_PRICE,minQ=d.mode==='custom'?NFC_CUSTOM_MIN:5,cu=d.mode==='custom';
+  sec1='<div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">'
+  +'<div style="flex:0 0 196px">'+cardPreview(c)+'</div>'
+  +'<div style="flex:1;min-width:220px;display:grid;gap:14px">'
+  +'<div style="display:flex;gap:10px;flex-wrap:wrap"><div class="seg"><button data-dm="std"'+(cu?'':' class="on"')+'>標準黑卡</button><button data-dm="custom"'+(cu?' class="on"':'')+'>客製卡面</button></div>'
+  +'<div class="seg"><button data-dori="land"'+(d.ori==='port'?'':' class="on"')+'>橫式</button><button data-dori="port"'+(d.ori==='port'?' class="on"':'')+'>直式</button></div></div>'
+  +'<div style="display:flex;align-items:center;gap:12px"><div class="stp"><button data-cq="-5"'+(d.qty<=minQ?' disabled':'')+'>−</button><div class="v">'+d.qty+' <small>張</small></div><button data-cq="5">+</button></div>'
+  +'<span style="font-size:13px;color:var(--ink2)">'+money(unit)+'／張'+(cu?' · '+NFC_CUSTOM_MIN+' 張起':'')+'</span></div>'
+  +'</div></div>';
+  const drop=(img,id,rm,lab)=>'<div class="drop'+(img?' ok':'')+'">'+(img
+      ?'<div style="display:flex;align-items:center;justify-content:center;gap:6px;color:#00806E;font-size:13px;font-weight:700">'+ico('ck',15)+lab+'已附上</div><div style="display:flex;gap:8px;justify-content:center;margin-top:8px"><label class="btn ghost sm" style="cursor:pointer">更換<input type="file" id="'+id+'" accept="image/*,.pdf" style="display:none"></label><button class="btn ghost sm" id="'+rm+'">移除</button></div>'
+      :'<label class="btn ghost sm" style="cursor:pointer">'+ico('up',14)+'上傳'+lab+'<input type="file" id="'+id+'" accept="image/*,.pdf" style="display:none"></label><div class="tip" style="margin-top:6px">PNG／JPG／PDF</div>')+'</div>';
+  if(cu)sec1b='<div class="sb"><div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><b style="font-size:13px">設計規範</b><span class="tip">收到正反面檔案後，我們依這份規範校稿、印刷</span><span style="flex:1"></span><button class="btn ghost sm" id="specCp">'+ico('cp',13)+' 複製規範</button></div>'+specHTML()+'</div>'
+   +'<div class="sb" style="background:#F5F5F6">'
+   +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px" class="two">'
+   +'<div><div style="font-size:12.5px;font-weight:700;margin-bottom:8px">上傳設計檔<span class="tip" style="font-weight:400;margin-left:8px">正反面各一，下單後 1 個工作天內回覆校稿</span></div>'
+   +'<div style="display:grid;gap:8px">'+drop(d.img,'dImg','dImgRm','正面')+drop(d.back,'dBack','dBackRm','背面')+'</div></div>'
+   +'<div><div style="font-size:12.5px;font-weight:700;margin-bottom:8px">或用 AI 生成正面，再上傳</div>'
+   +'<div style="display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center">'
+   +'<input type="color" id="dColor" value="'+esc(d.color)+'" aria-label="主色" style="width:36px;height:34px;border:1px solid var(--hair);border-radius:8px;padding:2px;background:#fff">'
+   +'<div class="seg" style="justify-self:start">'+['極簡','科技','金屬','活潑','手繪'].map(x=>'<button data-ds="'+esc(x)+'"'+(d.style===x?' class="on"':'')+' style="padding:6px 10px">'+x+'</button>').join('')+'</div>'
+   +'</div>'
+   +'<input class="inp" id="dElem" placeholder="想放的元素，可空：例如抽象電路線條" value="'+esc(d.elem)+'" style="width:100%;margin-top:10px;padding:8px 11px;font-size:13px">'
+   +'<div class="prwrap" style="margin-top:10px"><textarea class="pr" id="dPr" readonly aria-label="Prompt">'+esc(nfcPrompt(c))+'</textarea></div>'
+   +'<div style="display:flex;gap:10px;align-items:center;margin-top:8px"><button class="btn sm" id="dCopy">'+ico('cp',13)+' 複製 Prompt</button><span class="tip">貼到 ChatGPT 生圖，存下來上傳。Logo 與文字由我們校稿時加上。</span></div>'
+   +'</div></div>'
+   +'<input class="inp" id="dNotes" placeholder="設計需求備註，可空：例如背面放公司 Logo、霧面材質" value="'+esc(d.notes)+'" style="width:100%;margin-top:14px;padding:8px 11px;font-size:13px">'
+   +'</div>'}
+ if(c.type==='seats'){const diff=c.seats-b.seats,used=usedSeats(o);
+  sec1='<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><div class="stp"><button data-cs="-1"'+(c.seats<=used?' disabled':'')+'>−</button><div class="v">'+c.seats+' <small>席</small></div><button data-cs="1">+</button></div>'
+  +'<div class="meta" style="margin:0"><span>目前 '+b.seats+' 席</span><i></i><span>已用 '+used+'</span><i></i><span>'+(diff>0?'今天按剩餘 '+daysLeft()+' 天計，之後 '+money(c.seats*SEAT*(b.yearly?10:1))+(b.yearly?'／年':'／月'):diff<0?'下期生效，今天不收費':'席次沒變')+'</span></div></div>'}
+ if(c.type==='yearly')sec1='<div class="meta" style="margin:0"><span>'+b.seats+' 席</span><i></i><span>折合 '+money(Math.round(b.seats*SEAT*10/12))+'／月</span><i></i><span>年繳一次 '+money(b.seats*SEAT*10)+'</span><i></i><span>席次仍可隨時調整</span></div>';
+
+ const disabled=(c.type==='seats'&&c.seats===b.seats)||c.co.cem.indexOf('@')<0;
+ return '<a class="bk" data-nav2="'+(c.type==='nfc'?'nfc':'bill')+'">'+ico('back',14)+(c.type==='nfc'?'企業 NFC 卡':'方案與帳單')+'</a>'
+ +'<h1>結帳</h1><div class="sub">'+(c.type==='nfc'?'企業 NFC 卡':c.type==='seats'?'調整席次':'改為年繳')+'</div>'
+ +'<div class="ck" style="margin-top:18px"><div class="l">'
+ +'<div class="sect">'+sh(1,'明細')+'<div class="sb">'+sec1+'</div>'+sec1b+'</div>'
+ +'<div class="sect">'+sh(2,'訂購資訊','帶入方案與帳單的資料，可改')+'<div class="sb"><div class="fgrid">'
+ +[['name','公司名稱'],['tax','統一編號 / Tax ID'],['title','發票抬頭'],['cph','聯絡電話'],['addr','公司地址',1],['cn','帳單聯絡人'],['cem','帳單 Email']]
+   .map(f=>'<div class="fld"'+(f[2]?' style="grid-column:1/-1"':'')+'><label for="ck-'+f[0]+'">'+f[1]+'</label><input class="inp" id="ck-'+f[0]+'" data-ckco="'+f[0]+'" value="'+esc(c.co[f[0]]||'')+'"'+(f[0]==='cem'&&c.co.cem.indexOf('@')<0?' style="border-color:#C8322B"':'')+'></div>').join('')
+ +'</div></div></div>'
+ +'<div class="sect">'+sh(3,'付款方式')+'<div class="sb" style="display:grid;gap:8px">'
+ +'<button class="opt'+(c.pay==='card'?' on':'')+'" data-pay="card" style="margin:0"><span class="rd"></span><div style="flex:1"><b>信用卡 •••• '+esc(b.card)+'</b><span class="tip">立即完成，發票隨即開立</span></div></button>'
+ +(c.type==='nfc'
+   ?'<button class="opt'+(c.pay==='wire'?' on':'')+'" data-pay="wire" style="margin:0"><span class="rd"></span><div style="flex:1"><b>匯款（對公轉帳）</b><span class="tip">下單後給虛擬帳號，入帳後出貨</span></div></button>'
+   :'<div class="opt off" style="margin:0"><span class="rd"></span><div style="flex:1"><b>匯款（對公轉帳）</b><span class="tip">訂閱目前只支援信用卡</span></div></div>')
+ +'</div></div></div>'
+ +'<div class="r"><div class="sect"><div class="sh"><b>摘要</b></div><div class="sb">'
+ +L.map(x=>'<div class="sumrow"><span style="flex:1;color:var(--ink2)">'+esc(x.t)+'</span><span class="num">'+(x.a?money(x.a):'免費')+'</span></div>').join('')
+ +'<div class="sumrow tot"><span>合計<span class="tip" style="font-weight:400;display:block">含 5% 營業稅</span></span><b>'+money(tot)+'</b></div>'
+ +'<button class="btn" id="ckGo" style="width:100%;justify-content:center;margin-top:14px;padding:11px'+(disabled?';opacity:.5':'')+'"'+(disabled?' disabled':'')+'>'+(c.pay==='wire'?'建立訂單':tot>0?'確認付款 '+money(tot):'確認變更')+'</button>'
+ +'<div class="tip" style="text-align:center;margin-top:8px">'+(c.type==='nfc'?'寄到訂購資訊的公司地址':c.type==='seats'?'席次變更立即生效':'年繳自今天起算')+'</div>'
+ +'</div></div></div></div>'}
+function invOpen(i){
+ const o=ST(),b=o.billing,iv=b.invoices[i];if(!iv)return;
+ $('#ovl').classList.add('show');
+ const d=$('#drawer');d.classList.add('show');
+ d.innerHTML='<div style="display:flex;align-items:center;margin-bottom:4px"><b style="font-size:16px">'+esc(iv.id)+'</b><span style="flex:1"></span><button class="btn tt sm" id="dx">'+ico('x',14)+'</button></div>'
+ +'<div class="tip" style="margin-bottom:14px">'+esc(iv.d)+' · '+(iv.st==='paid'?'已付款':iv.st==='wait'?'待匯款':'處理中')+'</div>'
+ +'<div class="card" style="padding:14px 16px">'
+ +'<div class="sumrow"><span style="color:var(--ink2)">'+esc(iv.item)+'</span><span class="num">'+money(iv.amt)+'</span></div>'
+ +'<div class="sumrow tot"><span>合計（含稅）</span><b>'+money(iv.amt)+'</b></div></div>'
+ +'<div class="sec" style="margin-top:16px">開立對象</div><div class="tip">'+esc(b.co.title||b.co.name)+'<br>統編 '+esc(b.co.tax)+'<br>'+esc(b.co.addr)+'<br>'+esc(b.co.cn)+' · '+esc(b.co.cem)+'</div>'
+ +'<div class="sec" style="margin-top:16px">付款與發票</div><div class="tip">'+esc(iv.pay)+'<br>發票 '+esc(iv.inv||'待開立')+'</div>'
+ +'<div style="display:flex;gap:8px;margin-top:16px;align-items:center"><button class="btn tt sm" id="invCp">複製明細</button><span class="tip">正式版：下載 PDF 發票</span></div>';
+ $('#invCp').onclick=()=>{copyText([iv.id,iv.d,iv.item,money(iv.amt),iv.pay,'發票 '+(iv.inv||'待開立')].join('\n'));$('#invCp').textContent='已複製'};
+ $('#dx').onclick=drawerClose}
+
+/* ═════ 資料邊界 ═════ */
+function pgEdge(){
+ return '<h1>資料邊界</h1><div class="sub">這一頁給法務與客戶看：本後台裝得下什麼、裝不下什麼。每一條都有規格書 REQ-ID。</div>'
+ +'<div style="margin-top:16px;max-width:620px">'
+ +'<div class="edge yes"><b>有的</b><div class="tip">名片面資訊、交換時間地點、經手成員（Q-10）· 系統事件指標：換卡、觸及公司、往返率、對方註冊率、互推（Q-16/17）· 依任一指標排序與匯出（Q-19）· 產業分類與修正痕跡（Q-32）· 活動 leads（Q-28）</div></div>'
+ +'<div class="edge no"><b>沒有的——任何權限、任何畫面、任何匯出都沒有</b><div class="tip">成員用「個人卡」換的任何名片，連存在與否都查不到（Q-08）· 成員自己寫的備註與語音逐字稿（Q-10）· 訊息內容的任何一個字——往返只計有沒有（Q-17、AC-29）· 成員在其他公司的企業卡與其存在（Q-33）· 成員看不見的暗指標——這裡每個數字，本人在 App 都查得到（Q-19）</div></div>'
+ +'<div class="tip" style="margin-top:6px">交換的告知在交換前：「此名片由○○公司認證，交換的名片內容將同步並持續更新於該公司的人脈庫。」（Q-09、Q-31）</div>'
+ +'</div>'}
+
+/* 主辦方點參展商列 → 這一攤的完整檔案＋參觀者看到的名錄頁 */
+function zoneHint(loc){const z=(loc||'')[0];
+ return z==='A'?'入口進來左側':z==='B'?'入口進來中段':z==='C'?'入口進來右側':''}
+function bthOpen(i){
+ const o=ST(),ev=EV(o);if(!ev)return;const b=ev.booths[i];if(!b)return;
+ const flds=(ev.dirCfg||[]).filter(f=>f.on);
+ const join=(b.ppl||[]).filter(pplOk),wait=(b.ppl||[]).filter(p=>!pplOk(p));
+ $('#ovl').classList.add('show');
+ const d=$('#drawer');d.classList.add('show');
+ d.innerHTML='<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px"><b style="font-size:16px">'+esc(b.n)+'</b>'
+  +(b.loc?'<span class="chip" style="background:var(--mangS);color:var(--mangD)">攤位 '+esc(b.loc)+'</span>':'')
+  +(b.st==='open'?'<span class="chip" style="background:#E2F9F4;color:#00806E">已開攤</span>':'<span class="chip">邀請中</span>')
+  +'<span style="flex:1"></span><button class="btn tt sm" id="dx">'+ico('x',14)+'</button></div>'
+  +'<div class="tip" style="margin-bottom:12px">參觀者在名錄點開這一攤，看到的就是下面這頁。</div>'
+
+  +'<div style="border:1px solid var(--hair);border-radius:14px;padding:16px">'
+  +'<div style="display:flex;gap:12px;align-items:center">'
+  +'<div style="width:44px;height:44px;border-radius:12px;background:#1E1E1E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex:0 0 auto">'+esc(b.n[0])+'</div>'
+  +'<div><div style="font-size:15px;font-weight:800">'+esc(b.n)+'</div>'
+  +'<div class="tip">'+esc(b.desc||'參展商')+'</div></div></div>'
+  +(b.launch
+    ?'<div style="background:var(--mangS);border:1px solid #D6D6FF;border-radius:11px;padding:10px 12px;margin-top:12px">'
+     +'<div style="font-size:10px;font-weight:800;color:var(--mangD);letter-spacing:.4px">本場發表</div>'
+     +'<div style="font-size:12.5px;line-height:1.7;margin-top:3px">'+esc(b.launch)+'</div></div>':'')
+  +'<div style="font-size:12.5px;line-height:1.75;color:var(--ink2);margin-top:12px">'
+  +(b.info?esc(b.info):'<span style="color:var(--ink3)">（介紹未填——名錄以 AI 公開情報墊底）</span>')+'</div>'
+  +(b.loc?'<div class="tip" style="margin-top:9px">攤位 '+esc(b.loc)+' · '+zoneHint(b.loc)+'</div>':'')
+  +'<div style="font-size:11.5px;font-weight:700;color:var(--ink3);margin:12px 0 6px">這一攤的人（可面對面換）</div>'
+  +(join.length
+    ?join.map(pp=>'<div style="display:flex;gap:9px;align-items:center;padding:5px 0">'
+      +'<div style="width:30px;height:30px;border-radius:50%;background:var(--fill);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">'+esc(pplName(pp)[0])+'</div>'
+      +'<div style="font-size:13px">'+esc(pplName(pp))+'</div></div>').join('')
+    :'<div class="tip">還沒有已加入 Heycard 的窗口——名錄這一區是空的。</div>')
+  +'</div>'
+
+  +'<div class="sec" style="margin-top:18px">名錄填寫狀態</div>'
+  +flds.map(f=>'<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--hair)">'
+    +'<span style="font-size:13px;flex:1">'+esc(f.label)+'</span>'
+    +((b[f.k]||'').trim()
+      ?'<span class="chip" style="background:#E2F9F4;color:#00806E">已填</span>'
+      :'<span class="chip warn">AI 墊底中</span>')+'</div>').join('')
+  +(wait.length?'<div class="tip" style="margin-top:8px">另有 '+wait.length+' 位窗口已邀請、待本人加入 Heycard。</div>':'')
+
+  +'<div class="sec" style="margin-top:18px">邀請與成效</div>'
+  +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
+  +'<div class="card tile" style="background:var(--fill);border:0;flex:1;min-width:100px"><div class="v" style="font-size:20px">'+(b.st==='open'?b.leads:'—')+'</div><div class="l">leads（只看數量，明細屬於參展商）</div></div>'
+  +'<div class="card tile" style="background:var(--fill);border:0;flex:1;min-width:100px"><div class="v" style="font-size:15px;padding-top:5px">/b/'+esc(b.code.toLowerCase())+'</div><div class="l">'+esc(b.em||'尚無 Email')+'</div></div>'
+  +'</div>'
+  +'<div style="margin-top:12px;display:flex;gap:8px">'
+  +'<a data-cpc="'+i+'" class="btn tt sm" style="cursor:pointer">複製邀請</a>'
+  +(dirMiss(ev,b)>0&&!b.nudged?'<a data-nudge="'+i+'" class="btn tt sm" style="cursor:pointer">催填名錄</a>':'')
+  +'</div>';
+ $('#dx').onclick=drawerClose}
+
+/* 複製不到剪貼簿時：抽屜給全文，自己全選複製（沙箱擋 prompt） */
+function cpOpen(msg){
+ $('#ovl').classList.add('show');
+ const d=$('#drawer');d.classList.add('show');
+ d.innerHTML='<div style="display:flex;align-items:center;margin-bottom:12px"><b style="font-size:15px">邀請訊息</b>'
+  +'<span style="flex:1"></span><button class="btn tt sm" id="dx">'+ico('x',14)+'</button></div>'
+  +'<textarea class="csv" readonly style="height:130px">'+esc(msg)+'</textarea>'
+  +'<button class="btn" id="cp2" style="margin-top:10px">複製全部</button>';
+ $('#cp2').onclick=()=>{const t=$('#drawer textarea');if(copyText(t.value)){$('#cp2').textContent='已複製';note('已複製')}else t.select()};
+ $('#dx').onclick=drawerClose}
+
+/* ═════ 匯出彈窗 ═════ */
+function csvOpen(rows){
+ const head='姓名,公司,職稱,產業,來源,日期,場合,經手';
+ const csv=[head].concat(rows.map(x=>[x[0],x[1],x[2],x[3],x[8]||'','2026-'+x[4],x[5],x[6]].join(','))).join('\n');
+ $('#ovl').classList.add('show');
+ const d=$('#drawer');d.classList.add('show');
+ d.innerHTML='<div style="display:flex;align-items:center;margin-bottom:12px"><b style="font-size:15px">匯出 CSV</b>'
+  +'<span style="flex:1"></span><button class="btn tt sm" id="dx">'+ico('x',14)+'</button></div>'
+  +'<div class="tip" style="margin-bottom:10px">'+rows.length+' 筆。原型環境不能真的下載，全選複製即可；正式版是檔案下載。匯出欄位＝畫面欄位，沒有多的。</div>'
+  +'<textarea class="csv" readonly>'+esc(csv)+'</textarea>'
+  +'<button class="btn" id="cp" style="margin-top:10px">複製全部</button>';
+ $('#cp').onclick=()=>{const t=$('textarea.csv');t.select();
+  try{navigator.clipboard.writeText(t.value)}catch(e){document.execCommand('copy')}
+  $('#cp').textContent='已複製'};
+ $('#dx').onclick=drawerClose}
+function memOpen(id){
+ const o=ST(),m=o.members.find(x=>x.id===id);if(!m)return;
+ const mine=o.lib.filter(x=>x[6]===m.name).reverse();
+ $('#ovl').classList.add('show');
+ const d=$('#drawer');d.classList.add('show');
+ d.innerHTML='<div style="display:flex;align-items:center;margin-bottom:4px"><b style="font-size:16px">'+esc(m.name)+'</b>'
+  +'<span class="tip" style="margin-left:10px">'+esc(m.title)+'</span>'
+  +'<span style="flex:1"></span><button class="btn tt sm" id="dx">'+ico('x',14)+'</button></div>'
+  +'<div class="tip" style="margin-bottom:14px">他在 App 看到的自己＝這一頁。</div>'
+  +'<div class="sec" style="margin-top:0">企業名片資訊<span>公司管理的欄位改了即時同步他的卡片</span></div>'
+  +'<div class="card" style="padding:14px 16px;margin-bottom:16px"><div class="fgrid">'
+  +'<div class="fld"><label for="dmTtl">職稱 <span style="font-weight:400;color:var(--mangD)">公司管理</span></label><input class="inp" id="dmTtl" value="'+esc(m.title)+'"></div>'
+  +'<div class="fld"><label for="dmCem">公司 Email（卡片上顯示） <span style="font-weight:400;color:var(--mangD)">公司管理</span></label><input class="inp" id="dmCem" value="'+esc(m.cem||'')+'"></div>'
+  +'<div class="fld"><label for="dmNm">中文姓名 <span style="font-weight:400">員工填寫 · 公司可修正</span></label><input class="inp" id="dmNm" value="'+esc(m.name)+'"></div>'
+  +'<div class="fld"><label for="dmNmEn">英文姓名 <span style="font-weight:400">員工填寫 · 公司可修正</span></label><input class="inp" id="dmNmEn" value="'+esc(m.nameEn||'')+'" placeholder="例：Hsiao-Ming Wang"></div>'
+  +'<div class="fld"><label>手機 <span style="font-weight:400">員工填寫 · 必填</span></label><input class="inp" value="'+esc(m.ph||'')+'" disabled placeholder="員工尚未填寫" style="background:var(--fill);color:var(--ink2)"></div>'
+  +'</div>'
+  +(m.ph?'':'<div class="tip" style="margin-top:8px;color:#8A6500">手機還沒填——卡片未啟用，已自動提醒他在 App 補上。</div>')
+  +'<button class="btn sm" id="dmSave" style="margin-top:12px">儲存，同步他的卡片</button></div>'
+  +'<div class="grid4" style="grid-template-columns:repeat(2,1fr);margin-top:0">'
+  +(function(){const act=Math.round(m.n*m.reply/100);
+    return [[m.n,'收進名片'],[m.co,'接觸公司'],[act,'互動中'],[m.n-act,'待跟進']]
+    .map(x=>'<div class="card tile"><div class="v" style="font-size:21px">'+x[0]+'</div><div class="l">'+x[1]+'</div></div>').join('')})()
+  +'</div><div class="sec">他經手的（'+mine.length+'）</div>'
+  +'<div class="card" style="padding:2px 12px">'+tableLib(mine,true)+'</div>';
+ $('#dmSave').onclick=()=>{const o2=ST(),m2=o2.members.find(x=>x.id===id);if(!m2)return;
+  m2.title=($('#dmTtl').value||'').trim()||m2.title;m2.cem=($('#dmCem').value||'').trim();
+  const nn=($('#dmNm').value||'').trim();if(nn&&nn!==m2.name){o2.lib.forEach(r=>{if(r[6]===m2.name)r[6]=nn});m2.name=nn}
+  m2.nameEn=($('#dmNmEn').value||'').trim();
+  save(o2);draw();note(m2.name+' 的企業名片已同步更新');drawerClose()};
+ $('#dx').onclick=drawerClose}
+function drawerClose(){$('#ovl').classList.remove('show');$('#drawer').classList.remove('show')}
+
+/* ═════ 渲染與事件 ═════ */
+function draw(){
+ const a=AU();
+ if(!a||a.cur==null){document.body.classList.add('out');drawLand();return}
+ document.body.classList.remove('out');
+ navDraw();
+ const pl=planOf(),c0=curCo();
+ const ban=pl==='demo'
+  ?'<div class="demoban"><b>Demo 模式</b><span>看得到所有功能，資料是示範資料。</span><span style="flex:1"></span><button class="btn sm" id="trialGo">綁卡，開始 14 天免費試用</button></div>'
+  :pl==='trial'?'<div class="demoban tr"><b>試用中</b><span>到 '+esc(c0.trialEnd||'')+' · 之後 '+money(ST().billing.seats*SEAT)+'／月，隨時取消</span></div>':'';
+ $('#main').innerHTML=ban+({ov:pgOv,mem:pgMem,card:pgCard,lib:pgLib,ai:pgAI,nfc:pgNfc,ppl:pgPpl,bill:pgBill,chk:pgChk,evs:pgEvs,exh:pgExh,edge:pgEdge})[PG==='ttl'?'ppl':PG]();
+ window.scrollTo(0,0)}
+
+document.addEventListener('click',e=>{
+ /* ── 前台：登入、選公司、建公司 ── */
+ const yr0=e.target.closest('[data-yr]');
+ if(yr0&&!AU()){landYr=+yr0.dataset.yr;$$('[data-yr]').forEach(x=>x.classList.toggle('on',+x.dataset.yr===landYr));const pw=$('#plansw');if(pw)pw.innerHTML=priceCards();return}
+ const lg=e.target.closest('[data-lgo]');
+ if(lg&&lg.dataset.pub==null){ /* 子頁（關於／部落格）的登入／註冊帶 data-pub，交給下面的 pub 處理 */
+  if(lg.dataset.lgo==='reg'){if(lMode!=='up'){lMode='up';lOtp=0;lSent=0;drawLand()}
+   const t=$('#login');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});const nm=$('#lnm');if(nm)nm.focus();return}
+  if(lg.dataset.lgo==='login'&&lMode!=='in'){lMode='in';lOtp=0;lSent=0;drawLand()}
+  const t=$('#'+lg.dataset.lgo);if(t){t.scrollIntoView({behavior:'smooth',block:'start'});if(lg.dataset.lgo==='login'){const em=$('#lem');if(em)em.focus()}}return}
+ const lm=e.target.closest('[data-lm]');
+ if(lm){lMode=lm.dataset.lm;lEm=(($('#lem')||{}).value||'').trim();lNm=(($('#lnm')||{}).value||lNm);lOtp=0;lSent=0;drawLand();return}
+ const pub=e.target.closest('[data-pub]');
+ if(pub&&!AU()){LPUB=pub.dataset.pub||'';
+  if(pub.dataset.lgo==='reg'&&lMode!=='up'){lMode='up';lOtp=0;lSent=0}
+  if(pub.dataset.lgo==='login'&&lMode!=='in'){lMode='in';lOtp=0;lSent=0}
+  drawLand();
+  if(pub.dataset.lgo){const t=$('#login');if(t){t.scrollIntoView();const f=$(pub.dataset.lgo==='reg'?'#lnm':'#lem');if(f)f.focus()}}return}
+ const po=e.target.closest('[data-post]');
+ if(po&&!AU()){LPUB='post:'+po.dataset.post;drawLand();return}
+ if(e.target.closest('#lgo')){const v=(($('#lem')||{}).value||'').trim(),E=$('#lerr');lEm=v;
+  if(v.indexOf('@')<0){$('#lem').style.borderColor='#C8322B';E.textContent='請輸入 Email';E.classList.add('on');return}
+  if(lMode==='up'){const nm=(($('#lnm')||{}).value||'').trim(),pw=(($('#lpw')||{}).value||'');
+   if(!nm){$('#lnm').style.borderColor='#C8322B';E.textContent='請輸入姓名';E.classList.add('on');return}
+   if(pw.length<8){$('#lpw').style.borderColor='#C8322B';E.textContent='密碼 8 碼以上，含英文與數字';E.classList.add('on');return}
+   const w0=lookup(v);
+   if(w0.known){note('這個 Email 已有 Heycard 帳號——已為你登入');
+    afterLogin({em:v,name:w0.name||nm,cos:w0.own,inv:w0.inv,cur:null});return}
+   note('Heycard 帳號已建立，App 也能用這組帳密登入');
+   afterLogin({em:v,name:nm||w0.name,cos:w0.own,inv:w0.inv,cur:null});return}
+  if(lOtp){if(!lSent){lSent=1;drawLand();note('驗證碼已寄到 '+v+'（原型：任意 6 位數字）');return}
+   const c=(($('#lcode')||{}).value||'').trim();if(!/^\d{6}$/.test(c)){$('#lcode').style.borderColor='#C8322B';E.textContent='請輸入 6 位數驗證碼';E.classList.add('on');return}}
+  else{const pw=(($('#lpw')||{}).value||'');if(!pw){$('#lpw').style.borderColor='#C8322B';E.textContent='請輸入密碼';E.classList.add('on');return}}
+  const w=lookup(v);lOtp=0;lSent=0;
+  afterLogin({em:v,name:w.name,cos:w.own,inv:w.inv,cur:null});return}
+ if(e.target.closest('#lotp')){lOtp=lOtp?0:1;lSent=0;lEm=(($('#lem')||{}).value||'').trim();drawLand();return}
+ if(e.target.closest('#lfpw')){const v=(($('#lem')||{}).value||'').trim();note(v.indexOf('@')>0?'重設密碼的連結已寄到 '+v:'先輸入 Email，再按忘記密碼');return}
+ if(e.target.closest('#logout,#logout2')){doLogout();return}
+ const pck=e.target.closest('[data-pick]');
+ if(pck){const a=AU();if(a)enter(a,+pck.dataset.pick);return}
+ const jn=e.target.closest('[data-join],[data-cojoin]');
+ if(jn){const a=AU();if(!a)return;const i=+(jn.dataset.join!=null?jn.dataset.join:jn.dataset.cojoin),c=a.inv[i];if(!c)return;
+  a.inv.splice(i,1);a.cos.push({n:c.n,role:'管理員'});note('已加入 '+c.n+' 的後台');enter(a,a.cos.length-1);return}
+ if(e.target.closest('#lcreate,#conew')){NC={name:'',country:'TW',tax:'',autoJoin:1};LP='newco';document.body.classList.add('out');drawLand();return}
+ if(e.target.closest('#ncAj')){NC.name=($('#ncName')||{}).value||'';NC.tax=($('#ncTax')||{}).value||'';NC.autoJoin=NC.autoJoin?0:1;drawLand();return}
+ if(e.target.closest('#ncGo')){const n=(($('#ncName')||{}).value||'').trim(),E=$('#ncErr');
+  if(!n){$('#ncName').style.borderColor='#C8322B';E.textContent='請輸入公司名稱';E.classList.add('on');return}
+  NC.name=n;NC.tax=(($('#ncTax')||{}).value||'').trim();
+  const a2=AU();if(!a2)return;
+  a2.cos.push({n:NC.name,role:'擁有者',plan:'demo'});
+  const o2=ST();o2.billing.seats=5;o2.billing.yearly=0;o2.billing.co.name=NC.name;o2.billing.co.title=NC.name;o2.billing.co.tax=NC.tax;save(o2);
+  enter(a2,a2.cos.length-1);note(NC.name+' 開好了——Demo 模式，看得到所有功能');return}
+ if(e.target.closest('#ncBack')){const a3=AU();if(a3&&(a3.cos.length||a3.inv.length)){if(a3.cur!=null){LP='land';draw()}else{LP='pick';drawLand()}}else doLogout();return}
+ if(e.target.closest('#brand')){const cw=$('#cosw');cw.classList.toggle('show');
+  if(window.innerWidth<=900){const r=$('#side').getBoundingClientRect();cw.style.top=(r.bottom+6)+'px'}else cw.style.top='';return}
+ const cs2=e.target.closest('[data-cosel]');
+ if(cs2){const a=AU();if(!a)return;$('#cosw').classList.remove('show');enter(a,+cs2.dataset.cosel);return}
+ const nv=e.target.closest('.nv,.nv2');
+ if(nv&&nv.id!=='logout'&&nv.dataset.pg&&AU()){$('#cosw').classList.remove('show');PG=nv.dataset.pg;askDF=askInv=askPpl=askMem=0;locEdit=-1;coEdit=0;ccAdv=0;evNew=0;askStaff=0;roleEdit='';xferOpen=0;xferTo='';nfcBind='';nfcOffC=-1;rmC='';seatEdit=0;seatNew=0;
+  if(PG!=='evs')selEv=null;draw();return}
+ if(e.target.closest('#trialGo,#trialGo2')){startTrial();return}
+ if(e.target.closest('#rst')){localStorage.removeItem(stKey());selEv=null;evNew=0;draw();return}
+ const td=e.target.closest('[data-td]');
+ if(td){const pp=td.dataset.td.split(':');PG=pp[0];
+  if(pp[1]){selEv=pp[1];evNew=0}draw();return}
+ const er=e.target.closest('.evrow');
+ if(er){selEv=er.dataset.ev;evNew=0;draw();return}
+ if(e.target.closest('#evCreate')){evNew=1;selEv=null;draw();return}
+ if(e.target.closest('#evBack')){evNew=0;selEv=null;askDF=askInv=0;locEdit=-1;draw();return}
+ const th=e.target.closest('th[data-k]');
+ if(th){const k=th.dataset.k;
+  if(sortK===k)sortD*=-1; else{sortK=k;sortD=-1}
+  draw();return}
+ const tr=e.target.closest('tr[data-m]');
+ if(tr){memOpen(tr.dataset.m);return}
+ const wchip=e.target.closest('[data-who]');
+ if(wchip){libWho=wchip.dataset.who;draw();return}
+ const aig=e.target.closest('[data-aigo]');
+ if(aig){const o=ST(),t=o.aiTasks.find(x=>x.id===aig.dataset.aigo);if(!t)return;
+  t.st='sent';save(o);draw();note('已把指令傳到 '+t.who+' 的 App 待辦');return}
+ if(e.target.closest('#aiAll')){const o=ST();o.aiTasks.forEach(t=>t.st='sent');save(o);draw();note('全部指派完成——已傳到各成員的 App 待辦');return}
+ const schip=e.target.closest('[data-src]');
+ if(schip){libSrc=schip.dataset.src;draw();return}
+ if(e.target.closest('#csv')){
+  const o=ST();
+  csvOpen(o.lib.filter(x=>(!libWho||x[6]===libWho)&&(!libInd||x[3]===libInd)&&(!libSrc||x[8]===libSrc)
+   &&(!libQ||x.join(' ').includes(libQ))).reverse());return}
+ const ok=e.target.closest('[data-ok]'),no=e.target.closest('[data-no]');
+ if(ok||no){const o=ST(),i=+(ok||no).dataset[ok?'ok':'no'],p=o.pending[i];
+  if(!p)return;o.pending.splice(i,1);
+  if(ok){const m=o.members.find(x=>x.id===p.id);if(m)m.title=p.to}
+  save(o);draw();return}
+ const sc=e.target.closest('[data-scan]');
+ if(sc){const o=ST(),ev=EV(o);if(!ev)return;
+  const i=+sc.dataset.scan,bb=ev.booths[i];bb.leads++;
+  bb.src=bb.src||{dir:0,qr:0,meet:0};bb.src.qr++;save(o);draw();
+  pulse('[data-leads="'+i+'"],#tLeads');note('參觀者掃了 '+bb.n+' 的攤位 QR → leads +1');return}
+ if(e.target.closest('#pmail')){const o=ST(),ev=EV(o);if(!ev)return;
+  ev.pool++;save(o);draw();
+  pulse('#tPool');note('沒裝 App 的參觀者留了 Email → 待領池 +1');return}
+ if(e.target.closest('#bjoin')){
+  const o=ST(),code=($('#bcode').value||'').trim().toUpperCase();
+  let hit=null;
+  o.evs.filter(x=>x.st==='approved').forEach(ev=>{
+   const i=ev.booths.findIndex(b=>b.code.toUpperCase()===code);
+   if(i>=0)hit={e:ev.id,b:i,ev:ev}});
+  if(!hit){$('#bcode').style.borderColor='#C8322B';$('#bcode').value='';
+   $('#bcode').placeholder='沒有這組邀請碼，試試 B-5T09';return}
+  hit.ev.booths[hit.b].st='open';o.myEx={e:hit.e,b:hit.b};save(o);draw();
+  note('已開攤——「'+hit.ev.name+'」');return}
+ const bs=e.target.closest('[data-bsim]');
+ if(bs){const o=ST();if(!o.myEx)return;
+  const ev=o.evs.find(x=>x.id===o.myEx.e),b=ev&&ev.booths[o.myEx.b];if(!b)return;
+  const k=bs.dataset.bsim;
+  b.leads++;b.src=b.src||{dir:0,qr:0,meet:0};b.src[k]++;save(o);draw();
+  pulse('#bl-'+k+',#bl-total');
+  note({dir:'參觀者在名錄裡加入了你們',qr:'參觀者掃了攤位 QR',meet:'窗口面對面換到一張'}[k]+' → leads +1');return}
+ const pd=e.target.closest('[data-pdel]');
+ if(pd){const o=ST();if(!o.myEx)return;
+  const ev=o.evs.find(x=>x.id===o.myEx.e),b=ev&&ev.booths[o.myEx.b];if(!b)return;
+  b.ppl.splice(+pd.dataset.pdel,1);save(o);draw();return}
+ if(e.target.closest('#padd')){askPpl=1;draw();const f2=$('#ppIn');if(f2)f2.focus();return}
+ if(e.target.closest('#ppGo')){
+  const v=(($('#ppIn')||{}).value||'').trim();
+  if(!v){const f2=$('#ppIn');if(f2)f2.style.borderColor='#C8322B';return}
+  const o=ST();if(!o.myEx)return;
+  const ev=o.evs.find(x=>x.id===o.myEx.e),b=ev&&ev.booths[o.myEx.b];if(!b)return;
+  b.ppl=b.ppl||[];b.ppl.push({n:v,ok:0});askPpl=0;save(o);draw();note('邀請已寄給 '+v+'，本人加入後會出現在名錄');return}
+ const pk=e.target.closest('[data-pok]');
+ if(pk){const o=ST();if(!o.myEx)return;
+  const ev=o.evs.find(x=>x.id===o.myEx.e),b=ev&&ev.booths[o.myEx.b];if(!b)return;
+  const p2=b.ppl[+pk.dataset.pok];if(p2&&typeof p2==='object')p2.ok=1;save(o);draw();note(pplName(p2)+' 已加入 Heycard，現在出現在名錄裡');return}
+ if(e.target.closest('#bleave')){const o=ST();if(!o.myEx)return;
+  const ev=o.evs.find(x=>x.id===o.myEx.e),b=ev&&ev.booths[o.myEx.b];
+  if(b){b.st='invited';b.leads=0;b.src={dir:0,qr:0,meet:0}}
+  o.myEx=null;save(o);draw();return}
+ const evt=e.target.closest('[data-evt]');
+ if(evt){const o=ST();o.draft=o.draft||{};o.draft.type=evt.dataset.evt;
+  ['evName','evOrg','evDate','evVenue','evIntro'].forEach(id=>{
+   const el2=$('#'+id);if(el2)o.draft['_'+id]=el2.value});
+  save(o);draw();return}
+ if(e.target.closest('#evApply')){
+  const o=ST(),n=($('#evName').value||'').trim();
+  if(!n){$('#evName').style.borderColor='#C8322B';return}
+  const d=o.draft||{};
+  const id='e'+Date.now().toString(36);
+  o.evs.push({id:id,name:n,type:d.type||'展會',
+   org:($('#evOrg').value||'').trim(),
+   date:($('#evDate').value||'').trim()||'日期待定',
+   venue:($('#evVenue').value||'').trim()||'地點待定',
+   intro:($('#evIntro').value||'').trim(),
+   logo:d.logo||'',banner:d.banner||'',
+   st:'pending',entry:'',joined:0,pool:0,
+   dirCfg:[{k:'desc',label:'一句介紹',on:1},{k:'info',label:'公司介紹',on:1},{k:'launch',label:'本場新品／新技術',on:1}],
+   booths:[]});
+  o.draft={};evNew=0;selEv=id;save(o);draw();return}
+ if(e.target.closest('#evPass')){const o=ST(),ev=EV(o);if(!ev)return;
+  ev.st='approved';ev.entry='HEY-'+Math.random().toString(36).slice(2,7).toUpperCase();
+  save(o);draw();return}
+ if(e.target.closest('#evInv')){askInv=1;draw();const f2=$('#invIn');if(f2)f2.focus();return}
+ if(e.target.closest('#invGo')){
+  const v=(($('#invIn')||{}).value||'').trim(),em=(($('#invEm')||{}).value||'').trim();
+  if(!v){const f2=$('#invIn');if(f2)f2.style.borderColor='#C8322B';return}
+  if(em.indexOf('@')<0){const f2=$('#invEm');if(f2)f2.style.borderColor='#C8322B';return}
+  const o=ST(),ev=EV(o);if(!ev)return;
+  ev.booths.push({n:v,em:em,desc:'',loc:'',info:'',launch:'',leads:0,src:{dir:0,qr:0,meet:0},st:'invited',ppl:[],
+   code:'B-'+Math.random().toString(36).slice(2,6).toUpperCase()});
+  askInv=0;save(o);draw();note('邀請信已寄到 '+em);return}
+ const ls=e.target.closest('[data-locset]');
+ if(ls){locEdit=+ls.dataset.locset;draw();const f2=$('#locIn');if(f2){f2.focus();f2.select()}return}
+ if(e.target.closest('#locGo')){
+  const o=ST(),ev=EV(o);if(!ev)return;const b=ev.booths[locEdit];if(!b)return;
+  b.loc=(($('#locIn')||{}).value||'').trim().toUpperCase();
+  locEdit=-1;save(o);draw();return}
+ const df=e.target.closest('[data-dft]');
+ if(df){const o=ST(),ev=EV(o);if(!ev)return;
+  const f=ev.dirCfg[+df.dataset.dft];f.on=f.on?0:1;save(o);draw();return}
+ if(e.target.closest('#dfadd')){askDF=1;draw();const f2=$('#dfIn');if(f2)f2.focus();return}
+ if(e.target.closest('#dfGo')){
+  const v=(($('#dfIn')||{}).value||'').trim();
+  if(!v){const f2=$('#dfIn');if(f2)f2.style.borderColor='#C8322B';return}
+  const o=ST(),ev=EV(o);if(!ev)return;
+  ev.dirCfg.push({k:'c'+Date.now()%100000,label:v,on:1});
+  askDF=0;save(o);draw();return}
+ const ng=e.target.closest('[data-nudge]');
+ if(ng){const o=ST(),ev=EV(o);if(!ev)return;
+  const bb=ev.booths[+ng.dataset.nudge];bb.nudged=1;save(o);draw();note('已寄提醒給 '+bb.n);return}
+ const cp=e.target.closest('[data-cpc]');
+ if(cp){const o=ST(),ev=EV(o);if(!ev)return;
+  const b=ev.booths[+cp.dataset.cpc];
+  const msg='【'+ev.name+'】邀請 '+b.n+' 參展（免費開攤）。\n點連結直接開攤：heycard.app/b/'+b.code.toLowerCase()+'\n（或在 Heycard 輸入邀請碼 '+b.code+'）\n'+metaLine([ev.date,ev.venue]);
+  if(copyText(msg)){cp.textContent='已複製';cp.style.color='#00806E';note('邀請訊息已複製，直接貼給 '+b.n)}
+  else cpOpen(msg);
+  return}
+ if(e.target.closest('#invite')){askMem=1;draw();const f2=$('#memIn');if(f2)f2.focus();return}
+ if(e.target.closest('#memNo')){askMem=0;draw();return}
+ if(e.target.closest('#memGo')){
+  const v=(($('#memIn')||{}).value||'').trim(),cm=(($('#memCem')||{}).value||'').trim(),tl=(($('#memTtl')||{}).value||'').trim();
+  const E2=$('#memErr');
+  if(v.indexOf('@')<0){$('#memIn').style.borderColor='#C8322B';if(E2){E2.textContent='請輸入他的 Heycard Email';E2.classList.add('on')}return}
+  if(!tl){$('#memTtl').style.borderColor='#C8322B';if(E2){E2.textContent='職稱由公司填寫——先填好再寄';E2.classList.add('on')}return}
+  const nm2=(($('#memNm')||{}).value||'').trim(),ne2=(($('#memNmEn')||{}).value||'').trim();
+  const o=ST();o.invited.push({em:v,cem:cm,title:tl,name:nm2,nameEn:ne2});askMem=0;save(o);draw();
+  note('邀請已寄到 '+v+'——他接受並'+(nm2?'確認姓名、':'補上姓名與')+'補上手機後，卡片就啟用');return}
+ /* 公司資訊（卡片預設） */
+ if(e.target.closest('#ccAdv')){ccAdv=ccAdv?0:1;ccRefresh();return}
+ if(e.target.closest('#ccEd')){coEdit=1;draw();return}
+ if(e.target.closest('#ccNo')){coEdit=0;draw();return}
+ if(e.target.closest('#ccSave')){const o=ST();
+  $$('[data-cocard]').forEach(el2=>{o.coCard[el2.dataset.cocard]=el2.value.trim()});
+  coEdit=0;save(o);draw();note('公司資訊已更新——全部成員的企業名片已同步');return}
+ const cco=e.target.closest('[data-ccori]');
+ if(cco){const o=ST();(o.coCard.design=o.coCard.design||{}).ori=cco.dataset.ccori;save(o);ccRefresh();return}
+ const ccm=e.target.closest('[data-ccmat]');
+ if(ccm){const o=ST();const dd=(o.coCard.design=o.coCard.design||{});dd.mat=ccm.dataset.ccmat;dd.ink='';save(o);ccRefresh();return}
+ const ccp=e.target.closest('[data-ccp]');
+ if(ccp){const o=ST(),p=CO_PRESETS[+ccp.dataset.ccp];if(!p)return;
+  const dd=(o.coCard.design=o.coCard.design||{});dd.mat=p[1];dd.hue=p[2];dd.ink='';save(o);ccRefresh();note('已套用「'+p[0]+'」——全員卡片即時同步');return}
+ const cci=e.target.closest('[data-ccink]');
+ if(cci){const o=ST();(o.coCard.design=o.coCard.design||{}).ink=cci.dataset.ccink;save(o);ccRefresh();return}
+ const ccf=e.target.closest('[data-ccfont]');
+ if(ccf){const o=ST();(o.coCard.design=o.coCard.design||{}).font=ccf.dataset.ccfont;save(o);ccRefresh();return}
+ const ccb=e.target.closest('[data-ccbrand]');
+ if(ccb){const o=ST();(o.coCard.design=o.coCard.design||{}).hideBrand=+ccb.dataset.ccbrand;save(o);ccRefresh();note(+ccb.dataset.ccbrand?'已移除 Heycard 標記（企業版內含）':'已顯示 Heycard 標記');return}
+ /* 企業 NFC 卡 */
+ const nb=e.target.closest('[data-nbind]');
+ if(nb){nfcBind=nb.dataset.nbind;nfcQ='';draw();const q2=$('#nbq');if(q2)q2.focus();return}
+ const nto=e.target.closest('[data-nto]');
+ if(nto){const o=ST(),p=nto.dataset.nto.split(':'),c=o.nfc.cards[+p[0]],m=o.members.find(x=>x.id===p[1]);
+  if(!c||!m)return;c.m=m.id;nfcBind='';save(o);draw();note(c.uid+' → '+m.name+'：感應就打開他的企業名片');return}
+ const nfr=e.target.closest('[data-nfree]');
+ if(nfr){const o=ST(),c=o.nfc.cards[+nfr.dataset.nfree];if(!c)return;
+  const m=o.members.find(x=>x.id===c.m);c.m='';save(o);draw();note(c.uid+' 已解除綁定，回到庫存'+(m?'（'+m.name+' 的個人帳號不受影響）':''));return}
+ const nof=e.target.closest('[data-noff]');
+ if(nof){nfcOffC=+nof.dataset.noff;draw();return}
+ if(e.target.closest('[data-noffno]')){nfcOffC=-1;draw();return}
+ const nofg=e.target.closest('[data-noffgo]');
+ if(nofg){const o=ST(),c=o.nfc.cards[+nofg.dataset.noffgo];if(!c)return;
+  c.m='';c.st='off';nfcOffC=-1;save(o);draw();note(c.uid+' 已停用：感應不再打開任何名片');return}
+ const nbk=e.target.closest('[data-nback]');
+ if(nbk){const o=ST(),c=o.nfc.cards[+nbk.dataset.nback];if(!c)return;
+  delete c.st;save(o);draw();return}
+ const ntp=e.target.closest('[data-ntap]');
+ if(ntp){const o=ST(),i=+ntp.dataset.ntap,c=o.nfc.cards[i];if(!c||!c.m)return;
+  const m=o.members.find(x=>x.id===c.m);c.taps++;c.mo=(c.mo||0)+1;save(o);draw();
+  pulse('[data-taps="'+i+'"]');note('對方手機打開了 '+(m?m.name:'')+' 的企業名片 → 存入後進公司庫');return}
+ /* 前往結帳（席次／年繳／NFC 共用） */
+ const ck=e.target.closest('[data-ck]');
+ if(ck){const o=ST();ckFrom=PG;o.cart=cartNew(ck.dataset.ck,o);save(o);seatEdit=0;PG='chk';draw();return}
+ const nv2=e.target.closest('[data-nav2]');
+ if(nv2){const o=ST();if(o.cart&&o.cart.done){o.cart=null;save(o)}PG=nv2.dataset.nav2;seatNew=0;draw();return}
+ /* 方案與帳單 */
+ if(e.target.closest('#seatEd')){seatEdit=1;seatNew=ST().billing.seats;draw();return}
+ if(e.target.closest('#seatNo')){seatEdit=0;seatNew=0;draw();return}
+ const sq=e.target.closest('[data-sq]');
+ if(sq){const o=ST();seatNew=Math.max(usedSeats(o),(seatNew||o.billing.seats)+ +sq.dataset.sq);draw();return}
+ if(e.target.closest('#cardSwap')){const o=ST();o.billing.card=String(1000+Math.floor(Math.random()*9000));save(o);draw();note('已更換為 •••• '+o.billing.card+'（模擬）');return}
+ if(e.target.closest('#biSave')){const o=ST();BI_F.forEach(f=>{const el2=$('#bi-'+f[0]);if(el2)o.billing.co[f[0]]=el2.value.trim()});save(o);const m=$('#biMsg');if(m)m.textContent='已儲存';note('訂購資訊已儲存');return}
+ const ivr=e.target.closest('tr[data-inv]');
+ if(ivr){invOpen(+ivr.dataset.inv);return}
+ /* 結帳頁 */
+ const dm=e.target.closest('[data-dm]');
+ if(dm){const o=ST(),c=o.cart;if(!c||c.type!=='nfc')return;c.d.mode=dm.dataset.dm;
+  if(c.d.mode==='custom'&&c.d.qty<NFC_CUSTOM_MIN)c.d.qty=NFC_CUSTOM_MIN;save(o);draw();return}
+ const dor=e.target.closest('[data-dori]');
+ if(dor){const o=ST(),c=o.cart;if(!c||c.type!=='nfc')return;c.d.ori=dor.dataset.dori;save(o);draw();return}
+ const cq=e.target.closest('[data-cq]');
+ if(cq){const o=ST(),c=o.cart;if(!c||c.type!=='nfc')return;const mn=c.d.mode==='custom'?NFC_CUSTOM_MIN:5;
+  c.d.qty=Math.min(500,Math.max(mn,c.d.qty+ +cq.dataset.cq));save(o);draw();return}
+ const cs=e.target.closest('[data-cs]');
+ if(cs){const o=ST(),c=o.cart;if(!c||c.type!=='seats')return;c.seats=Math.max(usedSeats(o),c.seats+ +cs.dataset.cs);save(o);draw();return}
+ const ds=e.target.closest('[data-ds]');
+ if(ds){const o=ST(),c=o.cart;if(!c)return;c.d.style=ds.dataset.ds;save(o);draw();return}
+ if(e.target.closest('#dCopy')){const o=ST(),c=o.cart;if(!c)return;
+  if(copyText(nfcPrompt(c))){const bt=$('#dCopy');bt.textContent='已複製，去貼到 ChatGPT';note('Prompt 已複製')}return}
+ if(e.target.closest('#dImgRm')){const o=ST();if(!o.cart)return;o.cart.d.img='';save(o);draw();return}
+ if(e.target.closest('#specTg')){nfcSpecOpen=nfcSpecOpen?0:1;draw();return}
+ if(e.target.closest('#dBackRm')){const o=ST();if(!o.cart)return;o.cart.d.back='';save(o);draw();return}
+ if(e.target.closest('#specCp')){const t=NFC_SPEC.map(g=>'【'+g.g+'】\n'+g.items.map(it=>it[0]+'：'+it[1]+(it[2]?'':'（待確認）')).join('\n')).join('\n\n');
+  if(copyText('Heycard 企業 NFC 卡 設計規範\n\n'+t)){$('#specCp').textContent='已複製';note('規範已複製')}return}
+ const py=e.target.closest('[data-pay]');
+ if(py){const o=ST();if(!o.cart)return;o.cart.pay=py.dataset.pay;save(o);draw();return}
+ if(e.target.closest('#ckGo')){const o=ST(),c=o.cart,b=o.billing;if(!c)return;
+  BI_F.forEach(f=>{const el2=$('#ck-'+f[0]);if(el2)c.co[f[0]]=el2.value.trim()});
+  if(c.co.cem.indexOf('@')<0){save(o);draw();return}
+  const L=cartLines(o),tot=L.reduce((a,x)=>a+x.a,0),d=new Date();
+  const dd=(d.getMonth()+1)+'/'+String(d.getDate()).padStart(2,'0');
+  const id='HC-'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'-'+String(b.invoices.length+1).padStart(2,'0');
+  const paid=c.pay==='card';
+  b.co=Object.assign({},c.co);
+  if(c.type==='nfc'){o.nfc.orders.unshift({d:dd,n:c.d.qty,st:paid?'ship':'wait',custom:c.d.mode==='custom',ori:c.d.ori,img:(c.d.img?1:0)+(c.d.back?1:0),notes:c.d.notes});
+   b.invoices.unshift({id:id,d:dd,item:L[0].t,amt:tot,pay:paid?'信用卡 •••• '+b.card:'匯款',inv:paid?'AB-'+(10030000+Math.floor(Math.random()*9999)):'',st:paid?'paid':'wait'})}
+  if(c.type==='seats'){const diff=c.seats-b.seats;b.seats=c.seats;
+   b.invoices.unshift({id:id,d:dd,item:(diff>0?'加 '+diff+' 席（本期按比例）':'減 '+(-diff)+' 席（下期生效）')+' · 共 '+c.seats+' 席',amt:tot,pay:tot?'信用卡 •••• '+b.card:'—',inv:tot?'AB-'+(10030000+Math.floor(Math.random()*9999)):'',st:'paid'})}
+  if(c.type==='yearly'){b.yearly=1;b.next=(d.getMonth()+1)+'/'+String(d.getDate()).padStart(2,'0')+'/'+(d.getFullYear()+1);
+   b.invoices.unshift({id:id,d:dd,item:'企業版 '+b.seats+' 席 · 年繳',amt:tot,pay:'信用卡 •••• '+b.card,inv:'AB-'+(10030000+Math.floor(Math.random()*9999)),st:'paid'})}
+  c.done=1;save(o);draw();note(paid?'付款完成，發票已寄到 '+c.co.cem:'訂單已建立，等待匯款');return}
+ const npd=e.target.closest('[data-npaid]');
+ if(npd){const o=ST(),od=o.nfc.orders[+npd.dataset.npaid];if(!od)return;od.st='ship';
+  const iv=o.billing.invoices.find(x=>x.st==='wait');if(iv){iv.st='paid';iv.inv='AB-'+(10030000+Math.floor(Math.random()*9999))}
+  save(o);draw();note('匯款已入帳，發票開立，開始出貨');return}
+ const nar=e.target.closest('[data-narr]');
+ if(nar){const o=ST(),od=o.nfc.orders[+nar.dataset.narr];if(!od)return;
+  od.st='done';const base=o.nfc.cards.length;
+  const batch=Math.random().toString(16).slice(2,6).toUpperCase();
+  for(let i=0;i<od.n;i++)o.nfc.cards.push({uid:'HC-'+batch+'-'+String(i+1).padStart(2,'0'),m:'',taps:0,mo:0});
+  save(o);draw();note(od.n+' 張到貨，已進庫存');return}
+ /* 人員與權限 */
+ const rl=e.target.closest('[data-role]');
+ if(rl){roleEdit=(roleEdit===rl.dataset.role?'':rl.dataset.role);draw();return}
+ const sr=e.target.closest('[data-setrole]');
+ if(sr){const o=ST(),p=sr.dataset.setrole.split(':'),u=o.staff.find(x=>x.id===p[0]);
+  if(u){u.role=p[1];roleEdit='';save(o);draw();note(u.name+' → '+ROLES[p[1]].n)}return}
+ const srm=e.target.closest('[data-srm]');
+ if(srm){rmC=srm.dataset.srm;roleEdit='';draw();return}
+ if(e.target.closest('[data-srmno]')){rmC='';draw();return}
+ const srmg=e.target.closest('[data-srmgo]');
+ if(srmg){const o=ST(),u=o.staff.find(x=>x.id===srmg.dataset.srmgo);if(!u)return;
+  o.staff=o.staff.filter(x=>x.id!==u.id);rmC='';save(o);draw();note('已移除 '+u.name+' 的後台權限（個人帳號不受影響）');return}
+ if(e.target.closest('#sfAdd')){askStaff=1;xferTo='admin';draw();const f2=$('#sfEm');if(f2)f2.focus();return}
+ const sfr=e.target.closest('[data-sfrole]');
+ if(sfr){xferTo=sfr.dataset.sfrole;const em=($('#sfEm')||{}).value||'';draw();const f2=$('#sfEm');if(f2)f2.value=em;return}
+ if(e.target.closest('#sfGo')){
+  const em=(($('#sfEm')||{}).value||'').trim();
+  if(em.indexOf('@')<0){const f2=$('#sfEm');if(f2)f2.style.borderColor='#C8322B';return}
+  const o=ST();o.staff.push({id:'u'+Date.now().toString(36),name:em.split('@')[0],em:em,role:xferTo||'viewer',st:'invited'});
+  askStaff=0;xferTo='';save(o);draw();note('邀請已寄到 '+em+'——對方用自己的 Heycard 帳號登入即可');return}
+ if(e.target.closest('#xfer')){xferOpen=1;xferTo='';draw();return}
+ if(e.target.closest('#xferNo')){xferOpen=0;xferTo='';draw();return}
+ const xt=e.target.closest('[data-xto]');
+ if(xt){xferTo=xt.dataset.xto;draw();return}
+ if(e.target.closest('#xferGo')){if(!xferTo)return;
+  const o=ST(),me=o.staff.find(x=>x.me),to=o.staff.find(x=>x.id===xferTo);if(!me||!to)return;
+  to.role='owner';me.role='admin';xferOpen=0;xferTo='';save(o);draw();
+  note('擁有權已轉移給 '+to.name+'，你現在是管理員');return}
+ const bth=e.target.closest('tr[data-bth]');
+ if(bth&&!e.target.closest('button,a,input,[data-scan],[data-cpc],[data-locset],[data-nudge]')){
+  bthOpen(+bth.dataset.bth);return}
+ if(e.target===$('#ovl'))drawerClose()});
+
+document.addEventListener('input',e=>{
+ if(e.target.id==='nbq'){nfcQ=e.target.value;
+  const l=$('#nbList');if(l)l.innerHTML=nbListHTML(+e.target.dataset.ni);return}
+ if(e.target.id==='ccHue'){const o=ST();(o.coCard.design=o.coCard.design||{}).hue=+e.target.value;save(o);
+  const pv=$('#ccPv');if(pv)pv.innerHTML=ccPvHTML(o);return}
+ if(e.target.id==='ccInkPick'){const o=ST();(o.coCard.design=o.coCard.design||{}).ink=e.target.value;save(o);
+  const pv=$('#ccPv');if(pv)pv.innerHTML=ccPvHTML(o);return}
+ if(e.target.id==='q'){libQ=e.target.value;
+  /* 只重畫表格，不動輸入框，游標才不會掉 */
+  const o=ST();
+  const rows=o.lib.filter(x=>(!libWho||x[6]===libWho)&&(!libInd||x[3]===libInd)&&(!libSrc||x[8]===libSrc)
+   &&(!libQ||x.join(' ').includes(libQ))).reverse();
+  const card=$('#main .card');if(card){card.innerHTML=libBody(rows);card.style.padding=rows.length?'6px 14px':'34px 24px'}
+  const b=$('#csv');if(b)b.textContent='匯出 CSV（'+rows.length+' 筆）'}
+ /* 申請表 → 右欄手機模擬即時更新（只動預覽，不重畫，游標不掉） */
+ if(/^ev(Name|Org|Date|Venue|Intro)$/.test(e.target.id)){
+  const g=id=>{const el2=$('#'+id);return el2?el2.value.trim():''};
+  const nm=$('#pvName'),dv=$('#pvDV'),it=$('#pvIntro'),og=$('#pvOrg');
+  if(nm){const v=g('evName');nm.textContent=v||'活動名稱';nm.style.color=v?'#fff':'#565656'}
+  if(dv){const d=g('evDate'),ve=g('evVenue');
+   dv.textContent=(d||'日期')+' · '+(ve||'地點');dv.style.color=(d||ve)?'#BDBDBD':'#565656'}
+  if(it){const v=g('evIntro');it.textContent=v;it.style.display=v?'block':'none'}
+  if(og){const v=g('evOrg');og.textContent=v?'主辦　'+v:'';og.style.display=v?'block':'none'}}
+ if(e.target.dataset&&e.target.dataset.bf){const o=ST();
+  if(o.myEx){const ev=o.evs.find(x=>x.id===o.myEx.e),bb=ev&&ev.booths[o.myEx.b];
+   if(bb){bb[e.target.dataset.bf]=e.target.value;save(o)}}}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&['lem','lpw','lcode'].includes(e.target.id)){const b=$('#lgo');if(b)b.click()}
+ if(e.key==='Enter'&&['ncName','ncTax'].includes(e.target.id)){const b=$('#ncGo');if(b)b.click()}});
+document.addEventListener('input',e=>{
+ const o=ST(),c=o.cart;if(!c)return;
+ if(e.target.dataset&&e.target.dataset.ckco){c.co[e.target.dataset.ckco]=e.target.value;save(o);
+  if(e.target.dataset.ckco==='name'){const pr=$('#dPr');if(pr)pr.value=nfcPrompt(c)}
+  if(e.target.dataset.ckco==='cem'){const g=$('#ckGo');if(g){const bad=e.target.value.indexOf('@')<0;g.disabled=bad;g.style.opacity=bad?'.5':'';e.target.style.borderColor=bad?'#C8322B':''}}return}
+ if(e.target.id==='dElem'){c.d.elem=e.target.value;save(o);const pr=$('#dPr');if(pr)pr.value=nfcPrompt(c);return}
+ if(e.target.id==='dNotes'){c.d.notes=e.target.value;save(o);return}
+ if(e.target.id==='dColor'||e.target.id==='dColorHex'){const v=e.target.value.trim();if(/^#[0-9a-f]{6}$/i.test(v)){c.d.color=v.toUpperCase();save(o);
+  const a=$('#dColor'),h=$('#dColorHex'),pr=$('#dPr');if(a&&e.target.id!=='dColor')a.value=v;if(h&&e.target.id!=='dColorHex')h.value=v.toUpperCase();if(pr)pr.value=nfcPrompt(c)}return}});
+document.addEventListener('change',e=>{
+ if(e.target.id==='ccHue'||e.target.id==='ccInkPick'){ccRefresh();return}
+ if(e.target.id==='ncCty'){NC.country=e.target.value;NC.name=($('#ncName')||{}).value||NC.name;drawLand();return}
+ if(e.target.id==='dImg'||e.target.id==='dBack'){const f=e.target.files&&e.target.files[0];if(!f)return;const k=e.target.id==='dImg'?'img':'back';
+  const rd=new FileReader();rd.onload=()=>{const o=ST();if(!o.cart)return;o.cart.d[k]=f.type==='application/pdf'?'pdf':rd.result;save(o);draw();note((k==='img'?'正面':'背面')+'已附上')};rd.readAsDataURL(f);return}
+ if(e.target.id==='indSel'){libInd=e.target.value;draw()}
+ if(e.target.dataset&&e.target.dataset.bf)draw()
+ if(e.target.id==='evLogoF'||e.target.id==='evBanF'){
+  const f=e.target.files&&e.target.files[0];if(!f)return;
+  const k=e.target.id==='evLogoF'?'logo':'banner';
+  const keep={};['evName','evOrg','evDate','evVenue','evIntro'].forEach(id=>{
+   const el2=$('#'+id);if(el2)keep[id]=el2.value});
+  const rd=new FileReader();
+  rd.onload=()=>{const o=ST();o.draft=o.draft||{};o.draft[k]=rd.result;
+   Object.keys(keep).forEach(id=>{o.draft['_'+id]=keep[id]});
+   save(o);draw()};
+  rd.readAsDataURL(f)}});
+
+draw();
+</script>
+
+</body></html>
